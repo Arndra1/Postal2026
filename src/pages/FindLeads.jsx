@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, Eye, Sparkles, Save, Loader2, Check, X } from "lucide-react";
+import ComplianceBanner from "@/components/ComplianceBanner";
+import { MARKETING_NOTICE } from "@/lib/compliance";
 
 const industries = ["Technology", "Consulting", "Finance", "Healthcare", "Marketing", "Real Estate", "Manufacturing", "Retail", "Education", "Other"];
 
@@ -85,6 +87,8 @@ export default function FindLeads() {
   return (
     <div>
       <PageHeader title="Find Leads" subtitle="Discover leads by person, business, industry, and location." />
+
+      <ComplianceBanner text={MARKETING_NOTICE} />
 
       <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

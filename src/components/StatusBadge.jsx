@@ -20,11 +20,21 @@ const styles = {
   empty: "bg-muted text-muted-foreground",
 };
 
+// Data-quality labels — "Verified" is only shown when a verification process
+// actually occurred (provider-verified email or phone).
+const labels = {
+  verified: "Verified Contact",
+  enriched: "Enriched Data",
+  unverified: "Unverified",
+  not_found: "Not Found",
+  unknown: "Unknown",
+};
+
 export default function StatusBadge({ status }) {
   const cls = styles[status] || styles.unknown;
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${cls}`}>
-      {String(status || "unknown").replace("_", " ")}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
+      {labels[status] || String(status || "unknown").replace(/_/g, " ")}
     </span>
   );
 }

@@ -4,12 +4,13 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2, User, Building2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, User, Building2, ShieldCheck } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { COMPLIANCE_NOTICE } from "@/lib/compliance";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -147,6 +148,11 @@ export default function Register() {
         </>
       }
     >
+      <div className="mb-6 p-3 rounded-lg bg-secondary/15 border border-secondary/30 text-xs text-muted-foreground leading-relaxed">
+        <span className="flex items-center gap-1.5 font-medium text-foreground mb-1"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Compliance Notice</span>
+        {COMPLIANCE_NOTICE}
+      </div>
+
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-6"

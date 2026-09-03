@@ -3,7 +3,7 @@ import { PLAN_PRICE, PLAN_CURRENCY, PLAN_ID, MONTHLY_CREDITS, getOrCreateSubscri
 import { logActivity } from "../../shared/logging.ts";
 import { unauthorized, badRequest, forbidden } from "../../shared/roles.ts";
 
-// Activate a LeadPulse Pro membership and grant monthly credits.
+// Activate a Leadora membership and grant monthly credits.
 // Server-side only — never trust payment status from the browser.
 // In demo mode (no live provider connected) this records the subscription and grants credits.
 // With a live provider (PayPal/Stripe), the frontend checkout confirms payment first; this
@@ -55,7 +55,7 @@ export default async function(req) {
     // Grant monthly credits once per cycle.
     const newBalance = await grantCredits(base44, user.id, MONTHLY_CREDITS, "grant", "subscription", sub.id, "Monthly membership credits (100)");
 
-    await logActivity(base44, user, "subscription_activated", "LeadPulse Pro membership activated", { plan: PLAN_ID, provider });
+    await logActivity(base44, user, "subscription_activated", "Leadora membership activated", { plan: PLAN_ID, provider });
 
     return Response.json({ ok: true, subscription: updated, balance: newBalance });
   } catch (error) {

@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { isAdmin, isOwner, unauthorized, forbidden, badRequest } from "../../shared/roles.ts";
-import { logActivity } from "../../shared/logging.ts";
+import { logActivity, logCompliance } from "../../shared/logging.ts";
 
 // Admin/owner user management: change role or disable/enable an account.
 // Only owner can grant admin/owner roles. Admins can manage staff/user roles.
@@ -46,6 +46,7 @@ export default async function(req) {
       const disabled = !!body.disabled;
       const updated = await base44.asServiceRole.entities.User.update(targetUserId, { disabled });
       await logActivity(base44, user, disabled ? "account_disabled" : "account_enabled", disabled ? "Account disabled" : "Account enabled", { target_user_id: targetUserId });
+      await logCompliance(base44, disabled ? "account_suspended" : "account_reinstated", targetUserId, user.id, disabled ? "Account suspended by admin" : "Account reinstated by admin", { target_user_id: targetUserId });
       return Response.json({ ok: true, user: updated });
     }
 

@@ -1,0 +1,106 @@
+{
+  "name": "ComplianceLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "default": ""
+    },
+    "admin_id": {
+      "type": "string",
+      "default": ""
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "terms_accepted",
+        "terms_version_updated",
+        "account_suspended",
+        "account_reinstated",
+        "compliance_warning",
+        "high_volume_export",
+        "unusual_api_usage",
+        "excessive_search_activity",
+        "admin_compliance_review",
+        "provider_enabled",
+        "provider_disabled"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

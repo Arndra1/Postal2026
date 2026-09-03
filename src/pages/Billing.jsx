@@ -38,7 +38,7 @@ export default function Billing() {
 
   return (
     <div>
-      <PageHeader title="Billing" subtitle="Manage your LeadPulse Pro membership." />
+      <PageHeader title="Billing" subtitle="Manage your Leadora membership." />
 
       {exempt && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">
@@ -50,7 +50,7 @@ export default function Billing() {
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-card rounded-2xl border-2 border-primary/20 lady-shadow-lg p-8">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-heading text-xl font-semibold">LeadPulse Pro Membership</h2>
+            <h2 className="font-heading text-xl font-semibold">Leadora Membership</h2>
             {!exempt && <StatusBadge status={status} />}
           </div>
           <div className="flex items-end gap-1 mt-3">
@@ -88,7 +88,7 @@ export default function Billing() {
           <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>
           {!exempt ? (
             <div className="space-y-4 text-sm">
-              <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Plan</span><span className="font-medium">LeadPulse Pro</span></div>
+              <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Plan</span><span className="font-medium">Leadora</span></div>
               <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Status</span><StatusBadge status={status} /></div>
               <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Credits Balance</span><span className="font-medium">{data.wallet.balance} / 100</span></div>
               {data.subscription.period_end && <div className="flex items-center justify-between py-2 border-b border-border"><span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Period End</span><span className="font-medium">{new Date(data.subscription.period_end).toLocaleDateString()}</span></div>}

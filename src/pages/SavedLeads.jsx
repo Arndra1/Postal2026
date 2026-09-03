@@ -6,6 +6,8 @@ import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Trash2, Download, Eye, Sparkles, Loader2, X, Check } from "lucide-react";
+import ComplianceBanner from "@/components/ComplianceBanner";
+import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 
 export default function SavedLeads() {
   const { user } = useAuth();
@@ -66,13 +68,24 @@ export default function SavedLeads() {
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "leadpulse-saved-leads.csv"; a.click();
+    a.href = url; a.download = "leadora-saved-leads.csv"; a.click();
     URL.revokeObjectURL(url);
+    // Compliance: log high-volume exports for admin review.
+    if (filtered.length >= 50) {
+      base44.entities.ComplianceLog.create({
+        user_id: user.id,
+        event_type: "high_volume_export",
+        description: "Exported " + filtered.length + " leads to CSV",
+        metadata: { count: filtered.length }
+      }).catch(() => {});
+    }
   };
 
   return (
     <div>
       <PageHeader title="Saved Leads" subtitle="Organize, search, and export your saved leads." action={<Button onClick={exportCsv} variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>} />
+
+      <ComplianceBanner text={MARKETING_NOTICE + " " + ACCURACY_NOTICE} />
 
       <div className="bg-card rounded-2xl border border-border lady-shadow p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">

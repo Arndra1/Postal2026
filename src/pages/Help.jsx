@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Coins, Sparkles, CreditCard, Mail, ChevronDown } from "lucide-react";
+import { HelpCircle, Coins, Sparkles, CreditCard, Mail, ChevronDown, Scale } from "lucide-react";
+import { COMPLIANCE_NOTICE, ACCURACY_NOTICE, MARKETING_NOTICE, PERMITTED_USES, PROHIBITED_ELIGIBILITY_USES } from "@/lib/compliance";
 
 const faqs = [
   { q: "How do credits work?", a: "Your membership includes 100 credits each month. Each successful enrichment costs 5 credits, so you can run up to 20 successful enrichments per cycle." },
@@ -14,14 +15,14 @@ const faqs = [
 const sections = [
   { icon: Coins, title: "How Credits Work", body: "100 monthly credits. 5 credits per successful enrichment. No charge on failures. Credits reset each billing cycle and do not roll over." },
   { icon: Sparkles, title: "How Enrichment Works", body: "Enter a name and/or company (plus any known details). We contact our provider, validate the response, and return verified email, phone, website, LinkedIn, and address. You're only charged when verified data is returned." },
-  { icon: CreditCard, title: "Billing Help", body: "The LeadPulse Pro membership is $59/month and includes 100 credits. Cancel anytime — access continues until your period ends. All payments are processed securely server-side." },
+  { icon: CreditCard, title: "Billing Help", body: "The Leadora membership is $59/month and includes 100 credits. Cancel anytime — access continues until your period ends. All payments are processed securely server-side." },
 ];
 
 export default function Help() {
   const [open, setOpen] = useState(null);
   return (
     <div>
-      <PageHeader title="Help" subtitle="Answers and guidance for getting the most from LeadPulse Pro." />
+      <PageHeader title="Help" subtitle="Answers and guidance for getting the most from Leadora." />
 
       <div className="grid lg:grid-cols-3 gap-4 mb-8">
         {sections.map((s) => (
@@ -48,10 +49,35 @@ export default function Help() {
         </div>
       </div>
 
+      <div className="bg-card rounded-2xl border border-border lady-shadow p-6 mb-6">
+        <h2 className="font-heading text-lg font-semibold mb-3 flex items-center gap-2"><Scale className="w-5 h-5 text-primary" /> Compliance &amp; Permitted Use</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{COMPLIANCE_NOTICE}</p>
+        <div className="grid sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h3 className="text-sm font-semibold mb-2">Permitted uses</h3>
+            <ul className="space-y-1.5">
+              {PERMITTED_USES.map((p) => (
+                <li key={p} className="text-xs text-muted-foreground flex items-start gap-1.5"><span className="text-accent mt-0.5">✓</span>{p}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold mb-2">Prohibited eligibility uses</h3>
+            <ul className="space-y-1.5">
+              {PROHIBITED_ELIGIBILITY_USES.map((p) => (
+                <li key={p} className="text-xs text-muted-foreground flex items-start gap-1.5"><span className="text-destructive mt-0.5">✕</span>{p}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">{ACCURACY_NOTICE}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed mt-2">{MARKETING_NOTICE}</p>
+      </div>
+
       <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
         <h2 className="font-heading text-lg font-semibold mb-2 flex items-center gap-2"><Mail className="w-5 h-5 text-primary" /> Contact Support</h2>
         <p className="text-sm text-muted-foreground">Need a hand? Reach out to our support team and we'll get back to you promptly.</p>
-        <a href="mailto:support@leadpulsepro.com" className="inline-block mt-4"><Button variant="outline">Email Support</Button></a>
+        <a href="mailto:support@leadora.com" className="inline-block mt-4"><Button variant="outline">Email Support</Button></a>
       </div>
     </div>
   );

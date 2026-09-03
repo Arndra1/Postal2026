@@ -41,7 +41,7 @@ export default async function(req) {
     }
 
     // Run enrichment provider.
-    const providerResult = await runEnrichment(inputs);
+    const providerResult = await runEnrichment(base44, inputs);
 
     // Only charge on a verified success.
     let creditsCharged = 0;

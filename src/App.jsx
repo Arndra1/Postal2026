@@ -29,6 +29,7 @@ import AdminCredits from '@/pages/admin/AdminCredits';
 import AdminEnrichments from '@/pages/admin/AdminEnrichments';
 import AdminBilling from '@/pages/admin/AdminBilling';
 import AdminActivity from '@/pages/admin/AdminActivity';
+import AdminCompliance from '@/pages/admin/AdminCompliance';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/enrichments" element={<AdminGuard><AdminEnrichments /></AdminGuard>} />
           <Route path="/admin/billing" element={<AdminGuard><AdminBilling /></AdminGuard>} />
           <Route path="/admin/activity" element={<AdminGuard><AdminActivity /></AdminGuard>} />
+          <Route path="/admin/compliance" element={<AdminGuard><AdminCompliance /></AdminGuard>} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

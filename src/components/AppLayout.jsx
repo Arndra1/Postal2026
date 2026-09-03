@@ -4,8 +4,9 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, LogOut, Menu, X, ChevronRight
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
+import TermsGate from "@/components/TermsGate";
 
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,6 +27,7 @@ const adminNav = [
   { to: "/admin/enrichments", label: "Enrichments", icon: Sparkles },
   { to: "/admin/billing", label: "Billing Events", icon: CreditCard },
   { to: "/admin/activity", label: "System Activity", icon: ShieldCheck },
+  { to: "/admin/compliance", label: "Compliance", icon: Scale },
 ];
 
 export default function AppLayout() {
@@ -50,7 +52,7 @@ export default function AppLayout() {
         <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
-        <span className="font-heading text-lg font-semibold tracking-tight">LeadPulse Pro</span>
+        <span className="font-heading text-lg font-semibold tracking-tight">Leadora</span>
       </Link>
 
       <nav className="mt-8 flex-1 space-y-1">
@@ -120,7 +122,7 @@ export default function AppLayout() {
       <div className="lg:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <Link to="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg lady-gradient flex items-center justify-center"><Sparkles className="w-4 h-4 text-white" /></div>
-          <span className="font-heading font-semibold">LeadPulse Pro</span>
+          <span className="font-heading font-semibold">Leadora</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>
       </div>
@@ -139,7 +141,9 @@ export default function AppLayout() {
       {/* Main content */}
       <main className="lg:pl-64">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
-          <Outlet />
+          <TermsGate>
+            <Outlet />
+          </TermsGate>
         </div>
       </main>
     </div>

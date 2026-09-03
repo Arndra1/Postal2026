@@ -9,7 +9,7 @@ import {
 const features = [
   { icon: Search, title: "Lead Discovery", desc: "Find leads by person, business, industry, location, and job title with powerful filters." },
   { icon: UserSearch, title: "Contact Enrichment", desc: "Turn a name and company into a complete, actionable contact profile in seconds." },
-  { icon: BadgeCheck, title: "Verified Contact Data", desc: "Get verified emails, phone numbers, and professional profiles you can trust." },
+  { icon: BadgeCheck, title: "Contact Verification", desc: "Provider-verified emails, phone numbers, and professional profiles, labeled by actual data quality." },
   { icon: FolderHeart, title: "Saved Lead Management", desc: "Organize, search, and filter your saved leads in clean, scannable lists." },
   { icon: Coins, title: "Credit Tracking", desc: "Transparent credit balance with a full ledger of every movement." },
   { icon: FileSpreadsheet, title: "CSV Export", desc: "Export your saved leads to CSV for your CRM, outreach, or spreadsheet." },
@@ -39,7 +39,7 @@ export default function Landing() {
             <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-heading text-xl font-semibold tracking-tight">LeadPulse Pro</span>
+            <span className="font-heading text-xl font-semibold tracking-tight">Leadora</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
@@ -62,14 +62,14 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/20 text-primary text-xs font-medium mb-6">
-              <Sparkles className="w-3.5 h-3.5" /> Lead intelligence, refined.
+              <Sparkles className="w-3.5 h-3.5" /> Public-data lead intelligence &amp; prospecting.
             </div>
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight">
               Find Better Leads.<br />Get Better Data.<br />
               <span className="text-primary">Close More Business.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              LeadPulse Pro helps business owners discover, enrich, organize, and manage leads with verified contact intelligence.
+              Leadora helps businesses discover, enrich, organize, and manage leads with public-data lead intelligence — built for lawful marketing, prospecting, and business development.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link to="/signup"><Button size="lg" className="h-12 px-8 text-base">Start Now <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
@@ -144,7 +144,7 @@ export default function Landing() {
         <div className="max-w-md mx-auto bg-card rounded-3xl border-2 border-primary/20 lady-shadow-lg p-8">
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-medium mb-4">Membership</div>
-            <h3 className="font-heading text-2xl font-semibold">LeadPulse Pro Membership</h3>
+            <h3 className="font-heading text-2xl font-semibold">Leadora Membership</h3>
             <div className="mt-4 flex items-end justify-center gap-1">
               <span className="font-heading text-5xl font-semibold">$59</span>
               <span className="text-muted-foreground mb-2">/month</span>
@@ -174,9 +174,12 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg lady-gradient flex items-center justify-center"><Sparkles className="w-4 h-4 text-white" /></div>
-            <span className="font-heading font-semibold text-foreground">LeadPulse Pro</span>
+            <span className="font-heading font-semibold text-foreground">Leadora</span>
           </div>
-          <p>© {new Date().getFullYear()} LeadPulse Pro. All rights reserved.</p>
+          <div className="text-center md:text-right">
+            <p>© {new Date().getFullYear()} Leadora. All rights reserved.</p>
+            <p className="text-xs mt-1">Leadora is not a consumer reporting agency. Data may not be used to determine eligibility for credit, employment, housing, insurance, or government benefits.</p>
+          </div>
         </div>
       </footer>
     </div>

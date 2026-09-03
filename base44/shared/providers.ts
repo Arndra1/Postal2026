@@ -8,9 +8,12 @@ import { secrets } from "base44:runtime";
 
 // A provider returns a normalized result object.
 // status: "success" | "empty" | "failed" | "timeout" | "validation_error"
-export async function runEnrichment(inputs) {
-  const provider = resolveProvider();
+export async function runEnrichment(base44, inputs) {
+  const provider = await resolveProvider(base44);
   const start = Date.now();
+  if (!provider) {
+    return { status: "failed", results: null, data_sources: [], duration_ms: Date.now() - start, error: "provider_disabled" };
+  }
   try {
     const raw = await provider.enrich(inputs);
     const duration_ms = Date.now() - start;
@@ -25,7 +28,13 @@ export async function runEnrichment(inputs) {
   }
 }
 
-function resolveProvider() {
+// The owner can disable an individual data source (ProviderSetting records,
+// managed in the admin compliance dashboard) without shutting down enrichment.
+async function resolveProvider(base44) {
+  try {
+    const settings = await base44.asServiceRole.entities.ProviderSetting.filter({ provider_key: "mock_provider" });
+    if (settings.length > 0 && settings[0].enabled === false) return null;
+  } catch (_e) { /* settings unavailable — treat as enabled */ }
   // In production, choose based on which secret is configured, e.g.:
   // const pdlKey = secrets.get("PDL_API_KEY");
   // if (pdlKey) return peopleDataLabsProvider(pdlKey);
