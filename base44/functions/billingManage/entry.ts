@@ -22,6 +22,28 @@ export default async function(req) {
     const sub = await getOrCreateSubscription(base44, user.id);
 
     if (action === "cancel") {
+      // If billed through Base44 Payments, stop renewal at the provider first
+      // (soft cancel — access remains until the paid period ends).
+      if (sub.billing_provider === "base44_payments" && sub.provider_subscription_id) {
+        const apiKey = Deno.env.get("WIX_CHECKOUT_API_KEY") || "";
+        const siteId = Deno.env.get("WIX_CHECKOUT_SITE_ID") || "";
+        if (!apiKey || !siteId) {
+          return Response.json({ error: "Payments are not configured." }, { status: 502 });
+        }
+        const cancelRes = await fetch(
+          "https://www.wixapis.com/payments/base44/v1/subscriptions/" + encodeURIComponent(sub.provider_subscription_id) + "/cancel",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": apiKey, "wix-site-id": siteId },
+            body: JSON.stringify({ subscription_id: sub.provider_subscription_id, reason: "Customer requested cancellation", immediate: false })
+          }
+        );
+        if (!cancelRes.ok) {
+          const errText = await cancelRes.text();
+          console.error("billingManage: provider cancel failed", { status: cancelRes.status, errText });
+          return Response.json({ error: "Could not cancel your membership with the payment provider. Please try again." }, { status: 502 });
+        }
+      }
       const updated = await base44.asServiceRole.entities.Subscription.update(sub.id, {
         status: "cancelled",
         cancelled_at: new Date().toISOString()
@@ -36,6 +58,11 @@ export default async function(req) {
       // is required — reactivation must never resurrect an expired membership.
       if (!sub.period_end || new Date(sub.period_end) <= new Date()) {
         return badRequest("Your billing period has ended. Subscribe again to reactivate your membership.");
+      }
+      // Auto-renewal turned off at the provider (soft cancel) cannot be turned back
+      // on via API — the buyer must start a new subscription after this period ends.
+      if (sub.billing_provider === "base44_payments") {
+        return badRequest("Automatic renewal is off for this membership. It stays active until the period ends — subscribe again afterward to restart.");
       }
       const updated = await base44.asServiceRole.entities.Subscription.update(sub.id, {
         status: "active",

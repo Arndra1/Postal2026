@@ -26,6 +26,7 @@ import Credits from '@/pages/Credits';
 import Billing from '@/pages/Billing';
 import Account from '@/pages/Account';
 import Help from '@/pages/Help';
+import ThankYou from '@/pages/ThankYou';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminSubscriptions from '@/pages/admin/AdminSubscriptions';
@@ -69,6 +70,7 @@ const AuthenticatedApp = () => {
       <Route path="/responsible-data-use" element={<ResponsibleDataUse />} />
       <Route path="/terms" element={<TermsOfUse />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/ThankYou" element={<ThankYou />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />

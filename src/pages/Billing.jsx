@@ -21,15 +21,25 @@ export default function Billing() {
     setAction("sub");
     setNotice("");
     try {
-      await base44.functions.invoke("billingSubscribe", {});
-      await load();
+      const res = await base44.functions.invoke("create-checkout", { productId: "leadora_membership" });
+      if (res.data?.redirectUrl) {
+        window.location.href = res.data.redirectUrl;
+      } else {
+        setNotice("Could not start checkout. Please try again.");
+      }
     } catch (err) {
-      setNotice(err?.response?.data?.error || "Online checkout isn't available yet.");
+      setNotice(err?.response?.data?.error || "Could not start checkout. Please try again.");
     } finally { setAction(null); }
   };
   const cancel = async () => {
     setAction("cancel");
-    try { await base44.functions.invoke("billingManage", { action: "cancel" }); await load(); } catch (_e) {} finally { setAction(null); }
+    setNotice("");
+    try {
+      await base44.functions.invoke("billingManage", { action: "cancel" });
+      await load();
+    } catch (err) {
+      setNotice(err?.response?.data?.error || "Could not cancel your membership. Please try again.");
+    } finally { setAction(null); }
   };
   const reactivate = async () => {
     setAction("react");
@@ -72,10 +82,9 @@ export default function Billing() {
                 <>
                   <Button className="w-full h-11" onClick={subscribe} disabled={action === "sub"}>
                     {action === "sub" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />} Subscribe
-                  </Button>
-                  {notice && <p className="text-xs text-muted-foreground text-center pt-1">{notice}</p>}
-                </>
-              )}
+                    </Button>
+                    </>
+                    )}
               {(status === "active" || status === "trialing") && (
                 <>
                   <Button variant="outline" className="w-full h-11" onClick={cancel} disabled={action === "cancel"}>
@@ -88,6 +97,7 @@ export default function Billing() {
                   )}
                 </>
               )}
+              {notice && <p className="text-xs text-muted-foreground text-center pt-1">{notice}</p>}
             </div>
           )}
         </div>
