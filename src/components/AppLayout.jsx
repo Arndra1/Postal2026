@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
-  LayoutDashboard, Search, Sparkles, FolderHeart, Coins, CreditCard, UserCircle, HelpCircle,
+  LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
   ShieldCheck, Scale, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
 import TermsGate from "@/components/TermsGate";
@@ -13,6 +13,7 @@ const userNav = [
   { to: "/find-leads", label: "Find Leads", icon: Search },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },
+  { to: "/pipeline", label: "Pipeline", icon: Columns3 },
   { to: "/credits", label: "Credits", icon: Coins },
   { to: "/billing", label: "Billing", icon: CreditCard },
   { to: "/account", label: "Account", icon: UserCircle },

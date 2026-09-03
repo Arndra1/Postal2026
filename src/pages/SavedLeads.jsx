@@ -5,9 +5,10 @@ import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Trash2, Download, Eye, Sparkles, Loader2, X, Check } from "lucide-react";
+import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
+import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
 
 export default function SavedLeads() {
   const { user } = useAuth();
@@ -48,6 +49,11 @@ export default function SavedLeads() {
   const remove = async (id) => {
     await base44.entities.Lead.delete(id);
     load();
+  };
+
+  const updateLead = async (id, partial) => {
+    setLeads(prev => prev.map(l => (l.id === id ? { ...l, ...partial } : l)));
+    await base44.entities.Lead.update(id, partial);
   };
 
   const enrich = async (l) => {
@@ -133,6 +139,9 @@ export default function SavedLeads() {
                   <td className="px-5 py-3"><StatusBadge status={l.enrichment_status} /></td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => updateLead(l.id, { starred: !l.starred })} title={l.starred ? "Unstar" : "Star"}>
+                        <Star className={"w-4 h-4 " + (l.starred ? "fill-accent text-accent" : "")} />
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => setDetail(l)} title="View"><Eye className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="sm" onClick={() => enrich(l)} disabled={busy[l.id] === "loading"} title="Enrich">
                         {busy[l.id] === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : busy[l.id] === "enriched" ? <Check className="w-4 h-4 text-accent" /> : <Sparkles className="w-4 h-4" />}
@@ -148,27 +157,14 @@ export default function SavedLeads() {
       </div>
 
       {detail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setDetail(null)} />
-          <div className="relative bg-card rounded-2xl border border-border lady-shadow-lg max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-heading text-xl font-semibold">{detail.person_name || "Lead"}</h3>
-              <Button variant="ghost" size="icon" onClick={() => setDetail(null)}><X className="w-5 h-5" /></Button>
-            </div>
-            <div className="space-y-2 text-sm">
-              {["business_name","email","phone","website","linkedin","address","city","state","industry","job_title","confidence"].map(k => (
-                <div key={k} className="flex justify-between gap-4 py-2 border-b border-border">
-                  <span className="text-muted-foreground capitalize">{k.replace("_", " ")}</span>
-                  <span className="font-medium text-right break-all">{detail[k] || "—"}</span>
-                </div>
-              ))}
-              <div className="flex justify-between gap-4 py-2">
-                <span className="text-muted-foreground">Enrichment</span>
-                <StatusBadge status={detail.enrichment_status} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <LeadDetailPanel
+          lead={detail}
+          onClose={() => setDetail(null)}
+          onLeadUpdated={(u) => {
+            setDetail(u);
+            setLeads(prev => prev.map(l => (l.id === u.id ? u : l)));
+          }}
+        />
       )}
     </div>
   );

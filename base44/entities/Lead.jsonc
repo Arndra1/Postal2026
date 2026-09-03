@@ -76,6 +76,35 @@
     "confidence": {
       "type": "string",
       "default": ""
+    },
+    "pipeline_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "won",
+        "lost"
+      ],
+      "default": "new"
+    },
+    "starred": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "list_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     }
   },
   "required": [

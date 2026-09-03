@@ -21,6 +21,7 @@ import Dashboard from '@/pages/Dashboard';
 import FindLeads from '@/pages/FindLeads';
 import Enrich from '@/pages/Enrich';
 import SavedLeads from '@/pages/SavedLeads';
+import Pipeline from '@/pages/Pipeline';
 import Credits from '@/pages/Credits';
 import Billing from '@/pages/Billing';
 import Account from '@/pages/Account';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
           <Route path="/find-leads" element={<FindLeads />} />
           <Route path="/enrich" element={<Enrich />} />
           <Route path="/saved-leads" element={<SavedLeads />} />
+          <Route path="/pipeline" element={<Pipeline />} />
           <Route path="/credits" element={<Credits />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/account" element={<Account />} />
