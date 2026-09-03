@@ -3,6 +3,11 @@
 
 export const TERMS_VERSION = "1.0";
 
+// Official Leadora support and contact address — used for customer support,
+// billing questions, account assistance, privacy requests, compliance and
+// security inquiries, and all Terms of Use / Privacy Policy contact points.
+export const SUPPORT_EMAIL = "support@abundance-consultants.com";
+
 export const COMPLIANCE_NOTICE =
   "Leadora is a lead intelligence, business research, marketing, and contact-enrichment platform. Leadora is not a consumer reporting agency. Information obtained through Leadora may be used for lawful marketing, prospecting, business development, research, and customer-acquisition purposes. Leadora data may not be used to determine eligibility for credit, employment, housing, insurance, government benefits, or any other purpose regulated by the Fair Credit Reporting Act or similar laws.";
 

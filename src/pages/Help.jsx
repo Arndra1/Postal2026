@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, Coins, Sparkles, CreditCard, Mail, ChevronDown, Scale } from "lucide-react";
-import { COMPLIANCE_NOTICE, ACCURACY_NOTICE, MARKETING_NOTICE, PERMITTED_USES, PROHIBITED_ELIGIBILITY_USES } from "@/lib/compliance";
+import { COMPLIANCE_NOTICE, ACCURACY_NOTICE, MARKETING_NOTICE, PERMITTED_USES, PROHIBITED_ELIGIBILITY_USES, SUPPORT_EMAIL } from "@/lib/compliance";
 
 const faqs = [
   { q: "How do credits work?", a: "Your membership includes 100 credits each month. Each successful enrichment costs 5 credits, so you can run up to 20 successful enrichments per cycle." },
@@ -76,8 +76,9 @@ export default function Help() {
 
       <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
         <h2 className="font-heading text-lg font-semibold mb-2 flex items-center gap-2"><Mail className="w-5 h-5 text-primary" /> Contact Support</h2>
-        <p className="text-sm text-muted-foreground">Need a hand? Reach out to our support team and we'll get back to you promptly.</p>
-        <a href="mailto:support@leadora.com" className="inline-block mt-4"><Button variant="outline">Email Support</Button></a>
+        <p className="text-sm text-muted-foreground">Need a hand? Reach out to our support team and we'll get back to you promptly. For billing questions, account assistance, privacy requests, compliance questions, or security inquiries, email us at:</p>
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-block mt-4"><Button variant="outline">Email Support</Button></a>
+        <p className="text-sm font-medium mt-3">{SUPPORT_EMAIL}</p>
       </div>
     </div>
   );

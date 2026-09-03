@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollText, ShieldCheck, Loader2 } from "lucide-react";
 import {
   TERMS_VERSION, COMPLIANCE_NOTICE, MARKETING_NOTICE,
-  PERMITTED_USES, PROHIBITED_ELIGIBILITY_USES, CERTIFICATIONS
+  PERMITTED_USES, PROHIBITED_ELIGIBILITY_USES, CERTIFICATIONS, SUPPORT_EMAIL
 } from "@/lib/compliance";
 
 // Gates the whole application until the user accepts the current Terms of Use.
@@ -100,6 +100,7 @@ export default function TermsGate({ children }) {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed">{MARKETING_NOTICE}</p>
+        <p className="mt-3 text-xs text-muted-foreground leading-relaxed">Questions about these terms, our Privacy Policy, or compliance? Contact <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a></p>
 
         <Button className="w-full h-11 mt-6" onClick={accept} disabled={!allChecked || submitting}>
           {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Recording acceptance...</> : "Accept Terms & Continue"}

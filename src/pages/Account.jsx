@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Building2, Mail, Lock, Check, Loader2 } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/compliance";
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -76,6 +77,7 @@ export default function Account() {
               <Check className="w-4 h-4 text-accent" />
               <div><div className="font-medium">Role</div><div className="text-muted-foreground capitalize">{user.role}</div></div>
             </div>
+            <p className="text-xs text-muted-foreground">Need account assistance, or have a privacy or security request? Contact <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a></p>
           </div>
         </div>
       </div>

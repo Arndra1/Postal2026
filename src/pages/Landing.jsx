@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SUPPORT_EMAIL } from "@/lib/compliance";
 import {
   Search, BadgeCheck, FileSpreadsheet, FolderHeart, Coins, Download, BarChart3, ShieldCheck,
   UserSearch, Sparkles, ArrowRight, Check
@@ -178,6 +179,7 @@ export default function Landing() {
           </div>
           <div className="text-center md:text-right">
             <p>© {new Date().getFullYear()} Leadora. All rights reserved.</p>
+            <p className="text-xs mt-1">Questions? Contact us at <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a></p>
             <p className="text-xs mt-1">Leadora is not a consumer reporting agency. Data may not be used to determine eligibility for credit, employment, housing, insurance, or government benefits.</p>
           </div>
         </div>
