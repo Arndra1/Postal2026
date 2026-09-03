@@ -1,6 +1,6 @@
 {
   "name": "Owner Bootstrap",
-  "description": "Grants the private owner account the protected owner role and permanent access whenever it signs up or logs in",
+  "description": "Grants the private owner account its protected owner role and permanent access whenever it signs up or logs in",
   "trigger": {
     "config": {
       "trigger_type": "app_user_auth",
@@ -23,7 +23,7 @@
         "provision_owner": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "provisionOwnerAccount",
+            "function_name": "provisionOwner",
             "args": {
               "user_id": "${ .trigger.user_id }",
               "email": "${ .trigger.email }"
