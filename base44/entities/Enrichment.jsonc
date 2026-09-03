@@ -1,0 +1,118 @@
+{
+  "name": "Enrichment",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string",
+      "default": ""
+    },
+    "provider": {
+      "type": "string",
+      "default": ""
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "timeout",
+        "empty",
+        "validation_error"
+      ],
+      "default": "failed"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "results": {
+      "type": "object"
+    },
+    "credits_charged": {
+      "type": "number",
+      "default": 0
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "error_message": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "user_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

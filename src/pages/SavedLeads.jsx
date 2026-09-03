@@ -1,0 +1,162 @@
+import React, { useEffect, useState, useMemo } from "react";
+import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
+import PageHeader from "@/components/PageHeader";
+import StatusBadge from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Trash2, Download, Eye, Sparkles, Loader2, X, Check } from "lucide-react";
+
+export default function SavedLeads() {
+  const { user } = useAuth();
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sort, setSort] = useState("created_date");
+  const [busy, setBusy] = useState({});
+  const [detail, setDetail] = useState(null);
+
+  const load = () => {
+    setLoading(true);
+    base44.entities.Lead.filter({ user_id: user.id, saved: true }).then((res) => {
+      setLeads(res);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filtered = useMemo(() => {
+    let r = leads;
+    if (search) {
+      const s = search.toLowerCase();
+      r = r.filter(l => [l.person_name, l.business_name, l.email, l.city, l.state, l.industry].some(v => (v || "").toLowerCase().includes(s)));
+    }
+    if (statusFilter !== "All") r = r.filter(l => l.enrichment_status === statusFilter);
+    r = r.slice().sort((a, b) => {
+      if (sort === "created_date") return new Date(b.created_date || 0) - new Date(a.created_date || 0);
+      if (sort === "name") return (a.person_name || "").localeCompare(b.person_name || "");
+      if (sort === "company") return (a.business_name || "").localeCompare(b.business_name || "");
+      return 0;
+    });
+    return r;
+  }, [leads, search, statusFilter, sort]);
+
+  const remove = async (id) => {
+    await base44.entities.Lead.delete(id);
+    load();
+  };
+
+  const enrich = async (l) => {
+    setBusy(b => ({ ...b, [l.id]: "loading" }));
+    try {
+      await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
+      setBusy(b => ({ ...b, [l.id]: "enriched" }));
+      load();
+    } catch (_e) {
+      setBusy(b => ({ ...b, [l.id]: "failed" }));
+    }
+  };
+
+  const exportCsv = () => {
+    const headers = ["Name", "Company", "Email", "Phone", "Website", "City", "State", "Industry", "Date Saved", "Enrichment Status"];
+    const rows = filtered.map(l => [l.person_name, l.business_name, l.email, l.phone, l.website, l.city, l.state, l.industry, l.created_date ? new Date(l.created_date).toISOString() : "", l.enrichment_status]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "leadpulse-saved-leads.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div>
+      <PageHeader title="Saved Leads" subtitle="Organize, search, and export your saved leads." action={<Button onClick={exportCsv} variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>} />
+
+      <div className="bg-card rounded-2xl border border-border lady-shadow p-4 mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search saved leads..." className="pl-9 h-10" />
+        </div>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
+          <option>All</option><option value="none">Not enriched</option><option value="enriched">Enriched</option><option value="failed">Failed</option>
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
+          <option value="created_date">Sort: Newest</option><option value="name">Sort: Name</option><option value="company">Sort: Company</option>
+        </select>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="text-left font-medium px-5 py-3">Name</th>
+                <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Company</th>
+                <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Email</th>
+                <th className="text-left font-medium px-5 py-3 hidden xl:table-cell">Phone</th>
+                <th className="text-left font-medium px-5 py-3 hidden xl:table-cell">Website</th>
+                <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Location</th>
+                <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Industry</th>
+                <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Saved</th>
+                <th className="text-left font-medium px-5 py-3">Status</th>
+                <th className="text-right font-medium px-5 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && <tr><td colSpan={10} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan={10} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
+              {filtered.map((l) => (
+                <tr key={l.id} className="border-t border-border hover:bg-muted/30">
+                  <td className="px-5 py-3 font-medium">{l.person_name || "—"}</td>
+                  <td className="px-5 py-3 hidden md:table-cell">{l.business_name || "—"}</td>
+                  <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.email || "—"}</td>
+                  <td className="px-5 py-3 hidden xl:table-cell text-muted-foreground">{l.phone || "—"}</td>
+                  <td className="px-5 py-3 hidden xl:table-cell text-muted-foreground">{l.website || "—"}</td>
+                  <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{[l.city, l.state].filter(Boolean).join(", ") || "—"}</td>
+                  <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.industry || "—"}</td>
+                  <td className="px-5 py-3 hidden md:table-cell text-muted-foreground">{l.created_date ? new Date(l.created_date).toLocaleDateString() : "—"}</td>
+                  <td className="px-5 py-3"><StatusBadge status={l.enrichment_status} /></td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => setDetail(l)} title="View"><Eye className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => enrich(l)} disabled={busy[l.id] === "loading"} title="Enrich">
+                        {busy[l.id] === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : busy[l.id] === "enriched" ? <Check className="w-4 h-4 text-accent" /> : <Sparkles className="w-4 h-4" />}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => remove(l.id)} title="Delete"><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {detail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setDetail(null)} />
+          <div className="relative bg-card rounded-2xl border border-border lady-shadow-lg max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-heading text-xl font-semibold">{detail.person_name || "Lead"}</h3>
+              <Button variant="ghost" size="icon" onClick={() => setDetail(null)}><X className="w-5 h-5" /></Button>
+            </div>
+            <div className="space-y-2 text-sm">
+              {["business_name","email","phone","website","linkedin","address","city","state","industry","job_title","confidence"].map(k => (
+                <div key={k} className="flex justify-between gap-4 py-2 border-b border-border">
+                  <span className="text-muted-foreground capitalize">{k.replace("_", " ")}</span>
+                  <span className="font-medium text-right break-all">{detail[k] || "—"}</span>
+                </div>
+              ))}
+              <div className="flex justify-between gap-4 py-2">
+                <span className="text-muted-foreground">Enrichment</span>
+                <StatusBadge status={detail.enrichment_status} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

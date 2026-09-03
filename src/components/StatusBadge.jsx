@@ -1,0 +1,30 @@
+import React from "react";
+
+const styles = {
+  verified: "bg-accent/15 text-accent",
+  enriched: "bg-accent/15 text-accent",
+  active: "bg-accent/15 text-accent",
+  success: "bg-accent/15 text-accent",
+  unverified: "bg-secondary/25 text-primary",
+  pending: "bg-secondary/25 text-primary",
+  trialing: "bg-secondary/25 text-primary",
+  none: "bg-muted text-muted-foreground",
+  unknown: "bg-muted text-muted-foreground",
+  not_found: "bg-muted text-muted-foreground",
+  failed: "bg-destructive/10 text-destructive",
+  timeout: "bg-destructive/10 text-destructive",
+  cancelled: "bg-destructive/10 text-destructive",
+  expired: "bg-destructive/10 text-destructive",
+  past_due: "bg-destructive/10 text-destructive",
+  validation_error: "bg-destructive/10 text-destructive",
+  empty: "bg-muted text-muted-foreground",
+};
+
+export default function StatusBadge({ status }) {
+  const cls = styles[status] || styles.unknown;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${cls}`}>
+      {String(status || "unknown").replace("_", " ")}
+    </span>
+  );
+}

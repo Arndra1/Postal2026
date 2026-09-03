@@ -1,0 +1,112 @@
+{
+  "name": "CreditLedger",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "grant",
+        "spend",
+        "refund",
+        "adjust",
+        "reset"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "balance_after": {
+      "type": "number"
+    },
+    "reference_type": {
+      "type": "string",
+      "default": ""
+    },
+    "reference_id": {
+      "type": "string",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "user_id",
+    "action",
+    "amount",
+    "balance_after"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

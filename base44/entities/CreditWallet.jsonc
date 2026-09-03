@@ -1,0 +1,98 @@
+{
+  "name": "CreditWallet",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "balance": {
+      "type": "number",
+      "default": 0
+    },
+    "lifetime_granted": {
+      "type": "number",
+      "default": 0
+    },
+    "lifetime_used": {
+      "type": "number",
+      "default": 0
+    },
+    "last_grant_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "balance"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

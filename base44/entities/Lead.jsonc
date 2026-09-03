@@ -1,0 +1,145 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "person_name": {
+      "type": "string",
+      "default": ""
+    },
+    "business_name": {
+      "type": "string",
+      "default": ""
+    },
+    "city": {
+      "type": "string",
+      "default": ""
+    },
+    "state": {
+      "type": "string",
+      "default": ""
+    },
+    "industry": {
+      "type": "string",
+      "default": ""
+    },
+    "job_title": {
+      "type": "string",
+      "default": ""
+    },
+    "website": {
+      "type": "string",
+      "default": ""
+    },
+    "email": {
+      "type": "string",
+      "default": ""
+    },
+    "phone": {
+      "type": "string",
+      "default": ""
+    },
+    "linkedin": {
+      "type": "string",
+      "default": ""
+    },
+    "address": {
+      "type": "string",
+      "default": ""
+    },
+    "contact_status": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "verified",
+        "unverified",
+        "not_found"
+      ],
+      "default": "unknown"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "enriched",
+        "failed"
+      ],
+      "default": "none"
+    },
+    "saved": {
+      "type": "boolean",
+      "default": false
+    },
+    "confidence": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
