@@ -21,7 +21,7 @@ const features = [
 const steps = [
   { n: "01", title: "Find or import a lead", desc: "Search by name and company, or start from a website." },
   { n: "02", title: "Enrich the lead", desc: "Run enrichment to pull verified contact intelligence." },
-  { n: "03", title: "Receive verified info", desc: "Get verified email, phone, LinkedIn, and address." },
+  { n: "03", title: "Receive enriched info", desc: "Get emails, phone numbers, and professional profiles — labeled by their actual verification status." },
   { n: "04", title: "Save, organize & export", desc: "Save leads to lists and export to CSV anytime." },
 ];
 
@@ -63,34 +63,46 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/20 text-primary text-xs font-medium mb-6">
-              <Sparkles className="w-3.5 h-3.5" /> Public-data lead intelligence &amp; prospecting.
+              <Sparkles className="w-3.5 h-3.5" /> Public-Data Lead Intelligence &amp; Prospecting
             </div>
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight">
               Find Better Leads.<br />Get Better Data.<br />
               <span className="text-primary">Close More Business.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Leadora helps businesses discover, enrich, organize, and manage leads with public-data lead intelligence — built for lawful marketing, prospecting, and business development.
+              Leadora helps businesses discover prospects using public data and enrich lead records through permitted third-party data providers — built for lawful marketing, prospecting, and business development.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link to="/signup"><Button size="lg" className="h-12 px-8 text-base">Start Now <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
               <Link to="/login"><Button size="lg" variant="outline" className="h-12 px-8 text-base">Sign In</Button></Link>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">$59/month · 100 credits · No charge on failed lookups</p>
+            <p className="mt-4 text-sm text-muted-foreground">$59/month · 100 monthly credits · No charge for failed enrichments</p>
           </div>
           <div className="relative">
             <div className="bg-card rounded-2xl lady-shadow-lg border border-border p-6">
               <div className="flex items-center justify-between mb-5">
-                <span className="text-sm font-medium text-muted-foreground">Verified Contact</span>
-                <BadgeCheck className="w-5 h-5 text-accent" />
+                <span className="text-sm font-medium text-muted-foreground">Lead Intelligence</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/20 text-primary text-xs font-medium">
+                  <BadgeCheck className="w-3.5 h-3.5" /> Provider Match
+                </span>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border">
                   <div className="w-10 h-10 rounded-full lady-gradient flex items-center justify-center text-white font-semibold text-sm">JA</div>
                   <div><div className="font-medium">Jordan Avery</div><div className="text-sm text-muted-foreground">Director of Operations</div></div>
                 </div>
-                {["Verified email · jordan.avery@northwindco.com", "Verified phone · +1 (415) 555-0142", "LinkedIn · /in/jordan-avery"].map((t) => (
-                  <div key={t} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-accent" /> {t}</div>
+                {[
+                  { label: "Company", value: "Northwind Co." },
+                  { label: "Location", value: "Atlanta, Georgia" },
+                  { label: "Email Found", value: "jordan.avery@northwindco.com" },
+                  { label: "Phone Found", value: "+1 (415) 555-0142" },
+                  { label: "Professional Profile", value: "Profile found" }
+                ].map((r) => (
+                  <div key={r.label} className="flex items-start gap-3 text-sm">
+                    <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground w-36 flex-shrink-0">{r.label}</span>
+                    <span className="font-medium break-all">{r.value}</span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -166,9 +178,16 @@ export default function Landing() {
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="rounded-3xl lady-gradient p-10 md:p-16 text-center text-white">
           <h2 className="font-heading text-3xl md:text-4xl font-semibold">Ready to find better leads?</h2>
-          <p className="mt-4 text-white/80 max-w-xl mx-auto">Join the operators who close more business with verified contact intelligence.</p>
+          <p className="mt-4 text-white/80 max-w-xl mx-auto">Join the operators who close more business with public-data lead intelligence.</p>
           <Link to="/signup" className="inline-block mt-8"><Button size="lg" variant="secondary" className="h-12 px-8 text-base bg-white text-primary hover:bg-white/90">Start Now <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
         </div>
+      </section>
+
+      {/* Data notice */}
+      <section className="max-w-3xl mx-auto px-6 pb-12 -mt-8">
+        <p className="text-center text-xs text-muted-foreground leading-relaxed">
+          Leadora combines public records and permitted third-party data sources for prospecting and business intelligence. Information may be incomplete, outdated, or inaccurate and should be independently verified when important.
+        </p>
       </section>
 
       <footer className="border-t border-border">
