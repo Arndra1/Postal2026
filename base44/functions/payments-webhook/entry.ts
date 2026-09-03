@@ -13,6 +13,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 import { importSPKI, jwtVerify } from "npm:jose@5.9.6";
 import { getOrCreateSubscription, grantCreditsOnce, MONTHLY_CREDITS, PLAN_ID } from "../../shared/credits.ts";
+import { resolveProduct, MEMBERSHIP_PRODUCT_ID } from "../../shared/products.ts";
 
 // Wix event types (verbatim from Wix docs).
 const ORDER_APPROVED = "wix.ecom.v1.order_approved";
@@ -124,9 +125,20 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   const purchase = matches?.[0];
 
   if (!purchase) {
-    // The pending Base44Purchase is written by create-checkout before the buyer pays, so a miss
-    // here is a transient race (entity not yet visible) — return 500 so Wix retries, rather
-    // than ACKing a paid order we can't fulfill. (Wix stops after its retry window.)
+    // No pending purchase for this checkoutId. Two possibilities:
+    // 1. Transient race on the initial order (create-checkout's write not yet visible) —
+    //    return 500 so Wix retries.
+    // 2. A SUBSCRIPTION RENEWAL order: Wix generates renewal orders itself, with a
+    //    checkoutId this app never persisted. Renewal orders carry the same
+    //    lineItems[].subscriptionInfo.id as the original approved purchase, so resolve
+    //    the member through that.
+    if (subscriptionId) {
+      const originals = await db.entities.Base44Purchase.filter({ subscriptionId });
+      const original = originals?.[0];
+      if (original?.status === "paid" && original.appUserId) {
+        return await handleRenewalOrder(db, original.appUserId, order, checkoutId, orderId, subscriptionId);
+      }
+    }
     console.warn("payments-webhook: no Base44Purchase for checkoutId yet, asking Wix to retry", { checkoutId, orderId });
     return new Response("Purchase not found yet", { status: 500 });
   }
@@ -144,9 +156,10 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   const buyerEmail: string | null = purchase.buyerEmail ?? extractBuyerEmail(order);
 
   // ===== APP-SPECIFIC =====
-  // Grant: activate the Leadora membership and grant 100 monthly credits.
+  // Grant: branch on the SERVER-RESOLVED product (purchase.productId — set by create-checkout;
+  // the client never supplies price, product name, or credit amounts).
   // SECURITY: this runs ONLY on a Wix-signed, verified payment confirmation —
-  // clicking "Subscribe" never grants anything by itself.
+  // clicking a checkout button never grants anything by itself.
   // Must be idempotent (duplicate/concurrent deliveries are possible).
   let userId = purchase.appUserId ?? null;
   if (!userId && buyerEmail) {
@@ -160,25 +173,38 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     return new Response("OK", { status: 200 });
   }
 
-  const now = new Date();
-  const periodEnd = new Date(now);
-  periodEnd.setMonth(periodEnd.getMonth() + 1);
+  const product = resolveProduct(purchase.productId);
+  if (!product) {
+    console.error("payments-webhook: unknown productId on purchase", { purchaseId: purchase.id, productId: purchase.productId });
+    return new Response("OK", { status: 200 });
+  }
 
-  // Activate the membership (idempotent — same values on duplicate delivery).
-  const sub = await getOrCreateSubscription(db, userId);
-  await db.entities.Subscription.update(sub.id, {
-    plan: PLAN_ID,
-    status: "active",
-    billing_provider: "base44_payments",
-    provider_subscription_id: subscriptionId ?? "",
-    period_start: now.toISOString(),
-    period_end: periodEnd.toISOString(),
-    cancelled_at: ""
-  });
+  if (product.kind === "membership") {
+    const now = new Date();
+    const periodEnd = new Date(now);
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-  // Grant the 100 monthly credits exactly once per confirmed payment
-  // (idempotent, keyed on the purchase id).
-  await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
+    // Activate the membership (idempotent — same values on duplicate delivery).
+    const sub = await getOrCreateSubscription(db, userId);
+    await db.entities.Subscription.update(sub.id, {
+      plan: PLAN_ID,
+      status: "active",
+      billing_provider: "base44_payments",
+      provider_subscription_id: subscriptionId ?? "",
+      period_start: now.toISOString(),
+      period_end: periodEnd.toISOString(),
+      cancelled_at: ""
+    });
+
+    // Grant the 100 monthly credits exactly once per confirmed payment
+    // (idempotent, keyed on the purchase id).
+    await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
+  } else if (product.kind === "credit_pack") {
+    // One-time credit pack: add exactly the purchased credits, once.
+    // (Pack sales are gated to active members at checkout time.)
+    // Purchased credits are plain balance — they never expire at cycle boundaries.
+    await grantCreditsOnce(db, userId, product.credits, "base44_credit_pack", purchase.id, `Leadora credit pack (${product.credits} credits)`);
+  }
   // ===== END APP-SPECIFIC =====
 
   // Mark paid LAST, so "paid" always implies the grant above completed. The idempotency
@@ -258,5 +284,51 @@ async function handleSubscriptionEnded(db: any, eventData: any): Promise<Respons
   });
 
   console.log("payments-webhook: revoked subscription", { purchaseId: purchase.id, subscriptionId });
+  return new Response("OK", { status: 200 });
+}
+
+// A confirmed RENEWAL payment for an existing membership subscription. Wix creates renewal
+// orders itself (their checkoutId matches no pending purchase this app created), so the
+// member is resolved via the subscription id stored on the original approved purchase.
+// Grants exactly the 100 monthly credits once (keyed on the renewal order id) and rolls the
+// paid period forward one month. Fully idempotent: a duplicate delivery first hits the
+// terminal-status short-circuit in handleOrderApproved, and even a concurrent duplicate
+// cannot double-grant (grantCreditsOnce is keyed on the renewal order id).
+async function handleRenewalOrder(db: any, userId: string, order: any, checkoutId: string, orderId: string | undefined, subscriptionId: string): Promise<Response> {
+  const now = new Date();
+  const periodEnd = new Date(now);
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  // Roll the paid period forward and clear any soft-cancel from the previous cycle.
+  const subs = await db.entities.Subscription.filter({ user_id: userId });
+  const sub = subs?.[0];
+  if (sub) {
+    await db.entities.Subscription.update(sub.id, {
+      status: "active",
+      cancelled_at: "",
+      period_start: now.toISOString(),
+      period_end: periodEnd.toISOString()
+    });
+  }
+
+  // Grant the 100 monthly credits exactly once, keyed on the renewal order id.
+  await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_renewal", orderId ?? subscriptionId, "Leadora membership renewal credits (100/month)");
+
+  // Record the renewal as a paid purchase so the payment event is fully audited.
+  await db.entities.Base44Purchase.create({
+    checkoutSessionId: checkoutId,
+    status: "paid",
+    appUserId: userId,
+    buyerEmail: extractBuyerEmail(order),
+    productId: MEMBERSHIP_PRODUCT_ID,
+    productName: "Leadora Membership (Renewal)",
+    quantity: 1,
+    amount: String(order?.priceSummary?.total?.amount ?? "59.00"),
+    currency: order?.currency ?? "USD",
+    subscriptionId,
+    paidAt: now.toISOString()
+  });
+
+  console.log("payments-webhook: fulfilled renewal", { userId, checkoutId, orderId, subscriptionId });
   return new Response("OK", { status: 200 });
 }

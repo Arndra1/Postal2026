@@ -15,6 +15,8 @@
 // (order.checkoutId === checkoutSession.id). Skipping this write makes fulfillment impossible.
 
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
+import { resolveProduct } from "../../shared/products.ts";
+import { hasActiveMembership } from "../../shared/credits.ts";
 
 const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct";
 
@@ -71,30 +73,36 @@ Deno.serve(async (req: Request) => {
     // ===== APP-SPECIFIC =====
     // Resolve what is being bought AND its price SERVER-SIDE. NEVER trust a price sent by the
     // client — a buyer can tamper the request body and pay any amount. The client sends only a
-    // product identifier; the authoritative plan config lives here.
+    // product identifier; the authoritative catalog lives in shared/products.ts.
     const productId = String(body.productId ?? "");
-    const PLANS = {
-      leadora_membership: {
-        name: "Leadora Membership",
-        price: "59.00", // authoritative per-unit price (major units), resolved server-side
-        currency: "USD"
-      }
-    };
-    const plan = PLANS[productId];
-    if (!plan) {
+    const product = resolveProduct(productId);
+    if (!product) {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     }
-    const productName = plan.name;
-    const price = plan.price;
-    const currency = plan.currency;
-    // Fixed-entitlement membership — quantity is always exactly 1.
+    const productName = product.name;
+    const price = product.price;
+    const currency = product.currency;
+    // Fixed-entitlement products (membership / credit packs) — quantity is always exactly 1.
     const quantity = 1;
-    // Monthly auto-renewing subscription (infinite renewal; buyer can cancel anytime).
-    const subscriptionInfo = {
-      subscriptionSettings: { frequency: "MONTH" },
-      title: "Leadora Membership",
-      description: "Lead intelligence membership — 100 enrichment credits every month. Cancel anytime."
-    };
+    // For a SUBSCRIPTION set this to Wix's subscriptionInfo; null for a one-time payment.
+    let subscriptionInfo = null;
+    if (product.kind === "membership") {
+      // Monthly auto-renewing subscription (infinite renewal; buyer can cancel anytime).
+      subscriptionInfo = {
+        subscriptionSettings: { frequency: "MONTH" },
+        title: product.name,
+        description: "Lead intelligence membership — 100 enrichment credits every month. Cancel anytime."
+      };
+    } else {
+      // One-time credit pack — MEMBERS ONLY. Enforced server-side here, at purchase time.
+      if (!appUser) {
+        return new Response(JSON.stringify({ error: "Please sign in to purchase credit packs." }), { status: 400 });
+      }
+      const subs = await base44.asServiceRole.entities.Subscription.filter({ user_id: appUser.id });
+      if (!hasActiveMembership(subs?.[0])) {
+        return new Response(JSON.stringify({ error: "Credit packs require an active Leadora membership." }), { status: 400 });
+      }
+    }
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes in this app: the
     // returning buyer is often anonymous, so a missing or login-gated route strands a paid customer.
     // Match your router exactly — `/ThankYou`, not `/thank-you`.

@@ -5,6 +5,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, CreditCard, Loader2, Calendar, XCircle, RefreshCw } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
+import CreditPackGrid from "@/components/billing/CreditPackGrid";
 
 const includes = ["100 credits every month", "Lead search", "Lead enrichment", "Saved leads", "CSV export", "Dashboard analytics", "Lead management", "Account history"];
 
@@ -50,6 +51,9 @@ export default function Billing() {
 
   const exempt = data.exempt;
   const status = data.subscription.status;
+  const sub = data.subscription;
+  const paidThrough = !sub.period_end || new Date(sub.period_end) > new Date();
+  const memberLike = ["active", "trialing", "cancelled"].includes(status) && paidThrough;
 
   return (
     <div>
@@ -108,10 +112,10 @@ export default function Billing() {
             <div className="space-y-4 text-sm">
               <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Plan</span><span className="font-medium">Leadora</span></div>
               <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Status</span><StatusBadge status={status} /></div>
-              <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Credits Balance</span><span className="font-medium">{data.wallet.balance} / 100</span></div>
+              <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Credits Balance</span><span className="font-medium">{data.wallet.balance}</span></div>
               {data.subscription.period_end && <div className="flex items-center justify-between py-2 border-b border-border"><span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Period End</span><span className="font-medium">{new Date(data.subscription.period_end).toLocaleDateString()}</span></div>}
               {data.subscription.cancelled_at && <div className="flex justify-between py-2 border-b border-border"><span className="text-muted-foreground">Cancelled</span><span className="font-medium">{new Date(data.subscription.cancelled_at).toLocaleDateString()}</span></div>}
-              <p className="text-xs text-muted-foreground pt-2">Cancelled memberships keep access until the end of the current billing period. Credits reset once per valid billing cycle.</p>
+              <p className="text-xs text-muted-foreground pt-2">Cancelled memberships keep access until the end of the current billing period. Included and purchased credits never expire.</p>
               <p className="text-xs text-muted-foreground">Billing questions? Contact <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a></p>
             </div>
           ) : (
@@ -119,6 +123,8 @@ export default function Billing() {
           )}
         </div>
       </div>
+
+      {!exempt && <CreditPackGrid isMember={memberLike} />}
     </div>
   );
 }
