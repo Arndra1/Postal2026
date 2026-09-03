@@ -1,13 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
 // Leadora support: email-based customer support only — no phone support.
-// Stores the request and notifies the Abundance customer-service inboxes
-// (internal), plus sends a confirmation email to the requester.
+// Stores the request, notifies the customer-service inboxes, and sends the
+// owner a private copy of every customer-service communication. The owner's
+// address is internal only — customers only ever see the customer-service
+// addresses.
 const CATEGORIES = ["Account", "Billing", "Credits", "Lead Search", "Enrichment", "Data Correction", "Technical Problem", "Privacy", "Compliance", "Other"];
 const CUSTOMER_SERVICE_EMAILS = [
   "customerservice@abundance-consultants.com",
   "customerservice1@abundance-consultants.com"
 ];
+// Private owner/admin inbox — receives copies of all customer-service
+// communications. NEVER displayed publicly or shown to customers.
+const OWNER_EMAIL = "support@abundance-consultants.com";
 
 export default async function(req) {
   try {
@@ -58,7 +63,7 @@ export default async function(req) {
       "Company: " + (company || "—") + "\n" +
       "Submitted: " + submittedAt + "\n\n" +
       "Message:\n" + message;
-    for (const to of CUSTOMER_SERVICE_EMAILS) {
+    for (const to of [...CUSTOMER_SERVICE_EMAILS, OWNER_EMAIL]) {
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: to,
@@ -72,6 +77,7 @@ export default async function(req) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: accountEmail,
+        from_name: "Leadora Customer Service",
         subject: "We received your Leadora support request",
         body:
           "Hi " + name + ",\n\n" +
