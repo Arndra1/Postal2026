@@ -10,6 +10,9 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from '@/components/AppLayout';
 import AdminGuard from '@/components/AdminGuard';
 import Landing from '@/pages/Landing';
+import ResponsibleDataUse from '@/pages/ResponsibleDataUse';
+import TermsOfUse from '@/pages/TermsOfUse';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -62,6 +65,9 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/responsible-data-use" element={<ResponsibleDataUse />} />
+      <Route path="/terms" element={<TermsOfUse />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
