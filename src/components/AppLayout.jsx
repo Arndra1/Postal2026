@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
   ShieldCheck, Scale, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
+import Logo from "@/components/Logo";
 import TermsGate from "@/components/TermsGate";
 
 const userNav = [
@@ -49,11 +50,8 @@ export default function AppLayout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      <Link to="/dashboard" className="flex items-center gap-2 px-2 py-1">
-        <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-white" />
-        </div>
-        <span className="font-heading text-lg font-semibold tracking-tight">Leadora</span>
+      <Link to="/dashboard" aria-label="Leadora dashboard" className="flex items-center px-2 py-1">
+        <Logo variant="sidebar" />
       </Link>
 
       <nav className="mt-8 flex-1 space-y-1">
@@ -121,8 +119,8 @@ export default function AppLayout() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg lady-gradient flex items-center justify-center"><Sparkles className="w-4 h-4 text-white" /></div>
+        <Link to="/dashboard" aria-label="Leadora dashboard" className="flex items-center gap-2">
+          <Logo variant="icon" />
           <span className="font-heading font-semibold">Leadora</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sparkles, ArrowRight, BadgeCheck, Check
 } from "lucide-react";
+import Logo from "@/components/Logo";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import AudienceSection from "@/components/landing/AudienceSection";
@@ -18,20 +19,17 @@ export default function Landing() {
       {/* Nav */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-heading text-xl font-semibold tracking-tight">Leadora</span>
+          <Link to="/" aria-label="Leadora home" className="flex items-center">
+            <Logo variant="header" />
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <nav className="hidden lg:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
             <a href="#how" className="hover:text-foreground transition">How It Works</a>
             <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
             <Link to="/responsible-data-use" className="hover:text-foreground transition">Responsible Data Use</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link to="/login"><Button variant="ghost" className="hidden sm:inline-flex">Sign In</Button></Link>
+            <Link to="/login"><Button variant="ghost" className="hidden md:inline-flex">Sign In</Button></Link>
             <Link to="/register"><Button>Start Now</Button></Link>
           </div>
         </div>

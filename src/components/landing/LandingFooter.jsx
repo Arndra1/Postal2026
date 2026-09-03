@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import Logo from "@/components/Logo";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
 
 const exploreLinks = [
@@ -24,7 +24,7 @@ export default function LandingFooter() {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg lady-gradient flex items-center justify-center"><Sparkles className="w-4 h-4 text-white" /></div>
+              <Logo variant="icon" />
               <span className="font-heading text-lg font-semibold">Leadora</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
