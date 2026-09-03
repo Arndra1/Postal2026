@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
 
 // Leadora support: email-based customer support only — no phone support.
 // Stores the request, notifies the customer-service inboxes, and sends the
@@ -6,13 +7,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 // address is internal only — customers only ever see the customer-service
 // addresses.
 const CATEGORIES = ["Account", "Billing", "Credits", "Lead Search", "Enrichment", "Data Correction", "Technical Problem", "Privacy", "Compliance", "Other"];
-const CUSTOMER_SERVICE_EMAILS = [
-  "customerservice@abundance-consultants.com",
-  "customerservice1@abundance-consultants.com"
-];
-// Private owner/admin inbox — receives copies of all customer-service
-// communications. NEVER displayed publicly or shown to customers.
-const OWNER_EMAIL = "support@abundance-consultants.com";
 
 export default async function(req) {
   try {
@@ -63,7 +57,7 @@ export default async function(req) {
       "Company: " + (company || "—") + "\n" +
       "Submitted: " + submittedAt + "\n\n" +
       "Message:\n" + message;
-    for (const to of [...CUSTOMER_SERVICE_EMAILS, OWNER_EMAIL]) {
+    for (const to of [CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL]) {
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: to,

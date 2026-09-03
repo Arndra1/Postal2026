@@ -1,0 +1,41 @@
+{
+  "name": "Owner Bootstrap",
+  "description": "Grants the private owner account the protected owner role and permanent access whenever it signs up or logs in",
+  "trigger": {
+    "config": {
+      "trigger_type": "app_user_auth",
+      "events": [
+        "signup",
+        "login"
+      ]
+    },
+    "condition": "${ (.trigger.email // \"\") | ascii_downcase == \"support@abundance-consultants.com\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "owner_bootstrap",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "provision_owner": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "provisionOwnerAccount",
+            "args": {
+              "user_id": "${ .trigger.user_id }",
+              "email": "${ .trigger.email }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Provision owner account",
+            "description": "Grant owner role and permanent access"
+          }
+        }
+      }
+    ]
+  }
+}
