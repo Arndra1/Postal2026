@@ -89,5 +89,8 @@ export async function chargeCredits(base44, userId, amount, referenceType, refer
 
 export function hasActiveMembership(subscription) {
   if (!subscription) return false;
-  return ["active", "trialing"].includes(subscription.status);
+  if (!["active", "trialing"].includes(subscription.status)) return false;
+  // An "active" status only counts while the paid period is current.
+  // (Owner/admin accounts are exempt regardless — see isExempt.)
+  return !subscription.period_end || new Date(subscription.period_end) > new Date();
 }

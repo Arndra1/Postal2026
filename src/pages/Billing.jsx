@@ -12,16 +12,20 @@ export default function Billing() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [action, setAction] = useState(null);
+  const [notice, setNotice] = useState("");
 
   const load = () => base44.functions.invoke("userStats", {}).then((res) => setData(res.data));
   useEffect(() => { load(); }, []);
 
   const subscribe = async () => {
     setAction("sub");
+    setNotice("");
     try {
-      await base44.functions.invoke("billingSubscribe", { provider: "demo", amount: 59, currency: "USD" });
+      await base44.functions.invoke("billingSubscribe", {});
       await load();
-    } catch (_e) {} finally { setAction(null); }
+    } catch (err) {
+      setNotice(err?.response?.data?.error || "Online checkout isn't available yet.");
+    } finally { setAction(null); }
   };
   const cancel = async () => {
     setAction("cancel");
@@ -65,9 +69,12 @@ export default function Billing() {
           {!exempt && (
             <div className="space-y-2">
               {status !== "active" && status !== "trialing" && (
-                <Button className="w-full h-11" onClick={subscribe} disabled={action === "sub"}>
-                  {action === "sub" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />} Subscribe
-                </Button>
+                <>
+                  <Button className="w-full h-11" onClick={subscribe} disabled={action === "sub"}>
+                    {action === "sub" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />} Subscribe
+                  </Button>
+                  {notice && <p className="text-xs text-muted-foreground text-center pt-1">{notice}</p>}
+                </>
               )}
               {(status === "active" || status === "trialing") && (
                 <>

@@ -3,8 +3,10 @@
 // Live providers (People Data Labs, Enrich.so, NumVerify, business/location providers)
 // are wired by setting their API key as a secret and adding a branch in resolveProvider().
 // No provider secrets are ever exposed to the frontend.
-
-import { secrets } from "base44:runtime";
+//
+// SECURITY: there is no mock/demo provider. Fabricated contact data must never be
+// returned to users or charged for as "verified". Until a live provider's API key is
+// configured, enrichment fails closed and costs 0 credits.
 
 // A provider returns a normalized result object.
 // status: "success" | "empty" | "failed" | "timeout" | "validation_error"
@@ -12,7 +14,13 @@ export async function runEnrichment(base44, inputs) {
   const provider = await resolveProvider(base44);
   const start = Date.now();
   if (!provider) {
-    return { status: "failed", results: null, data_sources: [], duration_ms: Date.now() - start, error: "provider_disabled" };
+    return {
+      status: "failed",
+      results: null,
+      data_sources: [],
+      duration_ms: Date.now() - start,
+      error: "No data provider is currently configured. Enrichment will be available once a live provider is connected."
+    };
   }
   try {
     const raw = await provider.enrich(inputs);
@@ -28,18 +36,15 @@ export async function runEnrichment(base44, inputs) {
   }
 }
 
+// Returns the active live provider, or null when none is configured.
 // The owner can disable an individual data source (ProviderSetting records,
 // managed in the admin compliance dashboard) without shutting down enrichment.
 async function resolveProvider(base44) {
-  try {
-    const settings = await base44.asServiceRole.entities.ProviderSetting.filter({ provider_key: "mock_provider" });
-    if (settings.length > 0 && settings[0].enabled === false) return null;
-  } catch (_e) { /* settings unavailable — treat as enabled */ }
-  // In production, choose based on which secret is configured, e.g.:
+  // Wire live providers here once their API key secret is set, e.g.:
   // const pdlKey = secrets.get("PDL_API_KEY");
   // if (pdlKey) return peopleDataLabsProvider(pdlKey);
-  // For now, return the mock provider so the app is fully functional without live keys.
-  return mockProvider;
+  // No live provider configured — fail closed (no synthetic data, no charge).
+  return null;
 }
 
 function normalizeResult(raw, duration_ms, providerName) {
@@ -69,34 +74,3 @@ function normalizeResult(raw, duration_ms, providerName) {
     error: ""
   };
 }
-
-function slugify(s) {
-  return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.|\.$/g, "");
-}
-
-// Mock provider — deterministic, requires input signal, never throws.
-const mockProvider = {
-  name: "mock_provider",
-  async enrich(inputs) {
-    const hasSignal = inputs.person_name || inputs.business_name || inputs.website || inputs.email;
-    if (!hasSignal) {
-      return { verified_email: "", verified_phone: "" };
-    }
-    const person = inputs.person_name || "Jordan Avery";
-    const business = inputs.business_name || "Northwind Consulting";
-    let domain = "northwindco.com";
-    if (inputs.website) {
-      domain = String(inputs.website).replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
-    }
-    return {
-      verified_email: inputs.email || (slugify(person) + "@" + domain),
-      verified_phone: inputs.phone || "+1 (415) 555-0142",
-      website: inputs.website || ("https://" + domain),
-      linkedin: "https://linkedin.com/in/" + slugify(person),
-      address: "500 Market St, San Francisco, CA 94105",
-      job_title: inputs.job_title || "Director of Operations",
-      company: business,
-      confidence: "high"
-    };
-  }
-};

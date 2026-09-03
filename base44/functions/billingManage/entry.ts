@@ -31,6 +31,12 @@ export default async function(req) {
     }
 
     if (action === "reactivate") {
+      // SECURITY: only a cancelled-but-still-paid-through membership can be
+      // reactivated. Once the paid period has ended, a new confirmed payment
+      // is required — reactivation must never resurrect an expired membership.
+      if (!sub.period_end || new Date(sub.period_end) <= new Date()) {
+        return badRequest("Your billing period has ended. Subscribe again to reactivate your membership.");
+      }
       const updated = await base44.asServiceRole.entities.Subscription.update(sub.id, {
         status: "active",
         cancelled_at: ""

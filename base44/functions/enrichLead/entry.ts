@@ -76,21 +76,27 @@ export default async function(req) {
         balanceAfter = wallet.balance;
       }
 
-      // Update lead if provided.
+      // Update lead if provided — SECURITY: ownership is verified first.
+      // The user-scoped client enforces RLS (other users' leads are filtered out),
+      // and we additionally require the lead to belong to the caller (or an exempt
+      // admin/owner acting administratively). No cross-tenant overwrites, ever.
       if (leadId) {
         try {
-          await base44.asServiceRole.entities.Lead.update(leadId, {
-            email: providerResult.results.verified_email,
-            phone: providerResult.results.verified_phone,
-            website: providerResult.results.website,
-            linkedin: providerResult.results.linkedin,
-            address: providerResult.results.address,
-            job_title: providerResult.results.job_title,
-            contact_status: "verified",
-            enrichment_status: "enriched",
-            confidence: providerResult.results.confidence
-          });
-        } catch (_e) { /* lead may not exist */ }
+          const lead = await base44.entities.Lead.get(leadId);
+          if (lead && (lead.user_id === user.id || exempt)) {
+            await base44.entities.Lead.update(leadId, {
+              email: providerResult.results.verified_email,
+              phone: providerResult.results.verified_phone,
+              website: providerResult.results.website,
+              linkedin: providerResult.results.linkedin,
+              address: providerResult.results.address,
+              job_title: providerResult.results.job_title,
+              contact_status: "verified",
+              enrichment_status: "enriched",
+              confidence: providerResult.results.confidence
+            });
+          }
+        } catch (_e) { /* lead missing or not owned by caller — no update */ }
       }
     } else {
       // Failed/empty/timeout — log it, charge 0.
