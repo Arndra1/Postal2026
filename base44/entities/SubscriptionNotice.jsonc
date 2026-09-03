@@ -1,0 +1,106 @@
+{
+  "name": "SubscriptionNotice",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "notice_type": {
+      "type": "string",
+      "enum": [
+        "enrollment_confirmation",
+        "renewal_reminder",
+        "annual_reminder",
+        "price_change_notice",
+        "trial_expiration_notice",
+        "cancellation_confirmation"
+      ]
+    },
+    "email": {
+      "type": "string",
+      "default": ""
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reference": {
+      "type": "string",
+      "default": ""
+    },
+    "details": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "user_id",
+    "notice_type",
+    "sent_at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

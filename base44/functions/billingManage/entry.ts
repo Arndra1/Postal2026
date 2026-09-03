@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { getOrCreateSubscription, isExempt } from "../../shared/credits.ts";
+import { sendCancellationConfirmation } from "../../shared/subscriptionEmails.ts";
 import { logActivity } from "../../shared/logging.ts";
 import { unauthorized, badRequest } from "../../shared/roles.ts";
 
@@ -49,7 +50,14 @@ export default async function(req) {
         cancelled_at: new Date().toISOString()
       });
       await logActivity(base44, user, "subscription_cancelled", "Membership cancelled — access remains until period end", {});
-      return Response.json({ ok: true, subscription: updated, message: "Membership cancelled. Access remains until the end of your current billing period." });
+      // Cancellation confirmation email + notice record (compliance).
+      // A mail failure must NOT undo the completed cancellation.
+      try {
+        await sendCancellationConfirmation(base44, user.id, user.email, updated.period_end || "");
+      } catch (mailErr) {
+        console.error("billingManage: cancellation confirmation email failed", mailErr);
+      }
+      return Response.json({ ok: true, subscription: updated, message: "Membership cancelled. Access remains until the end of your current billing period. A confirmation email has been sent." });
     }
 
     if (action === "reactivate") {

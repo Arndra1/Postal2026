@@ -14,6 +14,7 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 import { importSPKI, jwtVerify } from "npm:jose@5.9.6";
 import { getOrCreateSubscription, grantCreditsOnce, MONTHLY_CREDITS, PLAN_ID } from "../../shared/credits.ts";
 import { resolveProduct, MEMBERSHIP_PRODUCT_ID } from "../../shared/products.ts";
+import { sendEnrollmentConfirmation } from "../../shared/subscriptionEmails.ts";
 
 // Wix event types (verbatim from Wix docs).
 const ORDER_APPROVED = "wix.ecom.v1.order_approved";
@@ -199,6 +200,20 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     // Grant the 100 monthly credits exactly once per confirmed payment
     // (idempotent, keyed on the purchase id).
     await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
+
+    // SUBSCRIPTION CONFIRMATION: acknowledgment email immediately after enrollment —
+    // renewal terms, start date, next billing date, cancellation instructions, and a
+    // manage-subscription link. Recorded in SubscriptionNotice. A mail failure must
+    // not block fulfillment.
+    const users = await db.entities.User.filter({ id: userId });
+    const memberEmail = users?.[0]?.email;
+    if (memberEmail) {
+      try {
+        await sendEnrollmentConfirmation(db, userId, memberEmail, now.toISOString(), periodEnd.toISOString());
+      } catch (mailErr) {
+        console.error("payments-webhook: enrollment confirmation email failed", mailErr);
+      }
+    }
   } else if (product.kind === "credit_pack") {
     // One-time credit pack: add exactly the purchased credits, once.
     // (Pack sales are gated to active members at checkout time.)

@@ -47,7 +47,8 @@ export default function CreditPackGrid({ isMember }) {
             <Zap className="w-4 h-4 text-accent mb-2" />
             <p className="font-heading text-lg font-semibold">{p.credits}</p>
             <p className="text-xs text-muted-foreground">credits</p>
-            <p className="text-sm font-medium mt-2 mb-3">{p.price}</p>
+            <p className="text-sm font-medium mt-2">{p.price}</p>
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-3">One-Time Purchase</p>
             <Button size="sm" className="w-full" disabled={!isMember || action === p.id} onClick={() => buy(p.id)}>
               {action === p.id ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : null} Buy
             </Button>

@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "subscription_reminders",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_reminders": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSubscriptionReminders",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send renewal reminders",
+            "description": "Renewal + annual notices"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Subscription Reminders",
+  "description": "Daily automatic-renewal compliance job \u2014 sends renewal reminders before each billing date and annual auto-renewal reminders to active members.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

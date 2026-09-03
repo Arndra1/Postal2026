@@ -17,6 +17,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 import { resolveProduct } from "../../shared/products.ts";
 import { hasActiveMembership } from "../../shared/credits.ts";
+import { TERMS_VERSION } from "../../shared/terms.ts";
 
 const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct";
 
@@ -86,7 +87,28 @@ Deno.serve(async (req: Request) => {
     const quantity = 1;
     // For a SUBSCRIPTION set this to Wix's subscriptionInfo; null for a one-time payment.
     let subscriptionInfo = null;
+    let consentId = null;
     if (product.kind === "membership") {
+      // Recurring subscription — AFFIRMATIVE AUTO-RENEWAL CONSENT REQUIRED.
+      // The Billing page records the consent (never pre-checked, affirmative click);
+      // it is validated HERE server-side before any recurring checkout can start.
+      // No consent → no subscription. Fail closed.
+      if (!appUser) {
+        return new Response(JSON.stringify({ error: "Please sign in and accept the automatic-renewal terms on the Billing page before subscribing." }), { status: 400 });
+      }
+      const consents = await base44.asServiceRole.entities.SubscriptionConsent.filter({ user_id: appUser.id, product_id: productId });
+      const consent = (consents ?? [])
+        .slice()
+        .sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0))[0];
+      const consentValid = consent
+        && consent.consent_at
+        && consent.price === product.price
+        && consent.currency === product.currency
+        && consent.billing_frequency === "monthly";
+      if (!consentValid) {
+        return new Response(JSON.stringify({ error: "Please accept the automatic-renewal terms on the Billing page before subscribing." }), { status: 400 });
+      }
+      consentId = consent.id;
       // Monthly auto-renewing subscription (infinite renewal; buyer can cancel anytime).
       subscriptionInfo = {
         subscriptionSettings: { frequency: "MONTH" },
@@ -173,6 +195,16 @@ Deno.serve(async (req: Request) => {
       amount: total.toFixed(2),
       currency,
     });
+
+    // ===== APP-SPECIFIC: link the recorded auto-renewal consent to this payment =====
+    // (payment/subscription reference + server-authoritative terms version).
+    if (consentId) {
+      await base44.asServiceRole.entities.SubscriptionConsent.update(consentId, {
+        checkout_session_id: checkoutSessionId,
+        terms_version: TERMS_VERSION
+      });
+    }
+    // ===== END APP-SPECIFIC =====
 
     return new Response(JSON.stringify({ redirectUrl }), {
       status: 200,

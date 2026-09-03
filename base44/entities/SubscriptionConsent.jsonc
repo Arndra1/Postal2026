@@ -1,0 +1,101 @@
+{
+  "name": "SubscriptionConsent",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "price": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "billing_frequency": {
+      "type": "string",
+      "default": "monthly"
+    },
+    "terms_version": {
+      "type": "string",
+      "default": ""
+    },
+    "consent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checkout_session_id": {
+      "type": "string",
+      "default": ""
+    },
+    "subscription_id": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "user_id",
+    "product_id",
+    "price",
+    "billing_frequency",
+    "consent_at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
