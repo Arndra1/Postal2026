@@ -127,9 +127,13 @@ export default function AdminDataSources() {
                 <th className="text-left font-medium px-4 py-3">State</th>
                 <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Agency</th>
                 <th className="text-left font-medium px-4 py-3 hidden lg:table-cell">Source Type</th>
-                <th className="text-left font-medium px-4 py-3">Automation</th>
                 <th className="text-left font-medium px-4 py-3">Status</th>
-                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Notes</th>
+                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Automated?</th>
+                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Free/Paid</th>
+                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Format</th>
+                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Update Freq</th>
+                <th className="text-left font-medium px-4 py-3 hidden xl:table-cell">Formation Date?</th>
+                <th className="text-left font-medium px-4 py-3 hidden 2xl:table-cell">Notes</th>
                 <th className="text-right font-medium px-4 py-3">Portal</th>
               </tr>
             </thead>
@@ -139,11 +143,15 @@ export default function AdminDataSources() {
                   <td className="px-4 py-3 font-medium">{r.state}</td>
                   <td className="px-4 py-3 hidden md:table-cell text-xs">{r.business_name}</td>
                   <td className="px-4 py-3 hidden lg:table-cell text-xs capitalize">{(r.extra?.source_type || "").replace(/_/g, " ")}</td>
-                  <td className="px-4 py-3 text-xs capitalize">{(r.extra?.automation_status || "").replace(/_/g, " ")}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${STATUS_STYLE[r.extra?.connection_status] || STATUS_STYLE.untested}`}>{r.extra?.connection_status || "ready"}</span>
                   </td>
-                  <td className="px-4 py-3 hidden xl:table-cell text-xs text-muted-foreground">{r.extra?.notes || "—"}</td>
+                  <td className="px-4 py-3 hidden xl:table-cell text-xs">{r.extra?.automated ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 hidden xl:table-cell text-xs">{r.extra?.free_paid || "—"}</td>
+                  <td className="px-4 py-3 hidden xl:table-cell text-xs">{r.extra?.data_format || "—"}</td>
+                  <td className="px-4 py-3 hidden xl:table-cell text-xs">{r.extra?.update_frequency || "—"}</td>
+                  <td className="px-4 py-3 hidden xl:table-cell text-xs">{r.extra?.formation_date_available ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 hidden 2xl:table-cell text-xs text-muted-foreground max-w-xs">{r.extra?.notes || "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <Button variant="ghost" size="sm" asChild>
                       <a href={r.source_url} target="_blank" rel="noreferrer"><ExternalLink className="w-3.5 h-3.5" /></a>

@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { providerForCategory } from "../../shared/public-data/registry.ts";
 import { getSourceByCode, STATE_BUSINESS_SOURCES } from "../../shared/stateBusinessSources.ts";
+import { STATE_FILING_ADAPTERS } from "../../shared/public-data/stateFilings.ts";
 import { logActivity } from "../../shared/logging.ts";
 import { unauthorized } from "../../shared/roles.ts";
 
@@ -31,6 +32,9 @@ export default async function(req) {
       city: body.city || "",
       industry: body.industry || "",
       job_title: body.job_title || "",
+      dateRange: body.dateRange || "LAST 30 DAYS",
+      startDate: body.startDate || "",
+      endDate: body.endDate || "",
     };
 
     const now = new Date().toISOString();
@@ -57,11 +61,32 @@ export default async function(req) {
             bulk_data: s.bulk_data,
             automation_status: s.automation_status,
             connection_status: s.connection_status,
+            free_paid: s.free_paid || "",
+            formation_date_available: s.formation_date_available || false,
+            data_format: s.data_format || "",
+            update_frequency: s.update_frequency || "",
+            automated: s.automated || false,
             notes: s.notes,
           },
         }));
         await logActivity(base44, user, "public_search_new_businesses", "Listed all state business registries", {});
         return Response.json({ status: "success", category, source: "State Business Registry", results: all, credits_charged: 0 });
+      }
+      // Live automated adapters (FL/CT/NY) — return REAL newly-registered records.
+      const adapter = STATE_FILING_ADAPTERS[inputs.state.toUpperCase()];
+      if (adapter) {
+        let pr;
+        try {
+          pr = await adapter(inputs);
+        } catch (_err) {
+          return Response.json({ status: "failed", error: "Source temporarily unavailable.", results: [] }, { status: 502 });
+        }
+        if (pr.status !== "success") {
+          return Response.json({ status: "failed", error: "Source temporarily unavailable.", results: [] }, { status: 502 });
+        }
+        const liveResults = await flagDuplicates(base44, user.id, pr.results || []);
+        await logActivity(base44, user, "public_search_new_businesses", "Live state filings search: " + inputs.state, { state: inputs.state, count: liveResults.length });
+        return Response.json({ status: "success", category, source: pr.source, results: liveResults, credits_charged: 0 });
       }
       const src = getSourceByCode(inputs.state);
       if (!src) {
