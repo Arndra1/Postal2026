@@ -84,7 +84,7 @@ export async function chargeCredits(base44, userId, amount, referenceType, refer
       reference_id: referenceId
     });
     if (dupes.length > 0) {
-      return { ok: true, balance: dupes[0].balance_after, duplicate: true };
+      return { ok: true, balance: dupes[0].balance_after, duplicate: true, ledger_id: dupes[0].id };
     }
   }
   const wallet = await getOrCreateWallet(base44, userId);
@@ -96,7 +96,7 @@ export async function chargeCredits(base44, userId, amount, referenceType, refer
     balance: newBalance,
     lifetime_used: (wallet.lifetime_used || 0) + amount
   });
-  await svc(base44).entities.CreditLedger.create({
+  const ledger = await svc(base44).entities.CreditLedger.create({
     user_id: userId,
     action: "spend",
     amount: -amount,
@@ -105,7 +105,7 @@ export async function chargeCredits(base44, userId, amount, referenceType, refer
     reference_id: referenceId || "",
     description: description || ""
   });
-  return { ok: true, balance: newBalance, duplicate: false };
+  return { ok: true, balance: newBalance, duplicate: false, ledger_id: ledger.id };
 }
 
 export function hasActiveMembership(subscription) {

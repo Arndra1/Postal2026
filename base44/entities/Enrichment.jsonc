@@ -48,6 +48,29 @@
     "error_message": {
       "type": "string",
       "default": ""
+    },
+    "enrichment_request_id": {
+      "type": "string",
+      "default": "",
+      "description": "Client-supplied request id for idempotency across retries/refreshes."
+    },
+    "inputs_hash": {
+      "type": "string",
+      "default": "",
+      "description": "Stable hash of enrichment inputs for short-window duplicate suppression."
+    },
+    "credit_ledger_id": {
+      "type": "string",
+      "default": "",
+      "description": "Id of the CreditLedger spend entry for this enrichment, when charged."
+    },
+    "provider_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Per-provider contribution: provider, status, fields returned, duration, errors."
     }
   },
   "required": [

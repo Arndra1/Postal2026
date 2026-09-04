@@ -12,6 +12,32 @@
     "enabled": {
       "type": "boolean",
       "default": true
+    },
+    "priority": {
+      "type": "number",
+      "default": 100,
+      "description": "Lower runs first in the enrichment waterfall."
+    },
+    "last_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "ok",
+        "error"
+      ],
+      "default": "none"
+    },
+    "last_success_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string",
+      "default": ""
+    },
+    "last_error_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
