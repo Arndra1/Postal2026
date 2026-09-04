@@ -176,10 +176,46 @@ export async function searchNewYork(inputs) {
   return { status: "success", source: "New York Department of State", results };
 }
 
+// ---- Pennsylvania: open-data Socrata API. creationdate = formation/registration date. ----
+export async function searchPennsylvania(inputs) {
+  const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
+  const where = `creationdate >= '${socrataDate(start, false)}' AND creationdate <= '${socrataDate(end, true)}'`;
+  const sel = "business_name,filing_number,typeofbusinessregistration,creationdate,address_line1,address_line2,city,state,zip,shortcountyname,party_type,last_name,first_name,middle_name";
+  const url = `https://data.pa.gov/resource/xvd7-5r2c.json?$where=${encodeURIComponent(where)}&$order=creationdate DESC&$limit=100&$select=${encodeURIComponent(sel)}`;
+  const r = await fetch(url);
+  if (!r.ok) return { status: "failed", error: `pa_${r.status}`, results: [] };
+  const rows = await r.json();
+  if (!Array.isArray(rows)) return { status: "failed", error: "pa_malformed", results: [] };
+  const results = rows.map((row) => prospect({
+    business_name: row.business_name || "",
+    state: "PA",
+    city: row.city || "",
+    zip: row.zip || "",
+    address: [row.address_line1, row.address_line2].filter(Boolean).join(", "),
+    official_record_id: row.filing_number || "",
+    agency: "Pennsylvania Department of State",
+    source: "PA Registered Businesses (data.pa.gov)",
+    source_url: "https://data.pa.gov/Licenses-Certificates/Registered-Businesses-in-PA-Current-by-County-Depa/xvd7-5r2c",
+    record_type: "state_filing",
+    record_label: "PUBLIC RECORD",
+    extra: {
+      entity_type: row.typeofbusinessregistration || "",
+      status: "",
+      formation_date: (row.creationdate || "").slice(0, 10),
+      business_id: row.filing_number || "",
+      county: row.shortcountyname || "",
+      party_type: row.party_type || "",
+      officer: [row.first_name, row.middle_name, row.last_name].filter(Boolean).join(" "),
+    },
+  }));
+  return { status: "success", source: "Pennsylvania Department of State", results };
+}
+
 export const STATE_FILING_ADAPTERS = {
   FL: searchFlorida,
   CT: searchConnecticut,
   NY: searchNewYork,
+  PA: searchPennsylvania,
 };
 
 export function hasStateAdapter(code) {
