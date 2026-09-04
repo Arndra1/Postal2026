@@ -4,10 +4,12 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, FlaskConical
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import TermsGate from "@/components/TermsGate";
+import BetaGate from "@/components/BetaGate";
+import BetaFeedbackWidget from "@/components/beta/BetaFeedbackWidget";
 
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +34,7 @@ const adminNav = [
   { to: "/admin/activity", label: "System Activity", icon: ShieldCheck },
   { to: "/admin/compliance", label: "Compliance", icon: Scale },
   { to: "/admin/data-sources", label: "Data Sources", icon: Database },
+  { to: "/admin/beta", label: "Beta Dashboard", icon: FlaskConical },
 ];
 
 export default function AppLayout() {
@@ -143,7 +146,10 @@ export default function AppLayout() {
       <main className="lg:pl-64">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
           <TermsGate>
-            <Outlet />
+            <BetaGate>
+              <Outlet />
+              <BetaFeedbackWidget />
+            </BetaGate>
           </TermsGate>
         </div>
       </main>

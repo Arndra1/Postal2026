@@ -76,6 +76,14 @@ export default function SavedLeads() {
     const a = document.createElement("a");
     a.href = url; a.download = "leadora-saved-leads.csv"; a.click();
     URL.revokeObjectURL(url);
+    // Log all CSV exports for beta analytics.
+    base44.entities.ActivityLog.create({
+      user_id: user.id,
+      user_email: user.email || "",
+      action: "csv_export",
+      description: "Exported " + filtered.length + " leads to CSV",
+      metadata: { count: filtered.length }
+    }).catch(() => {});
     // Compliance: log high-volume exports for admin review.
     if (filtered.length >= 50) {
       base44.entities.ComplianceLog.create({
