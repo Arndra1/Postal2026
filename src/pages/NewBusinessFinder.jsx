@@ -15,7 +15,7 @@ const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","
 const DATE_RANGES = ["TODAY", "LAST 7 DAYS", "LAST 30 DAYS", "LAST 90 DAYS", "CUSTOM RANGE"];
 const ENTITY_TYPES = ["All", "LLC", "Corporation", "Partnership", "Nonprofit", "Sole Proprietor"];
 const STATUSES = ["All", "Active", "Dissolved", "Withdrawn", "Revoked"];
-const LIVE_STATES = ["FL", "CT", "NY", "PA"];
+const LIVE_STATES = ["FL", "CT", "NY", "PA", "CO", "OR"];
 
 export default function NewBusinessFinder() {
   const { user } = useAuth();

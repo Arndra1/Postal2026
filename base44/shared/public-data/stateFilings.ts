@@ -211,11 +211,93 @@ export async function searchPennsylvania(inputs) {
   return { status: "success", source: "Pennsylvania Department of State", results };
 }
 
+// ---- Colorado: open-data Socrata API. entityformdate = entity formation date. ----
+export async function searchColorado(inputs) {
+  const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
+  const where = `entityformdate >= '${socrataDate(start, false)}' AND entityformdate <= '${socrataDate(end, true)}'`;
+  const sel = "entityid,entityname,entitytype,entitystatus,entityformdate,principaladdress1,principaladdress2,principalcity,principalstate,principalzipcode,mailingaddress1,mailingcity,mailingstate,mailingzipcode,jurisdictonofformation,agentfirstname,agentmiddlename,agentlastname,agentorganizationname";
+  const url = `https://data.colorado.gov/resource/4ykn-tg5h.json?$where=${encodeURIComponent(where)}&$order=entityformdate DESC&$limit=100&$select=${encodeURIComponent(sel)}`;
+  const r = await fetch(url);
+  if (!r.ok) return { status: "failed", error: `co_${r.status}`, results: [] };
+  const rows = await r.json();
+  if (!Array.isArray(rows)) return { status: "failed", error: "co_malformed", results: [] };
+  const results = rows.map((row) => prospect({
+    business_name: (row.entityname || "").replace(/,\s*(Delinquent|Good Standing|Withdrawn|Exists|Merged|Dissolved|Expired|Revoked)\b.*$/i, "").trim(),
+    state: "CO",
+    city: row.principalcity || "",
+    zip: row.principalzipcode || "",
+    address: [row.principaladdress1, row.principaladdress2].filter(Boolean).join(", "),
+    official_record_id: row.entityid ? String(row.entityid) : "",
+    agency: "Colorado Department of State (Secretary of State)",
+    source: "CO Business Entities (data.colorado.gov)",
+    source_url: "https://data.colorado.gov/Business/Business-Entities-in-Colorado/4ykn-tg5h",
+    record_type: "state_filing",
+    record_label: "PUBLIC RECORD",
+    extra: {
+      entity_type: row.entitytype || "",
+      status: row.entitystatus || "",
+      formation_date: (row.entityformdate || "").slice(0, 10),
+      business_id: row.entityid ? String(row.entityid) : "",
+      jurisdiction: row.jurisdictonofformation || "",
+      registered_agent: [row.agentfirstname, row.agentmiddlename, row.agentlastname].filter(Boolean).join(" ") || row.agentorganizationname || "",
+      mailing_city: row.mailingcity || "",
+      mailing_state: row.mailingstate || "",
+      mailing_zip: row.mailingzipcode || "",
+    },
+  }));
+  return { status: "success", source: "Colorado Department of State", results };
+}
+
+// ---- Oregon: open-data Socrata API. registry_date = registration/formation date. ----
+export async function searchOregon(inputs) {
+  const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
+  const where = `registry_date >= '${socrataDate(start, false)}' AND registry_date <= '${socrataDate(end, true)}'`;
+  const sel = "registry_number,business_name,entity_type,registry_date,address,address_continued,city,state,zip,jurisdiction,associated_name_type,first_name,middle_name,last_name";
+  const url = `https://data.oregon.gov/resource/tckn-sxa6.json?$where=${encodeURIComponent(where)}&$order=registry_date DESC&$limit=100&$select=${encodeURIComponent(sel)}`;
+  const r = await fetch(url);
+  if (!r.ok) return { status: "failed", error: `or_${r.status}`, results: [] };
+  const rows = await r.json();
+  if (!Array.isArray(rows)) return { status: "failed", error: "or_malformed", results: [] };
+  // Oregon dataset has one row per (business, associated_name_type) — dedupe by registry_number.
+  const seen = new Set();
+  const results = [];
+  for (const row of rows) {
+    const id = row.registry_number || "";
+    if (id && seen.has(id)) continue;
+    if (id) seen.add(id);
+    results.push(prospect({
+      business_name: row.business_name || "",
+      state: "OR",
+      city: row.city || "",
+      zip: row.zip || "",
+      address: [row.address, row.address_continued].filter(Boolean).join(", "),
+      official_record_id: id,
+      agency: "Oregon Secretary of State — Corporation Division",
+      source: "OR Active Businesses (data.oregon.gov)",
+      source_url: "https://data.oregon.gov/Business/Active-Businesses-ALL/tckn-sxa6",
+      record_type: "state_filing",
+      record_label: "PUBLIC RECORD",
+      extra: {
+        entity_type: row.entity_type || "",
+        status: "Active",
+        formation_date: (row.registry_date || "").slice(0, 10),
+        business_id: id,
+        jurisdiction: row.jurisdiction || "",
+        associated_name_type: row.associated_name_type || "",
+        associated_person: [row.first_name, row.middle_name, row.last_name].filter(Boolean).join(" "),
+      },
+    }));
+  }
+  return { status: "success", source: "Oregon Secretary of State — Corporation Division", results };
+}
+
 export const STATE_FILING_ADAPTERS = {
   FL: searchFlorida,
   CT: searchConnecticut,
   NY: searchNewYork,
   PA: searchPennsylvania,
+  CO: searchColorado,
+  OR: searchOregon,
 };
 
 export function hasStateAdapter(code) {
