@@ -80,6 +80,7 @@ export default async function(req) {
         credits_charged: 0,
         duration_ms: providerResult.duration_ms,
         data_sources: providerResult.data_sources,
+        provider_breakdown: providerResult.provider_breakdown || [],
         error_message: ""
       });
 
@@ -130,6 +131,7 @@ export default async function(req) {
         credits_charged: 0,
         duration_ms: providerResult.duration_ms,
         data_sources: providerResult.data_sources,
+        provider_breakdown: providerResult.provider_breakdown || [],
         error_message: providerResult.error || ""
       });
       if (!exempt) {
