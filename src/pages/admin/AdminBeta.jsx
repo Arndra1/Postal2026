@@ -62,8 +62,9 @@ export default function AdminBeta() {
         <StatCard icon={Sparkles} label="Enrichment Attempts" value={s.enrichmentAttempts} accent />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         <StatCard icon={TrendingUp} label="Successful Enrichments" value={s.successfulEnrichments} accent />
+        <StatCard icon={BarChart3} label="Failed / Empty" value={s.failedEnrichments} />
         <StatCard icon={BarChart3} label="Success Rate" value={`${s.successRate}%`} />
         <StatCard icon={Coins} label="Credits Used" value={s.creditsUsed} />
         <StatCard icon={Download} label="CSV Exports" value={s.csvExports} />
