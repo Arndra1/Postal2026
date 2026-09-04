@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import TermsGate from "@/components/TermsGate";
@@ -12,6 +12,7 @@ import TermsGate from "@/components/TermsGate";
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/find-leads", label: "Find Leads", icon: Search },
+  { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },
   { to: "/pipeline", label: "Pipeline", icon: Columns3 },
@@ -30,6 +31,7 @@ const adminNav = [
   { to: "/admin/billing", label: "Billing Events", icon: CreditCard },
   { to: "/admin/activity", label: "System Activity", icon: ShieldCheck },
   { to: "/admin/compliance", label: "Compliance", icon: Scale },
+  { to: "/admin/data-sources", label: "Data Sources", icon: Database },
 ];
 
 export default function AppLayout() {

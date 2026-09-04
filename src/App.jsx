@@ -35,6 +35,8 @@ import AdminEnrichments from '@/pages/admin/AdminEnrichments';
 import AdminBilling from '@/pages/admin/AdminBilling';
 import AdminActivity from '@/pages/admin/AdminActivity';
 import AdminCompliance from '@/pages/admin/AdminCompliance';
+import NewBusinessFinder from '@/pages/NewBusinessFinder';
+import AdminDataSources from '@/pages/admin/AdminDataSources';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -75,6 +77,7 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/find-leads" element={<FindLeads />} />
+          <Route path="/new-businesses" element={<NewBusinessFinder />} />
           <Route path="/enrich" element={<Enrich />} />
           <Route path="/saved-leads" element={<SavedLeads />} />
           <Route path="/pipeline" element={<Pipeline />} />
@@ -90,6 +93,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/billing" element={<AdminGuard><AdminBilling /></AdminGuard>} />
           <Route path="/admin/activity" element={<AdminGuard><AdminActivity /></AdminGuard>} />
           <Route path="/admin/compliance" element={<AdminGuard><AdminCompliance /></AdminGuard>} />
+          <Route path="/admin/data-sources" element={<AdminGuard><AdminDataSources /></AdminGuard>} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

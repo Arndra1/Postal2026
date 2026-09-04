@@ -105,6 +105,49 @@
         "type": "string"
       },
       "default": []
+    },
+    "official_record_id": {
+      "type": "string",
+      "default": "",
+      "description": "Official public-record ID (e.g. committee_id, docket_id, state filing ID)."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "default": ""
+    },
+    "agency": {
+      "type": "string",
+      "default": "",
+      "description": "Official agency that published the record."
+    },
+    "source_reference": {
+      "type": "string",
+      "default": "",
+      "description": "Direct URL to the official public record."
+    },
+    "source_category": {
+      "type": "string",
+      "enum": [
+        "new_businesses",
+        "government_open_data",
+        "public_records",
+        "market_intelligence",
+        "geographic"
+      ],
+      "default": "government_open_data"
+    },
+    "record_label": {
+      "type": "string",
+      "default": "PUBLIC RECORD",
+      "description": "Display label for the record provenance."
+    },
+    "retrieval_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "original_public_fields": {
+      "type": "object",
+      "description": "Original public-record fields, preserved verbatim. Enrichment never overwrites these."
     }
   },
   "required": [

@@ -1,0 +1,177 @@
+{
+  "name": "PublicDataSource",
+  "type": "object",
+  "properties": {
+    "source_key": {
+      "type": "string",
+      "description": "Stable unique key, e.g. census, data_gov_fec, courtlistener, hud, geoapify, sos_ca."
+    },
+    "source_name": {
+      "type": "string",
+      "default": ""
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "new_businesses",
+        "government_open_data",
+        "public_records",
+        "market_intelligence",
+        "geographic",
+        "validation"
+      ],
+      "default": "government_open_data"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "default": "",
+      "description": "Federal, a 2-letter state code, or 'National'."
+    },
+    "agency": {
+      "type": "string",
+      "default": ""
+    },
+    "official_url": {
+      "type": "string",
+      "default": ""
+    },
+    "api_endpoint": {
+      "type": "string",
+      "default": "",
+      "description": "Real API endpoint when one exists. Empty for manual portals."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "api",
+        "open_data",
+        "bulk_data",
+        "manual_search",
+        "restricted",
+        "needs_research",
+        "unavailable"
+      ],
+      "default": "manual_search"
+    },
+    "auth_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "secret_name": {
+      "type": "string",
+      "default": "",
+      "description": "Name of the Base44 Secret used for auth. Never stores the value."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "connection_status": {
+      "type": "string",
+      "enum": [
+        "live",
+        "ready",
+        "needs_key",
+        "error",
+        "untested"
+      ],
+      "default": "untested"
+    },
+    "last_success_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_reviewed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "limits": {
+      "type": "string",
+      "default": ""
+    },
+    "restrictions": {
+      "type": "string",
+      "default": ""
+    },
+    "error_state": {
+      "type": "string",
+      "default": ""
+    },
+    "freshness": {
+      "type": "string",
+      "default": "",
+      "description": "Human note on data update cadence, e.g. 'Annual'."
+    }
+  },
+  "required": [
+    "source_key",
+    "source_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
