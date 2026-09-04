@@ -1,6 +1,6 @@
 // Shared helpers for public-data provider modules. Server-side only.
 
-export const PUBLIC_TIMEOUT_MS = 15000;
+export const PUBLIC_TIMEOUT_MS = 10000;
 
 // fetch wrapper with AbortController timeout + safe JSON parsing.
 export async function fetchJson(url, opts = {}, ms = PUBLIC_TIMEOUT_MS) {

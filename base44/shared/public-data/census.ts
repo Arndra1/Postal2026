@@ -37,10 +37,14 @@ export async function searchMarketIntel(inputs) {
   let url = `https://api.census.gov/data/2021/cbp?get=NAME,ESTAB,EMP,PAYANN&for=county:*&in=state:${fips}&key=${key}`;
   if (naics) url += `&NAICS2017=${naics}`;
 
-  const { ok, status, json } = await fetchJson(url);
-  if (!ok || !Array.isArray(json)) return { status: "failed", error: `census_${status}`, results: [] };
+  // Census API latency is variable; retry once on timeout/network error.
+  let res = await fetchJson(url);
+  if (!res.ok && (res.status === 0 || res.text === "timeout" || res.text === "network_error")) {
+    res = await fetchJson(url);
+  }
+  if (!res.ok || !Array.isArray(res.json)) return { status: "failed", error: `census_${res.status || res.text}`, results: [] };
 
-  const rows = json.slice(1)
+  const rows = res.json.slice(1)
     .map((r) => ({
       name: r[0],
       estab: parseInt(r[1] || "0", 10),
@@ -72,9 +76,12 @@ export async function searchDemographics(inputs) {
   const fips = STATE_FIPS[(inputs.state || "").toUpperCase()];
   if (!fips) return { status: "failed", error: "invalid_state", results: [] };
   const url = `https://api.census.gov/data/2022/acs/acs5?get=NAME,B01001_001E&for=state:${fips}&key=${key}`;
-  const { ok, status, json } = await fetchJson(url);
-  if (!ok || !Array.isArray(json)) return { status: "failed", error: `census_${status}`, results: [] };
-  const row = json[1] || [];
+  let res = await fetchJson(url);
+  if (!res.ok && (res.status === 0 || res.text === "timeout" || res.text === "network_error")) {
+    res = await fetchJson(url);
+  }
+  if (!res.ok || !Array.isArray(res.json)) return { status: "failed", error: `census_${res.status || res.text}`, results: [] };
+  const row = res.json[1] || [];
   const results = [prospect({
     business_name: row[0] || "",
     state: (inputs.state || "").toUpperCase(),
