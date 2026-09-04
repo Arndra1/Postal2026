@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { isExempt, ENRICHMENT_COST, chargeCredits, getOrCreateWallet, hasActiveMembership, getOrCreateSubscription } from "../../shared/credits.ts";
-import { runEnrichment } from "../../shared/providers.ts";
+import { runEnrichment, findRecentSuccess } from "../../shared/providers.ts";
 import { logActivity } from "../../shared/logging.ts";
 import { unauthorized, badRequest } from "../../shared/roles.ts";
 
@@ -38,6 +38,26 @@ export default async function(req) {
       if ((wallet.balance || 0) < ENRICHMENT_COST) {
         return Response.json({ error: "Insufficient credits. You need at least 5 credits to enrich a lead.", code: "insufficient_credits" }, { status: 402 });
       }
+    }
+
+    // Idempotency: a duplicate request (retry after a transient 503, or a double-click)
+    // for the same inputs within the short dedup window returns the prior successful
+    // result WITHOUT re-running providers or re-charging credits.
+    const recent = await findRecentSuccess(base44, user.id, inputs);
+    if (recent) {
+      let bal = null;
+      if (!exempt) { const w = await getOrCreateWallet(base44, user.id); bal = w.balance; }
+      return Response.json({
+        status: "success",
+        results: recent.results || {},
+        data_sources: recent.data_sources || [],
+        duration_ms: 0,
+        credits_charged: 0,
+        balance_after: bal,
+        enrichment_id: recent.id,
+        error: "",
+        duplicate: true,
+      });
     }
 
     // Run enrichment provider.
