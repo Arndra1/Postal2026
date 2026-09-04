@@ -291,6 +291,43 @@ export async function searchOregon(inputs) {
   return { status: "success", source: "Oregon Secretary of State — Corporation Division", results };
 }
 
+// ---- Texas: Comptroller "Active Franchise Taxpayers" open-data Socrata API. ----
+// sos_charter_date = Secretary of State charter/formation date (calendar_date).
+// This is a SEPARATE free official open-data business-entity dataset — NOT paid SOSDirect.
+const TX_ORG_TYPES = { CL: "LLC", CO: "Corporation", CR: "Corporation", NP: "Nonprofit", PF: "Professional Association", LT: "Limited Partnership", LP: "Limited Partnership", GP: "General Partnership", PT: "Professional Corporation" };
+export async function searchTexas(inputs) {
+  const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
+  const where = `sos_charter_date >= '${socrataDate(start, false)}' AND sos_charter_date <= '${socrataDate(end, true)}'`;
+  const sel = "taxpayer_name,taxpayer_organizational_type,sos_charter_date,secretary_of_state_sos_or_coa_file_number,right_to_transact_business_code,taxpayer_address,taxpayer_city,taxpayer_state,taxpayer_zip,taxpayer_county_code";
+  const url = `https://data.texas.gov/resource/9cir-efmm.json?$where=${encodeURIComponent(where)}&$order=sos_charter_date DESC&$limit=100&$select=${encodeURIComponent(sel)}`;
+  const r = await fetch(url);
+  if (!r.ok) return { status: "failed", error: `tx_${r.status}`, results: [] };
+  const rows = await r.json();
+  if (!Array.isArray(rows)) return { status: "failed", error: "tx_malformed", results: [] };
+  const results = rows.map((row) => prospect({
+    business_name: (row.taxpayer_name || "").trim(),
+    state: "TX",
+    city: row.taxpayer_city || "",
+    zip: row.taxpayer_zip || "",
+    address: row.taxpayer_address || "",
+    official_record_id: row.secretary_of_state_sos_or_coa_file_number || "",
+    agency: "Texas Comptroller of Public Accounts (Active Franchise Taxpayers)",
+    source: "TX Active Franchise Taxpayers (data.texas.gov)",
+    source_url: "https://data.texas.gov/dataset/Active-Franchise-Taxpayers/9cir-efmm",
+    record_type: "state_filing",
+    record_label: "PUBLIC RECORD",
+    extra: {
+      entity_type: TX_ORG_TYPES[row.taxpayer_organizational_type] || row.taxpayer_organizational_type || "",
+      status: "Active",
+      formation_date: (row.sos_charter_date || "").slice(0, 10),
+      business_id: row.secretary_of_state_sos_or_coa_file_number || "",
+      right_to_transact: row.right_to_transact_business_code || "",
+      county_code: row.taxpayer_county_code || "",
+    },
+  }));
+  return { status: "success", source: "Texas Comptroller of Public Accounts", results };
+}
+
 export const STATE_FILING_ADAPTERS = {
   FL: searchFlorida,
   CT: searchConnecticut,
@@ -298,6 +335,7 @@ export const STATE_FILING_ADAPTERS = {
   PA: searchPennsylvania,
   CO: searchColorado,
   OR: searchOregon,
+  TX: searchTexas,
 };
 
 export function hasStateAdapter(code) {
