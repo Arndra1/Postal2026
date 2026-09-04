@@ -328,6 +328,137 @@ export async function searchTexas(inputs) {
   return { status: "success", source: "Texas Comptroller of Public Accounts", results };
 }
 
+// ---- Iowa: Secretary of State "Active Business Entities" (idh-be.iowa.gov DKAN). ----
+// Free, legal, official. effective_date = business effective/formation date (YYYY-MM-DD).
+// The portal returns the FULL active-businesses dataset as a ZIP-stored CSV (~100MB,
+// compression method 0 = stored; no server-side date filter). To keep searches fast and
+// memory bounded, the file is streamed once per 12h and only records with effective_date
+// in the last 150 days are cached in-process; each search filters that lightweight cache.
+let iowaCache = { rows: null, fetchedAt: 0 };
+let iowaRefreshing = null;
+const IOWA_CACHE_TTL = 12 * 60 * 60 * 1000;
+const IOWA_URL = "https://idh-be.iowa.gov/api/v1/datasets/554/rows.csv?limit=1000000";
+
+function parseCsvLine(line) {
+  const out = [];
+  let cur = "", inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === ",") { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+function dayStr(d) {
+  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate());
+}
+
+async function refreshIowaCache() {
+  const cutoff = dayStr(new Date(Date.now() - 150 * DAY_MS));
+  const r = await fetch(IOWA_URL);
+  if (!r.ok) throw new Error("ia_" + r.status);
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let raw = [], rawLen = 0, headerDone = false, dataOffset = 0;
+  let buf = "", header = null, colMap = null;
+  const rows = [];
+  const onLine = (line) => {
+    line = line.replace(/\r$/, "");
+    if (!line) return;
+    if (!header) { header = parseCsvLine(line); colMap = {}; header.forEach((c, i) => { colMap[c] = i; }); return; }
+    const p = parseCsvLine(line);
+    const g = (k) => { const i = colMap[k]; return i != null ? (p[i] || "") : ""; };
+    const ed = (g("effective_date") || "").slice(0, 10);
+    if (ed.length === 10 && ed >= cutoff) {
+      rows.push({
+        corp_number: g("corp_number"), legal_name: g("legal_name"),
+        corporation_type: g("corporation_type"), effective_date: ed,
+        registered_agent: g("registered_agent"),
+        ra_address: [g("ra_address_1"), g("ra_address_2")].filter(Boolean).join(", "),
+        ra_city: g("ra_city"), ra_state: g("ra_state"), ra_zip: g("ra_zip"),
+        ho_address: [g("ho_address_1"), g("ho_address_2")].filter(Boolean).join(", "),
+        ho_city: g("ho_city"), ho_state: g("ho_state"), ho_zip: g("ho_zip"),
+      });
+    }
+  };
+  const onText = (text) => {
+    buf += text;
+    const parts = buf.split("\n");
+    buf = parts.pop();
+    for (const ln of parts) onLine(ln);
+  };
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!headerDone) {
+      raw.push(value); rawLen += value.length;
+      if (rawLen >= 30 && dataOffset === 0) {
+        const m = new Uint8Array(rawLen); let o = 0;
+        for (const c of raw) { m.set(c, o); o += c.length; }
+        const dv = new DataView(m.buffer);
+        if (dv.getUint32(0, true) !== 0x04034b50) throw new Error("ia_zip_sig");
+        dataOffset = 30 + dv.getUint16(26, true) + dv.getUint16(28, true);
+      }
+      if (dataOffset > 0 && rawLen >= dataOffset) {
+        const m = new Uint8Array(rawLen); let o = 0;
+        for (const c of raw) { m.set(c, o); o += c.length; }
+        onText(dec.decode(m.subarray(dataOffset), { stream: true }));
+        headerDone = true; raw = null;
+      }
+    } else {
+      onText(dec.decode(value, { stream: true }));
+    }
+  }
+  const tail = dec.decode();
+  if (tail) onText(tail);
+  if (buf) onLine(buf);
+  rows.sort((a, b) => b.effective_date.localeCompare(a.effective_date));
+  iowaCache = { rows, fetchedAt: Date.now() };
+}
+
+export async function searchIowa(inputs) {
+  const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
+  const sStr = dayStr(start), eStr = dayStr(end);
+  if (!iowaCache.rows || Date.now() - iowaCache.fetchedAt > IOWA_CACHE_TTL) {
+    if (!iowaRefreshing) iowaRefreshing = refreshIowaCache().finally(() => { iowaRefreshing = null; });
+    try { await iowaRefreshing; }
+    catch (e) { return { status: "failed", error: e.message, results: [] }; }
+  }
+  const matched = [];
+  for (const row of iowaCache.rows) {
+    if (row.effective_date >= sStr && row.effective_date <= eStr) {
+      matched.push(prospect({
+        business_name: row.legal_name || "",
+        state: "IA",
+        city: row.ra_city || row.ho_city || "",
+        zip: row.ra_zip || row.ho_zip || "",
+        address: row.ra_address || row.ho_address || "",
+        official_record_id: row.corp_number || "",
+        agency: "Iowa Secretary of State — Business Services",
+        source: "IA Active Business Entities (idh-be.iowa.gov)",
+        source_url: "https://idh-be.iowa.gov/dataset/active-iowa-business-entities",
+        record_type: "state_filing",
+        record_label: "PUBLIC RECORD",
+        extra: {
+          entity_type: row.corporation_type || "",
+          status: "Active",
+          formation_date: row.effective_date,
+          business_id: row.corp_number || "",
+          registered_agent: row.registered_agent || "",
+        },
+      }));
+      if (matched.length >= 100) break;
+    }
+  }
+  return { status: "success", source: "Iowa Secretary of State — Business Services", results: matched };
+}
+
 export const STATE_FILING_ADAPTERS = {
   FL: searchFlorida,
   CT: searchConnecticut,
@@ -336,6 +467,7 @@ export const STATE_FILING_ADAPTERS = {
   CO: searchColorado,
   OR: searchOregon,
   TX: searchTexas,
+  IA: searchIowa,
 };
 
 export function hasStateAdapter(code) {
