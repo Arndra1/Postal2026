@@ -77,6 +77,16 @@ export default async function(req) {
     let chargePool = "";
     let enrichmentRecord = null;
 
+    // CREDIT LOGIC — single flat 5-credit charge per enrichment attempt.
+    // The charge is NOT per-provider-call: the waterfall (providers.ts) may
+    // call both Tracerfy and PDL, but only ONE 5-credit charge is applied
+    // when the final merged result contains a verified_email or verified_phone.
+    // - Tracerfy returns both email+phone → PDL skipped → 5 credits total.
+    // - Tracerfy returns phone only → PDL runs and returns email → 5 credits
+    //   total (covers both providers — no additional charge for PDL).
+    // - PDL runs to fill linkedin/job_title but returns no new email/phone
+    //   → still 5 credits (charge is for the enrichment attempt).
+    // - Neither provider returns a verified email or phone → 0 credits.
     if (providerResult.status === "success") {
       // Save enrichment record first to get an id for idempotent charging.
       enrichmentRecord = await base44.asServiceRole.entities.Enrichment.create({

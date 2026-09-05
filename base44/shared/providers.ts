@@ -13,10 +13,12 @@
 // no qualifying contact is returned. All keys stay server-side; none are
 // exposed to the frontend, logs, or responses.
 
-import { PERSON_PROVIDERS, allProviderMeta } from "./providers/registry.ts";
-import { isVerified, populatedFields } from "./providers/types.ts";
-import { validatePhone as numverifyValidate } from "./providers/numverify.ts";
-import { normalizeAddress as geoapifyNormalize } from "./providers/geoapify.ts";
+import { allProviderMeta } from "./providers/registry.ts";
+import { isVerified, populatedFields, RESULT_FIELDS } from "./providers/types.ts";
+import { validatePhone as numverifyValidate, isConfigured as numverifyConfigured } from "./providers/numverify.ts";
+import { normalizeAddress as geoapifyNormalize, isConfigured as geoapifyConfigured } from "./providers/geoapify.ts";
+import { PDL, isConfigured as pdlConfigured, enrich as pdlEnrich } from "./providers/pdl.ts";
+import { TRACERFY, isConfigured as tracerfyConfigured, hasRequiredInputs as tracerfyHasInputs, enrich as tracerfyEnrich } from "./providers/tracerfy.ts";
 
 const DEDUP_WINDOW_MINUTES = 5;
 
@@ -94,93 +96,173 @@ export { hashInputs };
 
 // ---- Orchestration ---------------------------------------------------------
 
+// ── Field-level enrichment waterfall ───────────────────────────────────
+//
+// SEQUENCE (per enrichment attempt):
+//   1. Geoapify  — normalize/clean address FIRST (before Tracerfy).
+//   2. Tracerfy  — cheapest contact provider; runs first when an address
+//                  is available. Returns owner phone/email.
+//   3. PDL       — called ONLY if Tracerfy didn't fill both email AND phone
+//                  (i.e., email OR phone OR job_title OR linkedin still empty).
+//                  Skipped entirely when Tracerfy returned both email+phone
+//                  to avoid a duplicate paid lookup.
+//   4. NumVerify — validate any phone from Tracerfy or PDL before marking
+//                  it "verified".
+//
+// FIELD-LEVEL DEDUP:
+//   A field filled by an earlier provider is never overwritten by a later
+//   one. PDL can still contribute linkedin/job_title even when Tracerfy
+//   already returned email+phone (but in that case PDL is skipped per the
+//   rule above — it only runs when at least one of email/phone is missing).
+//
+// CREDIT LOGIC (charged in enrichLead/entry.ts — NO CHANGE):
+//   A single flat 5-credit charge is applied per enrichment attempt when
+//   the final merged result contains a NEW verified_email or verified_phone.
+//   This charge is NOT per-provider-call:
+//   - If Tracerfy returns both email and phone → PDL is skipped → 5 credits.
+//   - If Tracerfy returns only phone → PDL runs and returns email → 5 credits
+//     (covers both providers — no additional charge for the PDL call).
+//   - If PDL runs after Tracerfy to fill linkedin/job_title and does NOT
+//     return a new email or phone → still 5 credits (the charge is for the
+//     enrichment attempt, not per field).
+//   - If neither provider returns a verified email or phone → 0 credits.
 export async function runEnrichment(base44, inputs) {
   const start = Date.now();
   const settings = await loadSettings(base44);
 
-  // Build the active person-provider cascade (configured, enabled, priority-sorted).
-  const cascade = PERSON_PROVIDERS
-    .map((p) => ({
-      ...p,
-      setting: settings[p.meta.key],
-      enabled: settings[p.meta.key] ? settings[p.meta.key].enabled !== false : true,
-      priority: settings[p.meta.key]?.priority ?? p.meta.defaultPriority,
-    }))
-    .filter((p) => p.configured() && p.enabled)
-    .sort((a, b) => a.priority - b.priority);
-
   const data_sources = [];
   const provider_breakdown = [];
+  const merged = {}; // accumulated results across providers (field-level merge)
 
-  if (cascade.length === 0) {
-    return {
-      status: "failed",
-      results: null,
-      data_sources,
-      provider_breakdown,
-      duration_ms: Date.now() - start,
-      error: "No data provider is currently configured. Enrichment will be available once a live provider is connected.",
-    };
+  function isEnabled(key) {
+    const s = settings[key];
+    return s ? s.enabled !== false : true;
   }
 
-  // Geoapify address normalization runs in parallel with the cascade.
-  const geoPromise = geoapifyNormalize(inputs);
+  function recordSkip(meta, reason) {
+    provider_breakdown.push({
+      provider: meta.name,
+      provider_key: meta.key,
+      status: "skipped",
+      fields: [],
+      duration_ms: 0,
+      error: reason,
+    });
+  }
 
-  let winner = null;
-
-  for (const provider of cascade) {
-    // Tracerfy only runs when it has the inputs it needs (an address).
-    if (provider.hasInputs && !provider.hasInputs(inputs)) {
-      provider_breakdown.push({
-        provider: provider.meta.name,
-        provider_key: provider.meta.key,
-        status: "skipped",
-        fields: [],
-        duration_ms: 0,
-        error: "insufficient_inputs",
-      });
-      continue;
-    }
-
-    let providerResult;
+  // Call a provider, merge its results field-by-field (never overwriting
+  // fields already filled by an earlier provider), and record which fields
+  // it CONTRIBUTED to the audit trail.
+  async function callProvider(meta, enrichFn, enrichedInputs) {
+    let result;
     try {
-      providerResult = await provider.enrich(inputs);
+      result = await enrichFn(enrichedInputs);
     } catch (err) {
       const msg = (err && err.message) ? err.message : "provider_error";
-      providerResult = {
+      result = {
         status: msg.includes("timeout") ? "timeout" : "failed",
         results: null,
-        data_sources: [provider.meta.name],
-        provider_key: provider.meta.key,
+        data_sources: [meta.name],
+        provider_key: meta.key,
         fields_returned: [],
         duration_ms: 0,
         error: msg,
       };
     }
 
-    provider_breakdown.push({
-      provider: provider.meta.name,
-      provider_key: provider.meta.key,
-      status: providerResult.status,
-      fields: providerResult.fields_returned || [],
-      duration_ms: providerResult.duration_ms || 0,
-      error: providerResult.error || "",
-    });
-    if (providerResult.data_sources && !data_sources.includes(providerResult.data_sources[0])) {
-      data_sources.push(providerResult.data_sources[0]);
+    // Field-level dedup: only fill fields that are still empty.
+    const contributed = [];
+    if (result.status === "success" && result.results) {
+      for (const f of RESULT_FIELDS) {
+        if (!merged[f] && result.results[f] && String(result.results[f]).trim()) {
+          merged[f] = result.results[f];
+          contributed.push(f);
+        }
+      }
     }
 
-    await markProviderStatus(base44, settings, provider.meta.key, providerResult);
+    provider_breakdown.push({
+      provider: meta.name,
+      provider_key: meta.key,
+      status: result.status,
+      fields: contributed,
+      duration_ms: result.duration_ms || 0,
+      error: result.error || "",
+    });
 
-    if (providerResult.status === "success" && isVerified(providerResult.results)) {
-      winner = providerResult;
-      break; // Stop calling paid providers once sufficient enrichment is obtained.
+    if (result.data_sources && result.data_sources[0] && !data_sources.includes(result.data_sources[0])) {
+      data_sources.push(result.data_sources[0]);
+    }
+
+    await markProviderStatus(base44, settings, meta.key, result);
+    return result;
+  }
+
+  // ── Step 1: Geoapify address normalization ──────────────────────────
+  // Runs BEFORE Tracerfy so the address is clean/normalized.
+  let enrichedInputs = { ...inputs };
+  if (geoapifyConfigured()) {
+    const geo = await geoapifyNormalize(inputs);
+    if (geo && geo.address) {
+      enrichedInputs.address = geo.address;
+      if (geo.city) enrichedInputs.city = geo.city;
+      if (geo.state) enrichedInputs.state = geo.state;
+      if (!data_sources.includes("Geoapify")) data_sources.push("Geoapify");
     }
   }
 
-  const geo = await geoPromise;
+  // ── Step 2: Tracerfy (cheapest contact provider, runs first) ────────
+  // Address-based skip-tracing for owner phone/email.
+  if (tracerfyConfigured() && isEnabled("tracerfy")) {
+    if (tracerfyHasInputs(enrichedInputs)) {
+      await callProvider(TRACERFY, tracerfyEnrich, enrichedInputs);
+    } else {
+      recordSkip(TRACERFY, "skipped, no address available");
+    }
+  } else {
+    recordSkip(TRACERFY, tracerfyConfigured() ? "disabled" : "not_configured");
+  }
 
-  if (!winner) {
+  // ── Step 3: PDL (fill remaining gaps) ──────────────────────────────
+  // PDL is called if, after Tracerfy, the lead is still missing email OR
+  // phone OR job_title OR linkedin. If Tracerfy already returned BOTH
+  // email and phone, PDL is skipped to avoid paying for a duplicate lookup
+  // on fields already filled.
+  const tracerfyFilledBoth = !!(merged.verified_email && merged.verified_phone);
+  if (pdlConfigured() && isEnabled("people_data_labs")) {
+    if (!tracerfyFilledBoth) {
+      await callProvider(PDL, pdlEnrich, enrichedInputs);
+    } else {
+      recordSkip(PDL, "skipped, email and phone already filled by Tracerfy");
+    }
+  } else {
+    recordSkip(PDL, pdlConfigured() ? "disabled" : "not_configured");
+  }
+
+  // ── Step 4: NumVerify phone validation ─────────────────────────────
+  // Validates any candidate phone from Tracerfy or PDL before marking it
+  // as "verified". Drops phones that fail validation. If NumVerify is not
+  // configured, the phone is kept as-is from the provider.
+  if (merged.verified_phone && numverifyConfigured()) {
+    const check = await numverifyValidate(merged.verified_phone);
+    if (check.valid) {
+      merged.verified_phone = check.intl || merged.verified_phone;
+      if (!data_sources.includes("NumVerify")) data_sources.push("NumVerify");
+    } else {
+      merged.verified_phone = "";
+    }
+  }
+
+  // Merge Geoapify-normalized address if no provider returned one.
+  if (enrichedInputs.address && !merged.address) {
+    merged.address = enrichedInputs.address;
+  }
+
+  // ── Final result ──────────────────────────────────────────────────
+  // Success requires at least a verified email or verified phone. Other
+  // fields (linkedin, job_title, etc.) are returned but do not alone
+  // trigger a credit charge.
+  if (!isVerified(merged)) {
     return {
       status: "empty",
       results: null,
@@ -191,41 +273,9 @@ export async function runEnrichment(base44, inputs) {
     };
   }
 
-  let results = { ...winner.results };
-
-  // NumVerify phone validation — drop phones that do not validate.
-  if (results.verified_phone) {
-    const check = await numverifyValidate(results.verified_phone);
-    if (check.valid) {
-      results.verified_phone = check.intl || results.verified_phone;
-      if (!data_sources.includes("NumVerify")) data_sources.push("NumVerify");
-    } else {
-      results.verified_phone = "";
-      if (!isVerified(results)) {
-        // Phone was the only contact and it failed validation — no qualifying data.
-        return {
-          status: "empty",
-          results: null,
-          data_sources,
-          provider_breakdown,
-          duration_ms: Date.now() - start,
-          error: "A candidate contact was found but the phone could not be verified.",
-        };
-      }
-    }
-  }
-
-  // Merge Geoapify-normalized address when available.
-  if (geo && geo.address) {
-    results.address = geo.address;
-    if (geo.city) results.city = geo.city;
-    if (geo.state) results.state = geo.state;
-    if (!data_sources.includes("Geoapify")) data_sources.push("Geoapify");
-  }
-
   return {
     status: "success",
-    results,
+    results: merged,
     data_sources,
     provider_breakdown,
     duration_ms: Date.now() - start,
