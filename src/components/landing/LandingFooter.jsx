@@ -23,9 +23,8 @@ export default function LandingFooter() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-3">
-              <Logo variant="icon" />
-              <span className="font-heading text-lg font-semibold">RingBellz</span>
+            <div className="mb-3">
+              <Logo variant="footer" />
             </div>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Public-data lead intelligence and enrichment for lawful prospecting, marketing, and business development.

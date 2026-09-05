@@ -124,9 +124,8 @@ export default function AppLayout() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
-        <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center gap-2">
-          <Logo variant="icon" />
-          <span className="font-heading font-semibold">RingBellz</span>
+        <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center">
+          <Logo variant="header" />
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>
       </div>
