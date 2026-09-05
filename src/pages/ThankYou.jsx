@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
+import Logo from "@/components/Logo";
 
 // Public post-checkout page. Payment confirmation is asynchronous (the Wix
 // webhook is the source of truth), so we never claim membership here — the
@@ -11,6 +12,9 @@ export default function ThankYou() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-card rounded-2xl border border-border lady-shadow-lg p-8 text-center">
+        <div className="flex justify-center mb-5">
+          <Logo variant="header" />
+        </div>
         <div className="w-14 h-14 rounded-full bg-accent/15 flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 className="w-7 h-7 text-accent" />
         </div>
