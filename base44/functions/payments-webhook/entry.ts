@@ -200,7 +200,7 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
 
     // Reset the monthly pool to 100 — unused monthly credits are forfeited (no rollover).
     // Idempotent, keyed on the purchase id. Pack pool is untouched.
-    await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
+    await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "RingBellz membership credits (100/month)");
 
     // SUBSCRIPTION CONFIRMATION: acknowledgment email immediately after enrollment —
     // renewal terms, start date, next billing date, cancellation instructions, and a
@@ -219,7 +219,7 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     // One-time credit pack: add exactly the purchased credits to the Pack pool, once.
     // (Pack sales are gated to active members at checkout time.)
     // Pack credits never expire and carry over across billing cycles.
-    await grantCreditsOnce(db, userId, product.credits, "base44_credit_pack", purchase.id, `Leadora credit pack (${product.credits} credits)`, "pack");
+    await grantCreditsOnce(db, userId, product.credits, "base44_credit_pack", purchase.id, `RingBellz credit pack (${product.credits} credits)`, "pack");
     // Compliance audit: log every pack purchase.
     await logCompliance(db, "credit_pack_purchased", userId, "", `Credit pack purchased: ${product.credits} credits for $${product.price}`, {
       purchase_id: purchase.id,
@@ -281,7 +281,7 @@ async function handleSubscriptionEnded(db: any, eventData: any): Promise<Respons
   }
 
   // ===== APP-SPECIFIC =====
-  // Revoke: end the Leadora membership tied to this purchase (mirror of the grant).
+  // Revoke: end the RingBellz membership tied to this purchase (mirror of the grant).
   // Cancelled memberships keep access until the paid-through period ends
   // (hasActiveMembership checks period_end); a natural expiry has already
   // passed its period, so access ends immediately. Idempotent.
@@ -338,7 +338,7 @@ async function handleRenewalOrder(db: any, userId: string, order: any, checkoutI
 
   // Reset the monthly pool to 100 on renewal — unused credits forfeited (no rollover).
   // Idempotent, keyed on the renewal order id. Pack pool is untouched.
-  await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_renewal", orderId ?? subscriptionId, "Leadora membership renewal credits (100/month)");
+  await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_renewal", orderId ?? subscriptionId, "RingBellz membership renewal credits (100/month)");
 
   // Record the renewal as a paid purchase so the payment event is fully audited.
   await db.entities.Base44Purchase.create({
@@ -347,7 +347,7 @@ async function handleRenewalOrder(db: any, userId: string, order: any, checkoutI
     appUserId: userId,
     buyerEmail: extractBuyerEmail(order),
     productId: MEMBERSHIP_PRODUCT_ID,
-    productName: "Leadora Membership (Renewal)",
+    productName: "RingBellz Membership (Renewal)",
     quantity: 1,
     amount: String(order?.priceSummary?.total?.amount ?? "59.00"),
     currency: order?.currency ?? "USD",

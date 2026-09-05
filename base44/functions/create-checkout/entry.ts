@@ -122,7 +122,7 @@ Deno.serve(async (req: Request) => {
       }
       const subs = await base44.asServiceRole.entities.Subscription.filter({ user_id: appUser.id });
       if (!hasActiveMembership(subs?.[0])) {
-        return new Response(JSON.stringify({ error: "Credit packs require an active Leadora membership." }), { status: 400 });
+        return new Response(JSON.stringify({ error: "Credit packs require an active RingBellz membership." }), { status: 400 });
       }
     }
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes in this app: the

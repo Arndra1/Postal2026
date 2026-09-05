@@ -7,8 +7,8 @@ import {
 
 const sections = [
   {
-    title: "1. About Leadora",
-    body: "Leadora is a lead intelligence, business research, marketing, and contact-enrichment platform. " + COMPLIANCE_NOTICE
+    title: "1. About RingBellz",
+    body: "RingBellz is a lead intelligence, business research, marketing, and contact-enrichment platform. " + COMPLIANCE_NOTICE
   },
   {
     title: "2. Your Account",
@@ -16,15 +16,15 @@ const sections = [
   },
   {
     title: "3. Permitted Use of Data",
-    body: "You may use information obtained through Leadora for: " + PERMITTED_USES.map((u) => u.toLowerCase()).join("; ") + "."
+    body: "You may use information obtained through RingBellz for: " + PERMITTED_USES.map((u) => u.toLowerCase()).join("; ") + "."
   },
   {
     title: "4. Prohibited Use of Data",
-    body: "Leadora may not be used for: " + PROHIBITED_ELIGIBILITY_USES.map((u) => u.toLowerCase()).join("; ") + ". Leadora is not a consumer reporting agency under the Fair Credit Reporting Act."
+    body: "RingBellz may not be used for: " + PROHIBITED_ELIGIBILITY_USES.map((u) => u.toLowerCase()).join("; ") + ". RingBellz is not a consumer reporting agency under the Fair Credit Reporting Act."
   },
   {
     title: "5. Credits and Billing",
-    body: "Membership is $59 per month and includes 100 monthly Leadora credits. A qualifying enrichment that successfully returns usable data costs 5 credits. Failed enrichments cost 0 credits. Credits do not roll over unless expressly stated. Membership fees are non-refundable except as required by law."
+    body: "Membership is $59 per month and includes 100 monthly RingBellz credits. A qualifying enrichment that successfully returns usable data costs 5 credits. Failed enrichments cost 0 credits. Credits do not roll over unless expressly stated. Membership fees are non-refundable except as required by law."
   },
   {
     title: "6. Data Accuracy",
@@ -32,11 +32,11 @@ const sections = [
   },
   {
     title: "7. Acceptable Platform Use",
-    body: "You may not resell Leadora data unless specifically authorized, attempt to scrape or circumvent the platform, misuse the service, or use it for any unlawful purpose."
+    body: "You may not resell RingBellz data unless specifically authorized, attempt to scrape or circumvent the platform, misuse the service, or use it for any unlawful purpose."
   },
   {
     title: "8. Termination",
-    body: "We may suspend or terminate accounts that violate these Terms, misuse data, or create risk for Leadora or its data providers."
+    body: "We may suspend or terminate accounts that violate these Terms, misuse data, or create risk for RingBellz or its data providers."
   },
   {
     title: "9. Contact",
@@ -53,7 +53,7 @@ export default function TermsOfUse() {
             <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-heading text-xl font-semibold">Leadora</span>
+            <span className="font-heading text-xl font-semibold">RingBellz</span>
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition">← Back to Home</Link>
         </div>

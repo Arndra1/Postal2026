@@ -14,7 +14,7 @@ export default function ThankYou() {
         <div className="w-14 h-14 rounded-full bg-accent/15 flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 className="w-7 h-7 text-accent" />
         </div>
-        <h1 className="font-heading text-2xl font-semibold">Thank you for joining Leadora</h1>
+        <h1 className="font-heading text-2xl font-semibold">Thank you for joining RingBellz</h1>
         <p className="text-sm text-muted-foreground mt-3">
           Your payment is being confirmed. Your membership and 100 monthly credits will appear on your
           Billing page within a few minutes.

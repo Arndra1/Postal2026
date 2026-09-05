@@ -7,7 +7,7 @@ const features = [
   { icon: FolderKanban, title: "Organize Leads", desc: "Save prospects, add notes, organize leads, and manage lead status from one dashboard." },
   { icon: Contact, title: "Contact Intelligence", desc: "Find available business emails, phone numbers, professional information, company information, and other permitted contact data." },
   { icon: Eye, title: "Source Transparency", desc: "See where information came from, or the appropriate source category, whenever practical." },
-  { icon: ShieldCheck, title: "Credit Protection", desc: "Credits are deducted only when a qualifying enrichment successfully returns usable data. Failed enrichments cost 0 Leadora credits." },
+  { icon: ShieldCheck, title: "Credit Protection", desc: "Credits are deducted only when a qualifying enrichment successfully returns usable data. Failed enrichments cost 0 RingBellz credits." },
 ];
 
 export default function FeaturesSection() {

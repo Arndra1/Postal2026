@@ -55,7 +55,7 @@ export default function AppLayout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      <Link to="/dashboard" aria-label="Leadora dashboard" className="flex items-center px-2 py-1">
+      <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center px-2 py-1">
         <Logo variant="sidebar" />
       </Link>
 
@@ -124,9 +124,9 @@ export default function AppLayout() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
-        <Link to="/dashboard" aria-label="Leadora dashboard" className="flex items-center gap-2">
+        <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center gap-2">
           <Logo variant="icon" />
-          <span className="font-heading font-semibold">Leadora</span>
+          <span className="font-heading font-semibold">RingBellz</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>
       </div>

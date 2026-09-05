@@ -25,7 +25,7 @@ export default function LandingFooter() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-3">
               <Logo variant="icon" />
-              <span className="font-heading text-lg font-semibold">Leadora</span>
+              <span className="font-heading text-lg font-semibold">RingBellz</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Public-data lead intelligence and enrichment for lawful prospecting, marketing, and business development.
@@ -64,9 +64,9 @@ export default function LandingFooter() {
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Leadora. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} RingBellz. All rights reserved.</p>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            Leadora is not a consumer reporting agency. Leadora data may not be used for credit, employment, housing, insurance, government-benefits, or other FCRA-regulated eligibility decisions.
+            RingBellz is not a consumer reporting agency. RingBellz data may not be used for credit, employment, housing, insurance, government-benefits, or other FCRA-regulated eligibility decisions.
           </p>
         </div>
       </div>

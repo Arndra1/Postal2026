@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 
 const planIncludes = [
-  "100 monthly Leadora credits",
+  "100 monthly RingBellz credits",
   "Lead discovery tools",
   "Lead workspace",
   "Contact enrichment access",
@@ -24,7 +24,7 @@ export default function PricingSection() {
         <div className="max-w-md mx-auto bg-card rounded-3xl border-2 border-primary/20 lady-shadow-lg p-8">
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-medium mb-4">Membership</div>
-            <h3 className="font-heading text-2xl font-semibold">Leadora Membership</h3>
+            <h3 className="font-heading text-2xl font-semibold">RingBellz Membership</h3>
             <div className="mt-4 flex items-end justify-center gap-1">
               <span className="font-heading text-5xl font-semibold">$59</span>
               <span className="text-muted-foreground mb-2">/month</span>

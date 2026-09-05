@@ -80,7 +80,7 @@ export default function Billing() {
 
   return (
     <div>
-      <PageHeader title="Billing" subtitle="Manage your Leadora membership." />
+      <PageHeader title="Billing" subtitle="Manage your RingBellz membership." />
 
       {exempt && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">
@@ -101,14 +101,14 @@ export default function Billing() {
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-card rounded-2xl border-2 border-primary/20 lady-shadow-lg p-8">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-heading text-xl font-semibold">Leadora Membership</h2>
+            <h2 className="font-heading text-xl font-semibold">RingBellz Membership</h2>
             {!exempt && <StatusBadge status={status} />}
           </div>
           <div className="flex items-end gap-1 mt-3">
             <span className="font-heading text-4xl font-semibold">$59</span>
             <span className="text-muted-foreground mb-1">/month</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">Includes 100 Leadora credits each successful monthly billing cycle.</p>
+          <p className="text-sm text-muted-foreground mt-1">Includes 100 RingBellz credits each successful monthly billing cycle.</p>
           <ul className="space-y-2.5 my-6">
             {includes.map((p) => <li key={p} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-accent flex-shrink-0" /> {p}</li>)}
           </ul>

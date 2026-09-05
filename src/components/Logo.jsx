@@ -19,7 +19,7 @@ export default function Logo({ variant = "header", className = "", ...props }) {
   return (
     <Image
       src={v.src}
-      alt="Leadora"
+      alt="RingBellz"
       fittingType="fit"
       className={`${v.className} ${className}`.trim()}
       {...props}

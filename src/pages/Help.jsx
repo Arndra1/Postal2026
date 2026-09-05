@@ -25,14 +25,14 @@ const faqs = [
   { q: "How do I submit a privacy request?", a: "Use the Contact Support form with the Privacy category. Describe the request clearly (for example, removal of specific personal information). We review and respond by email." },
   { q: "How do I report suspected misuse of the platform?", a: "Choose the Compliance category in the form below and describe what you observed. Misuse reports are taken seriously and reviewed by our compliance team." },
   { q: "How do I report a technical problem?", a: "Choose the Technical Problem category and describe what you were doing when the issue occurred, including any error message. The more detail, the faster we can fix it." },
-  { q: "Do you offer phone support?", a: "No. Leadora provides email-based support only. Submit the Contact Support form and the Leadora Support Team will respond by email." },
+  { q: "Do you offer phone support?", a: "No. RingBellz provides email-based support only. Submit the Contact Support form and the RingBellz Support Team will respond by email." },
 ];
 
 const articles = [
   { icon: UserCog, title: "Getting Started", body: "Set up your profile, learn how search, enrichment, and saved leads fit together, and take your first pass through the dashboard." },
   { icon: Coins, title: "How Credits Work", body: "100 monthly credits. 5 credits per successful enrichment. No charge on failures. Credits reset each billing cycle and do not roll over." },
   { icon: Sparkles, title: "How Enrichment Works", body: "Enter a name and/or company (plus any known details). We contact our provider, validate the response, and return verified contact data. You're only charged when verified data is returned." },
-  { icon: CreditCard, title: "Billing Help", body: "The Leadora membership is $59/month and includes 100 credits. Cancel anytime — access continues until your period ends. All payments are processed securely server-side." },
+  { icon: CreditCard, title: "Billing Help", body: "The RingBellz membership is $59/month and includes 100 credits. Cancel anytime — access continues until your period ends. All payments are processed securely server-side." },
   { icon: Database, title: "Report a Data Issue", body: "Found incorrect or outdated information? Submit a Data Correction request and we'll route it to the right data source for review." },
   { icon: ShieldCheck, title: "Privacy Requests", body: "To request removal of specific personal information or other privacy assistance, submit a Privacy request through the form below." },
   { icon: Flag, title: "Report Suspected Misuse", body: "If you believe the platform is being used unlawfully or in violation of our Terms of Use, submit a Compliance report. All reports are reviewed." },
@@ -85,7 +85,7 @@ export default function Help() {
         <div className="space-y-4">
           <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> Email Support</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-2">Leadora provides email-based support only — we do not offer phone support.</p>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-2">RingBellz provides email-based support only — we do not offer phone support.</p>
             <a href={`mailto:${SUPPORT_EMAIL}`} className="text-sm font-medium text-primary underline underline-offset-4 break-all">{SUPPORT_EMAIL}</a>
           </div>
           <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
@@ -94,7 +94,7 @@ export default function Help() {
               <li>• Include your account email and any error messages.</li>
               <li>• For data issues, name the record and what looks wrong.</li>
               <li>• One request per issue helps us respond faster.</li>
-              <li>• The Leadora Support Team responds by email.</li>
+              <li>• The RingBellz Support Team responds by email.</li>
             </ul>
           </div>
         </div>

@@ -11,10 +11,10 @@ export default function ResponsibleUseSection() {
         </div>
         <h2 className="font-heading text-3xl md:text-4xl font-semibold">Powerful Data. Responsible Use.</h2>
         <p className="mt-4 text-muted-foreground leading-relaxed">
-          Leadora is built for lawful marketing, prospecting, business research, lead generation, and business development.
+          RingBellz is built for lawful marketing, prospecting, business research, lead generation, and business development.
         </p>
         <p className="mt-3 text-muted-foreground leading-relaxed">
-          Leadora is not a consumer reporting agency and is not designed for FCRA-regulated eligibility decisions.
+          RingBellz is not a consumer reporting agency and is not designed for FCRA-regulated eligibility decisions.
         </p>
         <Link
           to="/responsible-data-use"

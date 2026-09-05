@@ -10,15 +10,15 @@ export const MEMBERSHIP_PRODUCT_ID = "leadora_membership";
 export const PRODUCTS: Record<string, any> = {
   [MEMBERSHIP_PRODUCT_ID]: {
     kind: "membership",
-    name: "Leadora Membership",
+    name: "RingBellz Membership",
     price: "59.00",
     currency: "USD",
     credits: 100
   },
   // One-time credit packs — purchased credits go to the Pack pool (never expire).
-  credits_small: { kind: "credit_pack", name: "25 Leadora Credits", price: "19.00", currency: "USD", credits: 25 },
-  credits_medium: { kind: "credit_pack", name: "75 Leadora Credits", price: "49.00", currency: "USD", credits: 75 },
-  credits_large: { kind: "credit_pack", name: "150 Leadora Credits", price: "89.00", currency: "USD", credits: 150 }
+  credits_small: { kind: "credit_pack", name: "25 RingBellz Credits", price: "19.00", currency: "USD", credits: 25 },
+  credits_medium: { kind: "credit_pack", name: "75 RingBellz Credits", price: "49.00", currency: "USD", credits: 75 },
+  credits_large: { kind: "credit_pack", name: "150 RingBellz Credits", price: "89.00", currency: "USD", credits: 150 }
 };
 
 export function resolveProduct(productId: string) {

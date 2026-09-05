@@ -49,7 +49,7 @@ export default function SupportForm() {
         <CheckCircle2 className="w-10 h-10 text-accent mx-auto mb-3" />
         <h3 className="font-heading text-lg font-semibold mb-1.5">Request received</h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Your request has been received. The Leadora Support Team will respond by email.
+          Your request has been received. The RingBellz Support Team will respond by email.
         </p>
         <p className="text-xs text-muted-foreground mt-3">Responses are sent to your account email from {SUPPORT_EMAIL}.</p>
       </div>

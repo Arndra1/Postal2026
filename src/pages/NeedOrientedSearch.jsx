@@ -228,7 +228,7 @@ export default function NeedOrientedSearch() {
         subtitle="Start with your prospect's need — we'll guide you to the right public-data source. All discovery is free; only optional contact enrichment costs credits."
       />
 
-      <ComplianceBanner text="Leadora surfaces public records for lawful marketing prospecting only. Bankruptcy and court filings are factual events — never characterize prospects as 'high risk,' 'credit denied,' or 'financially distressed.' Not a consumer reporting agency." />
+      <ComplianceBanner text="RingBellz surfaces public records for lawful marketing prospecting only. Bankruptcy and court filings are factual events — never characterize prospects as 'high risk,' 'credit denied,' or 'financially distressed.' Not a consumer reporting agency." />
 
       <div className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
         <div className="flex items-center gap-2.5">

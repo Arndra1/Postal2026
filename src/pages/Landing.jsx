@@ -19,7 +19,7 @@ export default function Landing() {
       {/* Nav */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="Leadora home" className="flex items-center">
+          <Link to="/" aria-label="RingBellz home" className="flex items-center">
             <Logo variant="header" />
           </Link>
           <nav className="hidden lg:flex items-center gap-8 text-sm text-muted-foreground">
@@ -51,7 +51,7 @@ export default function Landing() {
               <span className="text-primary">Close More Business.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Leadora helps businesses discover prospects using public data and enrich lead records through permitted third-party data providers — built for lawful marketing, prospecting, and business development.
+              RingBellz helps businesses discover prospects using public data and enrich lead records through permitted third-party data providers — built for lawful marketing, prospecting, and business development.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link to="/register"><Button size="lg" className="h-12 px-8 text-base">Start Now <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
@@ -101,7 +101,7 @@ export default function Landing() {
       {/* Data notice */}
       <section className="max-w-3xl mx-auto px-6 pb-12">
         <p className="text-center text-xs text-muted-foreground leading-relaxed">
-          Leadora combines public records and permitted third-party data sources for prospecting and business intelligence. Information may be incomplete, outdated, or inaccurate and should be independently verified when important.
+          RingBellz combines public records and permitted third-party data sources for prospecting and business intelligence. Information may be incomplete, outdated, or inaccurate and should be independently verified when important.
         </p>
       </section>
 

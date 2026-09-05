@@ -22,7 +22,7 @@ export default function MembershipStatusCard({ data, purchases, purchasedCredits
     <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
       <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>
       <div className="text-sm">
-        <Row label="Plan"><span>Leadora — $59/month</span></Row>
+        <Row label="Plan"><span>RingBellz — $59/month</span></Row>
         <Row label="Monthly Credits"><span>{data.wallet?.balance ?? 0} <span className="text-muted-foreground font-normal">/ 100 (resets each cycle)</span></span></Row>
         <Row label="Membership Status"><StatusBadge status={sub.status} /></Row>
         <Row label="Next Billing Date">

@@ -1,4 +1,4 @@
-// Leadora brand assets — master logo from the owner's uploaded design,
+// RingBellz brand assets — master logo from the owner's uploaded design,
 // with placement variants generated from it as the style reference.
 // Aspect ratios are preserved via the Logo component; never stretch or crop.
 export const BRAND_ASSETS = {

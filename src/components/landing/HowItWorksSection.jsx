@@ -3,7 +3,7 @@ import React from "react";
 const steps = [
   { n: "01", title: "Find", desc: "Search available public-data sources for prospects that match your target market." },
   { n: "02", title: "Enrich", desc: "Request additional contact or business information when available." },
-  { n: "03", title: "Save & Work", desc: "Save qualified prospects to your Leadora lead workspace and continue your sales process." },
+  { n: "03", title: "Save & Work", desc: "Save qualified prospects to your RingBellz lead workspace and continue your sales process." },
 ];
 
 export default function HowItWorksSection() {

@@ -15,7 +15,7 @@ export default function ResponsibleDataUse() {
             <div className="w-9 h-9 rounded-xl lady-gradient flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-heading text-xl font-semibold">Leadora</span>
+            <span className="font-heading text-xl font-semibold">RingBellz</span>
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition">← Back to Home</Link>
         </div>

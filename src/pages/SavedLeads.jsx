@@ -81,7 +81,7 @@ export default function SavedLeads() {
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "leadora-saved-leads.csv"; a.click();
+    a.href = url; a.download = "ringbellz-saved-leads.csv"; a.click();
     URL.revokeObjectURL(url);
     // Log all CSV exports for analytics.
     base44.entities.ActivityLog.create({

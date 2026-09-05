@@ -23,7 +23,7 @@ export default function AudienceSection() {
       <div className="text-center max-w-2xl mx-auto mb-14">
         <h2 className="font-heading text-3xl md:text-4xl font-semibold">Built for Businesses That Need Better Prospects</h2>
         <p className="mt-4 text-muted-foreground">
-          These businesses may use Leadora for lawful prospecting, marketing, business development, and research.
+          These businesses may use RingBellz for lawful prospecting, marketing, business development, and research.
         </p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -37,7 +37,7 @@ export default function AudienceSection() {
         ))}
       </div>
       <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
-        Leadora may not be used for underwriting, credit decisions, eligibility decisions, tenant screening, employment screening, insurance eligibility decisions, or consumer risk scoring.
+        RingBellz may not be used for underwriting, credit decisions, eligibility decisions, tenant screening, employment screening, insurance eligibility decisions, or consumer risk scoring.
       </p>
     </section>
   );
