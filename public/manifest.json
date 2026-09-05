@@ -1,0 +1,31 @@
+{
+  "name": "RingBellz — Lead Intelligence & Business Prospecting",
+  "short_name": "RingBellz",
+  "description": "Public-data lead intelligence and business prospecting. Not a consumer reporting agency.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8F4F0",
+  "theme_color": "#5B2A6E",
+  "icons": [
+    {
+      "src": "https://media.base44.com/images/public/6a99b5be1656f01c35a0cb12/e9bf4e7e8_NewLOgoring.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://media.base44.com/images/public/6a99b5be1656f01c35a0cb12/4f90dc9a6_generated_image.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://media.base44.com/images/public/6a99b5be1656f01c35a0cb12/4f90dc9a6_generated_image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
