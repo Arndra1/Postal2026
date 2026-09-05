@@ -14,16 +14,16 @@ export default function FeaturesSection() {
   return (
     <section id="features" className="max-w-7xl mx-auto px-6 py-20">
       <div className="text-center max-w-2xl mx-auto mb-14">
-        <h2 className="font-heading text-3xl md:text-4xl font-semibold">Everything You Need to Find and Work Better Leads</h2>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white">Everything You Need to Find and Work Better Leads</h2>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {features.map((f) => (
-          <div key={f.title} className="bg-card rounded-2xl border border-border p-6 lady-shadow hover:shadow-md transition">
-            <div className="w-11 h-11 rounded-xl bg-secondary/20 flex items-center justify-center mb-4">
-              <f.icon className="w-5 h-5 text-primary" />
+          <div key={f.title} className="bg-[#12131A] rounded-2xl border border-cyan-500/15 p-6 tech-card">
+            <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4">
+              <f.icon className="w-5 h-5 text-cyan-400" />
             </div>
-            <h3 className="font-heading font-semibold mb-1.5">{f.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+            <h3 className="font-heading font-semibold mb-1.5 text-white">{f.title}</h3>
+            <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>

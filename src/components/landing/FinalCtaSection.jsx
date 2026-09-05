@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 export default function FinalCtaSection() {
   return (
     <section className="max-w-7xl mx-auto px-6 pb-20">
-      <div className="rounded-3xl lady-gradient p-10 md:p-16 text-center text-white">
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-cyan-500 p-10 md:p-16 text-center text-white tech-glow-indigo">
         <h2 className="font-heading text-3xl md:text-4xl font-semibold">Ready to Find Better Leads?</h2>
         <p className="mt-4 text-white/80 max-w-xl mx-auto">
           Discover prospects, enrich the records that matter, and organize your opportunities in one workspace.

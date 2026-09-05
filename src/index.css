@@ -98,4 +98,24 @@
   .lady-shadow-lg {
     box-shadow: 0 4px 12px rgba(91, 42, 110, 0.06), 0 24px 48px rgba(91, 42, 110, 0.10);
   }
+  .tech-grid {
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .tech-glow-cyan {
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.1), 0 0 1px rgba(0, 240, 255, 0.25);
+  }
+  .tech-glow-indigo {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.2), 0 0 1px rgba(99, 102, 241, 0.4);
+  }
+  .tech-card {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  }
+  .tech-card:hover {
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.12), 0 0 1px rgba(0, 240, 255, 0.35);
+    border-color: rgba(0, 240, 255, 0.3) !important;
+    transform: translateY(-2px);
+  }
 }
