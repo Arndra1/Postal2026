@@ -147,14 +147,23 @@ export default function FindLeadsUnified() {
       let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
       let jobTitle = r.job_title || "";
       let confidence = "";
+      let leadAddress = r.address || "";
 
       // Nonprofit: officer lookup from Form 990 XML before saving (0 credits).
       if (r.record_type === "nonprofit_filing" && r.official_record_id) {
         try {
           const officerRes = await base44.functions.invoke("searchNonprofitLeads", { action: "lookup_officer", ein: r.official_record_id });
-          if (officerRes.data.status === "success" && officerRes.data.officers?.length > 0) {
-            personName = officerRes.data.officers[0].name;
-            jobTitle = officerRes.data.officers[0].title;
+          if (officerRes.data.status === "success") {
+            if (officerRes.data.officers?.length > 0) {
+              personName = officerRes.data.officers[0].name;
+              jobTitle = officerRes.data.officers[0].title;
+            } else {
+              confidence = "no contact name found";
+            }
+            // Use IRS filing address if the search result didn't have one.
+            if (!leadAddress && officerRes.data.financials?.address) {
+              leadAddress = officerRes.data.financials.address;
+            }
           } else {
             confidence = "no contact name found";
           }
@@ -166,7 +175,7 @@ export default function FindLeadsUnified() {
       const lead = await base44.entities.Lead.create({
         user_id: user.id,
         business_name: r.business_name, person_name: personName, job_title: jobTitle,
-        city: r.city, state: r.state, zip: r.zip, address: r.address,
+        city: r.city, state: r.state, zip: r.zip, address: leadAddress,
         industry: r.industry || r.extra?.entity_type || "",
         website: r.website || "",
         official_record_id: r.official_record_id, jurisdiction: r.jurisdiction || r.state || "",
@@ -194,14 +203,22 @@ export default function FindLeadsUnified() {
         let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
         let jobTitle = r.job_title || "";
         let confidence = "";
+        let leadAddress = r.address || "";
 
         // Nonprofit: officer lookup before creating the lead (0 credits).
         if (r.record_type === "nonprofit_filing" && r.official_record_id) {
           try {
             const officerRes = await base44.functions.invoke("searchNonprofitLeads", { action: "lookup_officer", ein: r.official_record_id });
-            if (officerRes.data.status === "success" && officerRes.data.officers?.length > 0) {
-              personName = officerRes.data.officers[0].name;
-              jobTitle = officerRes.data.officers[0].title;
+            if (officerRes.data.status === "success") {
+              if (officerRes.data.officers?.length > 0) {
+                personName = officerRes.data.officers[0].name;
+                jobTitle = officerRes.data.officers[0].title;
+              } else {
+                confidence = "no contact name found";
+              }
+              if (!leadAddress && officerRes.data.financials?.address) {
+                leadAddress = officerRes.data.financials.address;
+              }
             } else {
               confidence = "no contact name found";
             }
@@ -213,7 +230,7 @@ export default function FindLeadsUnified() {
         const lead = await base44.entities.Lead.create({
           user_id: user.id,
           business_name: r.business_name, person_name: personName, job_title: jobTitle,
-          city: r.city, state: r.state, zip: r.zip, address: r.address,
+          city: r.city, state: r.state, zip: r.zip, address: leadAddress,
           industry: r.industry || r.extra?.entity_type || "",
           official_record_id: r.official_record_id, agency: r.agency, source_reference: r.source_url,
           source_category: r.record_type === "nonprofit_filing" ? "nonprofits" : (tab === "public_records" ? prSub : "new_businesses"),
@@ -291,7 +308,9 @@ export default function FindLeadsUnified() {
     <div>
       <PageHeader title="Find Leads" subtitle="Discover prospects across public records and state registries. All discovery is free — only successful contact enrichment costs 5 credits." />
 
-      <ComplianceBanner text={MARKETING_NOTICE} />
+      <ComplianceBanner text={isNonprofit
+        ? "Nonprofit data is from public IRS Form 990 filings via ProPublica Nonprofit Explorer. Revenue and financial figures are shown as informational context only — not as indicators of creditworthiness, financial health, or eligibility. Do not characterize prospects in credit-decision terms."
+        : MARKETING_NOTICE} />
 
       {showCustomerPrompt && <CustomerTypePrompt onSelect={selectCustomerType} onDismiss={() => setTypeDismissed(true)} />}
 
