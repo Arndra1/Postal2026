@@ -41,12 +41,12 @@ export default function ResetPassword() {
         title="Invalid reset link"
         subtitle="This password reset link is missing or invalid"
         footer={
-          <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+          <Link to="/forgot-password" className="text-cyan-400 font-medium hover:text-cyan-300 transition">
             Request a new link
           </Link>
         }
       >
-        <p className="text-sm text-foreground text-center">
+        <p className="text-sm text-slate-200 text-center">
           The link you used appears to be incomplete. Please request a new password reset email.
         </p>
       </AuthLayout>
@@ -98,7 +98,7 @@ export default function ResetPassword() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <Button type="submit" className="w-full h-12 font-medium bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)]" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

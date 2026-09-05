@@ -108,7 +108,7 @@ export default function Register() {
           </InputOTP>
         </div>
         <Button
-          className="w-full h-12 font-medium"
+          className="w-full h-12 font-medium bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)]"
           onClick={handleVerify}
           disabled={loading || otpCode.length < 6}
         >
@@ -123,7 +123,7 @@ export default function Register() {
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Didn't receive the code?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
+          <button onClick={handleResend} className="text-cyan-400 font-medium hover:text-cyan-300 transition">
             Resend
           </button>
         </p>
@@ -141,21 +141,21 @@ export default function Register() {
           Already have an account?{" "}
           <Link
             to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}
-            className="text-primary font-medium hover:underline"
+            className="text-cyan-400 font-medium hover:text-cyan-300 transition"
           >
             Log in
           </Link>
         </>
       }
     >
-      <div className="mb-6 p-3 rounded-lg bg-secondary/15 border border-secondary/30 text-xs text-muted-foreground leading-relaxed">
-        <span className="flex items-center gap-1.5 font-medium text-foreground mb-1"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Compliance Notice</span>
+      <div className="mb-6 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20 text-xs text-slate-400 leading-relaxed">
+        <span className="flex items-center gap-1.5 font-medium text-white mb-1"><ShieldCheck className="w-3.5 h-3.5 text-cyan-400" /> Compliance Notice</span>
         {COMPLIANCE_NOTICE}
       </div>
 
       <Button
         variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
+        className="w-full h-12 text-sm font-medium mb-6 border-cyan-500/20 text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-300 hover:border-cyan-500/40"
         onClick={handleGoogle}
       >
         <GoogleIcon className="w-5 h-5 mr-2" />
@@ -167,7 +167,7 @@ export default function Register() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+          <span className="bg-[#12131A] px-3 text-slate-500">or</span>
         </div>
       </div>
 
@@ -258,7 +258,7 @@ export default function Register() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <Button type="submit" className="w-full h-12 font-medium bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)]" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
