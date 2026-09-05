@@ -6,12 +6,14 @@ import { CENSUS, isConfigured as censusConfigured, searchMarketIntel } from "./c
 import { DATA_GOV, isConfigured as datagovConfigured, searchBusinessEntities } from "./datagov.ts";
 import { COURTLISTENER, isConfigured as clConfigured, searchParties } from "./courtlistener.ts";
 import { HUD, isConfigured as hudConfigured, searchGeographic } from "./hud.ts";
+import { PROPUBLICA, isConfigured as propublicaConfigured, searchNonprofits } from "./propublica.ts";
 
 export const PUBLIC_SOURCES = [
   { meta: DATA_GOV, configured: datagovConfigured, search: searchBusinessEntities },
   { meta: COURTLISTENER, configured: clConfigured, search: searchParties },
   { meta: CENSUS, configured: censusConfigured, search: searchMarketIntel },
   { meta: HUD, configured: hudConfigured, search: searchGeographic },
+  { meta: PROPUBLICA, configured: propublicaConfigured, search: searchNonprofits },
 ];
 
 export function allSourceMeta() {

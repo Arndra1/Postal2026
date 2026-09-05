@@ -109,7 +109,7 @@
     "official_record_id": {
       "type": "string",
       "default": "",
-      "description": "Official public-record ID (e.g. committee_id, docket_id, state filing ID)."
+      "description": "Official public-record ID (e.g. committee_id, docket_id, state filing ID, EIN)."
     },
     "jurisdiction": {
       "type": "string",
@@ -132,7 +132,8 @@
         "government_open_data",
         "public_records",
         "market_intelligence",
-        "geographic"
+        "geographic",
+        "nonprofits"
       ],
       "default": "government_open_data"
     },
@@ -165,6 +166,7 @@
         "bankruptcy_filing",
         "court_party",
         "committee_filing",
+        "nonprofit_filing",
         "other"
       ],
       "default": "new_business_filing",

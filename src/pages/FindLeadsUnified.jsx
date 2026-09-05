@@ -1,15 +1,35 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Loader2, AlertCircle, Sparkles, MapPin, Building2, Scale } from "lucide-react";
+import { Search, Loader2, AlertCircle, Sparkles, MapPin, Building2, Scale, Heart } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
+import NonprofitLeadCard from "@/components/search/NonprofitLeadCard";
 import CustomerTypePrompt, { SUGGESTED_SEARCHES } from "@/components/search/CustomerTypePrompt";
+
+const NTEE_GROUPS = [
+  { id: "", label: "All categories" },
+  { id: 1, label: "Arts, Culture & Humanities" },
+  { id: 2, label: "Education" },
+  { id: 3, label: "Environment & Animals" },
+  { id: 4, label: "Health" },
+  { id: 5, label: "Human Services" },
+  { id: 6, label: "International, Foreign Affairs" },
+  { id: 7, label: "Public, Societal Benefit" },
+  { id: 8, label: "Religion Related" },
+  { id: 9, label: "Mutual/Membership Benefit" },
+  { id: 10, label: "Unknown / Unclassified" },
+];
+
+const ALL_STATES = [
+  "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
+];
 
 const LIVE_STATES = [
   { code: "FL", name: "Florida" }, { code: "CT", name: "Connecticut" },
@@ -27,6 +47,7 @@ const COUNTY_STATES = ["PA", "TX"];
 const TABS = [
   { key: "new_businesses", label: "New Businesses", icon: Building2, hint: "Recently registered business filings from 8 live state sources" },
   { key: "by_location", label: "By Location", icon: MapPin, hint: "Find businesses by state, city, ZIP, or county" },
+  { key: "nonprofits", label: "Nonprofits", icon: Heart, hint: "IRS-registered nonprofits by state and mission category (ProPublica)" },
   { key: "public_records", label: "Public Records", icon: Scale, hint: "Court cases, committee filings & housing records" },
 ];
 
@@ -38,11 +59,12 @@ const PR_SUBS = [
 
 export default function FindLeadsUnified() {
   const { user } = useAuth();
+  const location = useLocation();
   const [customerType, setCustomerType] = useState("");
   const [typeDismissed, setTypeDismissed] = useState(false);
   const [tab, setTab] = useState("new_businesses");
   const [prSub, setPrSub] = useState("public_records");
-  const [filters, setFilters] = useState({ state: "", dateRange: "LAST 30 DAYS", startDate: "", endDate: "", entityType: "", city: "", zip: "", county: "", nameQuery: "" });
+  const [filters, setFilters] = useState({ state: "", dateRange: "LAST 30 DAYS", startDate: "", endDate: "", entityType: "", city: "", zip: "", county: "", nameQuery: "", ntee: "", keyword: "" });
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -51,6 +73,14 @@ export default function FindLeadsUnified() {
   const [savedLeads, setSavedLeads] = useState({});
   const [enrichmentData, setEnrichmentData] = useState({});
   const [lists, setLists] = useState([]);
+
+  // Allow deep-linking to a specific tab (e.g. from Need-Oriented Search).
+  useEffect(() => {
+    if (location.state?.tab) {
+      setTab(location.state.tab);
+      if (location.state.filters) setFilters(f => ({ ...f, ...location.state.filters }));
+    }
+  }, [location.state]);
 
   useEffect(() => {
     base44.auth.me().then(u => setCustomerType(u.customer_type || "")).catch(() => {});
@@ -70,6 +100,9 @@ export default function FindLeadsUnified() {
   const keyOf = (r, i) => `${r.official_record_id || r.business_name || ""}|${i}`;
 
   const buildSearchPayload = () => {
+    if (tab === "nonprofits") {
+      return { action: "search", state: filters.state, ntee: filters.ntee, keyword: filters.keyword };
+    }
     if (tab === "public_records") {
       const base = { category: prSub };
       if (prSub === "public_records") return { ...base, business_name: filters.nameQuery, state: filters.state };
@@ -88,13 +121,18 @@ export default function FindLeadsUnified() {
 
   const runSearch = async (e) => {
     e?.preventDefault();
-    if (tab !== "public_records" && !filters.state) {
+    if (tab !== "public_records" && tab !== "nonprofits" && !filters.state) {
       setError("Select a state to search live business records.");
+      return;
+    }
+    if (tab === "nonprofits" && !filters.state && !filters.ntee && !filters.keyword) {
+      setError("Enter a keyword, select a state, or choose a category to search nonprofits.");
       return;
     }
     setLoading(true); setError(""); setResults([]); setSearched(true);
     try {
-      const res = await base44.functions.invoke("searchPublicLeads", buildSearchPayload());
+      const fnName = tab === "nonprofits" ? "searchNonprofitLeads" : "searchPublicLeads";
+      const res = await base44.functions.invoke(fnName, buildSearchPayload());
       const d = res.data;
       if (d.status === "success") setResults(d.results || []);
       else setError(d.error || "No results found.");
@@ -106,19 +144,41 @@ export default function FindLeadsUnified() {
     const i = results.indexOf(r); const k = keyOf(r, i);
     setBusy(b => ({ ...b, [k]: "saving" }));
     try {
+      let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
+      let jobTitle = r.job_title || "";
+      let confidence = "";
+
+      // Nonprofit: officer lookup from Form 990 XML before saving (0 credits).
+      if (r.record_type === "nonprofit_filing" && r.official_record_id) {
+        try {
+          const officerRes = await base44.functions.invoke("searchNonprofitLeads", { action: "lookup_officer", ein: r.official_record_id });
+          if (officerRes.data.status === "success" && officerRes.data.officers?.length > 0) {
+            personName = officerRes.data.officers[0].name;
+            jobTitle = officerRes.data.officers[0].title;
+          } else {
+            confidence = "no contact name found";
+          }
+        } catch (_e) {
+          confidence = "no contact name found";
+        }
+      }
+
       const lead = await base44.entities.Lead.create({
         user_id: user.id,
-        business_name: r.business_name, person_name: r.person_name || r.extra?.officer || r.extra?.registered_agent || "",
+        business_name: r.business_name, person_name: personName, job_title: jobTitle,
         city: r.city, state: r.state, zip: r.zip, address: r.address,
-        industry: r.industry || r.extra?.entity_type || "", job_title: r.job_title || "",
+        industry: r.industry || r.extra?.entity_type || "",
         website: r.website || "",
         official_record_id: r.official_record_id, jurisdiction: r.jurisdiction || r.state || "",
         agency: r.agency, source_reference: r.source_url,
-        source_category: tab === "public_records" ? prSub : "new_businesses",
+        source_category: r.record_type === "nonprofit_filing" ? "nonprofits" : (tab === "public_records" ? prSub : "new_businesses"),
         record_label: r.record_label || "PUBLIC RECORD",
         retrieval_timestamp: r.retrieved_at || new Date().toISOString(),
         original_public_fields: r,
         saved: true, contact_status: "unverified", pipeline_status: "new",
+        lead_type: "business",
+        event_type: r.record_type === "nonprofit_filing" ? "nonprofit_filing" : "other",
+        confidence,
       });
       setSavedLeads(s => ({ ...s, [k]: lead }));
       setBusy(b => ({ ...b, [k]: "saved" }));
@@ -131,24 +191,46 @@ export default function FindLeadsUnified() {
     try {
       let leadId = savedLeads[k]?.id;
       if (!leadId) {
+        let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
+        let jobTitle = r.job_title || "";
+        let confidence = "";
+
+        // Nonprofit: officer lookup before creating the lead (0 credits).
+        if (r.record_type === "nonprofit_filing" && r.official_record_id) {
+          try {
+            const officerRes = await base44.functions.invoke("searchNonprofitLeads", { action: "lookup_officer", ein: r.official_record_id });
+            if (officerRes.data.status === "success" && officerRes.data.officers?.length > 0) {
+              personName = officerRes.data.officers[0].name;
+              jobTitle = officerRes.data.officers[0].title;
+            } else {
+              confidence = "no contact name found";
+            }
+          } catch (_e) {
+            confidence = "no contact name found";
+          }
+        }
+
         const lead = await base44.entities.Lead.create({
           user_id: user.id,
-          business_name: r.business_name, person_name: r.person_name || r.extra?.officer || r.extra?.registered_agent || "",
+          business_name: r.business_name, person_name: personName, job_title: jobTitle,
           city: r.city, state: r.state, zip: r.zip, address: r.address,
           industry: r.industry || r.extra?.entity_type || "",
           official_record_id: r.official_record_id, agency: r.agency, source_reference: r.source_url,
-          source_category: tab === "public_records" ? prSub : "new_businesses",
+          source_category: r.record_type === "nonprofit_filing" ? "nonprofits" : (tab === "public_records" ? prSub : "new_businesses"),
           record_label: r.record_label || "PUBLIC RECORD",
           retrieval_timestamp: r.retrieved_at || new Date().toISOString(),
           original_public_fields: r, saved: true, contact_status: "unverified", pipeline_status: "new",
+          lead_type: "business",
+          event_type: r.record_type === "nonprofit_filing" ? "nonprofit_filing" : "other",
+          confidence,
         });
         leadId = lead.id; setSavedLeads(s => ({ ...s, [k]: lead }));
       }
       const inputs = {
         business_name: r.business_name,
-        person_name: r.person_name || r.extra?.officer || r.extra?.registered_agent || "",
+        person_name: savedLeads[k]?.person_name || r.person_name || r.extra?.officer || r.extra?.registered_agent || "",
         city: r.city, state: r.state, zip: r.zip, address: r.address,
-        website: r.website || "", job_title: r.job_title || "",
+        website: r.website || "", job_title: savedLeads[k]?.job_title || r.job_title || "",
       };
       const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs });
       setBusy(b => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
@@ -181,8 +263,8 @@ export default function FindLeadsUnified() {
     try { await base44.auth.updateMe({ customer_type: val }); } catch (_e) {}
   };
 
-  // Client-side post-filters (entity type, city, ZIP, county)
-  const filtered = results.filter(r => {
+  // Client-side post-filters (entity type, city, ZIP, county) — state filings only
+  const filtered = isNonprofit ? results : results.filter(r => {
     const et = (r.extra?.entity_type || r.industry || "").toLowerCase();
     const city = (r.city || "").toLowerCase();
     const zip = (r.zip || "").toLowerCase();
@@ -197,6 +279,7 @@ export default function FindLeadsUnified() {
   const showCustomerPrompt = !customerType && !typeDismissed;
   const suggestions = SUGGESTED_SEARCHES[customerType] || [];
   const isStateFiling = tab === "new_businesses" || tab === "by_location";
+  const isNonprofit = tab === "nonprofits";
   const showCounty = isStateFiling && COUNTY_STATES.includes(filters.state);
 
   const applySuggestion = (s) => {
@@ -249,7 +332,27 @@ export default function FindLeadsUnified() {
 
       <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isStateFiling ? (
+          {isNonprofit ? (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Keyword</Label>
+                <Input value={filters.keyword} onChange={e => setFilters({ ...filters, keyword: e.target.value })} placeholder="e.g. cancer, youth, housing" className="h-10" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">State (optional)</Label>
+                <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  <option value="">All states</option>
+                  {ALL_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Category (NTEE)</Label>
+                <select value={filters.ntee} onChange={e => setFilters({ ...filters, ntee: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  {NTEE_GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
+                </select>
+              </div>
+            </>
+          ) : isStateFiling ? (
             <>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">State</Label>
@@ -351,8 +454,9 @@ export default function FindLeadsUnified() {
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filtered.map((r, i) => {
                     const k = keyOf(r, i);
+                    const Card = isNonprofit ? NonprofitLeadCard : UnifiedLeadCard;
                     return (
-                      <UnifiedLeadCard key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} enrichmentData={enrichmentData[k]}
+                      <Card key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} enrichmentData={enrichmentData[k]}
                         onSave={onSave} onEnrich={onEnrich} onStar={onStar} onPipeline={onPipeline}
                         onTagsChange={onTagsChange} lists={lists} onCreateList={onCreateList} onListIdsChange={onListIdsChange} />
                     );

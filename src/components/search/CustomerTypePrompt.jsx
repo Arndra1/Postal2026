@@ -15,25 +15,32 @@ export const SUGGESTED_SEARCHES = {
   insurance: [
     { label: "New Businesses — Last 30 Days", tab: "new_businesses", filters: { dateRange: "LAST 30 DAYS" } },
     { label: "LLCs by State", tab: "new_businesses", filters: { entityType: "LLC" } },
+    { label: "Nonprofits — Health", tab: "nonprofits", filters: { ntee: 4 } },
     { label: "By Location", tab: "by_location" },
   ],
   marketing: [
     { label: "New Businesses — Last 7 Days", tab: "new_businesses", filters: { dateRange: "LAST 7 DAYS" } },
+    { label: "Nonprofits", tab: "nonprofits" },
     { label: "By Location", tab: "by_location" },
   ],
   credit_repair: [
     { label: "New Businesses — Last 90 Days", tab: "new_businesses", filters: { dateRange: "LAST 90 DAYS" } },
     { label: "Public Records", tab: "public_records" },
+    { label: "Nonprofits", tab: "nonprofits" },
   ],
   broker: [
     { label: "New Businesses — Last 30 Days", tab: "new_businesses", filters: { dateRange: "LAST 30 DAYS" } },
+    { label: "Nonprofits", tab: "nonprofits" },
     { label: "By Location", tab: "by_location" },
   ],
   funder: [
     { label: "New Businesses — Last 30 Days", tab: "new_businesses", filters: { dateRange: "LAST 30 DAYS" } },
+    { label: "Nonprofits", tab: "nonprofits" },
     { label: "By Location", tab: "by_location" },
   ],
-  other: [],
+  other: [
+    { label: "Nonprofits", tab: "nonprofits" },
+  ],
 };
 
 // Optional one-time prompt — personalizes suggested starting searches only.

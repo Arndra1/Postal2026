@@ -31,6 +31,16 @@ const NEED_PATHS = {
       cta: "Search new businesses",
       badge: "Public Record",
     },
+    {
+      key: "nonprofit_credit",
+      title: "Nonprofits & community organizations",
+      need: "Nonprofit organizations and community-service groups that may need credit-building, financial education, or community reinvestment services.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits" },
+      cta: "Search nonprofits",
+      badge: "Public Record",
+    },
   ],
   insurance: [
     {
@@ -40,6 +50,16 @@ const NEED_PATHS = {
       source: "State business registries (8 states live)",
       route: "/new-businesses",
       cta: "Search new businesses",
+      badge: "Public Record",
+    },
+    {
+      key: "nonprofit_insurance",
+      title: "Nonprofits needing coverage",
+      need: "Nonprofit organizations need directors & officers liability, event coverage, and property insurance. IRS filings surface orgs by category and location.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits", filters: { ntee: 4 } },
+      cta: "Search nonprofits",
       badge: "Public Record",
     },
     {
@@ -63,6 +83,16 @@ const NEED_PATHS = {
       badge: "Public Record",
     },
     {
+      key: "nonprofit_marketing",
+      title: "Nonprofits needing marketing",
+      need: "Nonprofits need fundraising campaigns, branding, digital outreach, and storytelling support. IRS filings surface orgs by mission category and state.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits" },
+      cta: "Search nonprofits",
+      badge: "Public Record",
+    },
+    {
       key: "businesses_by_location",
       title: "Businesses in your target market",
       need: "Find established businesses by location that may need a marketing agency partner.",
@@ -80,6 +110,16 @@ const NEED_PATHS = {
       source: "State business registries (8 states live)",
       route: "/new-businesses",
       cta: "Search new businesses",
+      badge: "Public Record",
+    },
+    {
+      key: "nonprofit_broker",
+      title: "Nonprofits needing a broker",
+      need: "Nonprofits need employee benefits, commercial insurance, and risk-management brokers. IRS filings surface orgs with staff and operations by state.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits" },
+      cta: "Search nonprofits",
       badge: "Public Record",
     },
     {
@@ -103,6 +143,16 @@ const NEED_PATHS = {
       badge: "Public Record",
     },
     {
+      key: "nonprofit_funding",
+      title: "Nonprofits seeking funding",
+      need: "Nonprofits may need working capital, lines of credit, or grant-writing support. IRS filings surface orgs by mission category, with revenue context shown informationally.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits" },
+      cta: "Search nonprofits",
+      badge: "Public Record",
+    },
+    {
       key: "businesses_by_location",
       title: "Businesses in your lending area",
       need: "Find established businesses by location that may need alternative funding or capital.",
@@ -120,6 +170,16 @@ const NEED_PATHS = {
       source: "State business registries (8 states live)",
       route: "/new-businesses",
       cta: "Search new businesses",
+      badge: "Public Record",
+    },
+    {
+      key: "nonprofit_general",
+      title: "Nonprofit organizations",
+      need: "Discover IRS-registered nonprofits by state and mission category. Public filing data — informational only, no eligibility or credit commentary.",
+      source: "ProPublica Nonprofit Explorer (IRS filings)",
+      route: "/find-leads-unified",
+      state: { tab: "nonprofits" },
+      cta: "Search nonprofits",
       badge: "Public Record",
     },
     {
@@ -190,7 +250,7 @@ export default function NeedOrientedSearch() {
             <h3 className="font-heading text-base font-semibold mb-1.5">{p.title}</h3>
             <p className="text-sm text-muted-foreground mb-3 flex-1">{p.need}</p>
             <p className="text-xs text-muted-foreground/80 mb-4">Source: {p.source}</p>
-            <Button variant="default" size="sm" className="w-full" onClick={() => navigate(p.route)}>
+            <Button variant="default" size="sm" className="w-full" onClick={() => navigate(p.route, p.state ? { state: p.state } : undefined)}>
               {p.cta} <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
