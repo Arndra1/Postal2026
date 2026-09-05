@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
-import { Coins, TrendingUp, TrendingDown, Crown, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, Crown, Zap, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Credits() {
   const [data, setData] = useState(null);
@@ -31,11 +33,21 @@ export default function Credits() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={Coins} label="Current Balance" value={data.exempt ? "∞" : data.wallet.balance} sub={data.exempt ? "Unlimited" : "Available credits"} />
-        <StatCard icon={TrendingUp} label="Lifetime Granted" value={data.wallet.lifetime_granted || 0} accent />
+        <StatCard icon={Clock} label="Monthly Credits" value={data.exempt ? "∞" : data.wallet.balance} sub={data.exempt ? "Unlimited" : "Resets each cycle"} />
+        <StatCard icon={Zap} label="Pack Credits" value={data.exempt ? "∞" : (data.wallet.pack_balance || 0)} sub={data.exempt ? "Unlimited" : "Never expire"} accent />
+        <StatCard icon={TrendingUp} label="Lifetime Granted" value={data.wallet.lifetime_granted || 0} />
         <StatCard icon={TrendingDown} label="Lifetime Used" value={data.wallet.lifetime_used || 0} />
-        <StatCard icon={Sparkles} label="Cost per Enrichment" value="5" sub="On success only" />
       </div>
+
+      {!data.exempt && (data.wallet.balance || 0) <= 5 && (
+        <div className="mb-6 flex items-center justify-between gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-3">
+            <Zap className="w-5 h-5 text-primary flex-shrink-0" />
+            <p className="text-sm">Your monthly credits are running low. <Link to="/billing" className="text-primary font-medium underline hover:no-underline">Buy a credit pack</Link> to keep enriching.</p>
+          </div>
+          <Link to="/billing"><Button size="sm">Buy Credits</Button></Link>
+        </div>
+      )}
 
       <div className="bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
         <div className="p-5 border-b border-border"><h2 className="font-heading text-lg font-semibold">Credit Ledger</h2></div>
@@ -47,17 +59,21 @@ export default function Credits() {
                 <th className="text-left font-medium px-5 py-3">Description</th>
                 <th className="text-right font-medium px-5 py-3">Amount</th>
                 <th className="text-right font-medium px-5 py-3">Balance After</th>
+                <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Pool</th>
                 <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Date</th>
               </tr>
             </thead>
             <tbody>
-              {ledger.length === 0 && <tr><td colSpan={5} className="px-5 py-10 text-center text-muted-foreground">No credit transactions yet.</td></tr>}
+              {ledger.length === 0 && <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No credit transactions yet.</td></tr>}
               {ledger.map((l) => (
                 <tr key={l.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-5 py-3 capitalize font-medium">{l.action}</td>
                   <td className="px-5 py-3 text-muted-foreground">{l.description || "—"}</td>
                   <td className={`px-5 py-3 text-right font-medium ${l.amount >= 0 ? "text-accent" : "text-destructive"}`}>{l.amount >= 0 ? "+" : ""}{l.amount}</td>
                   <td className="px-5 py-3 text-right">{l.balance_after}</td>
+                  <td className="px-5 py-3 hidden md:table-cell">
+                    {l.pool ? <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{l.pool}</span> : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-5 py-3 hidden md:table-cell text-muted-foreground">{l.created_date ? new Date(l.created_date).toLocaleString() : "—"}</td>
                 </tr>
               ))}

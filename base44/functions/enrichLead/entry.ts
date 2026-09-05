@@ -1,15 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { isExempt, ENRICHMENT_COST, chargeCredits, getOrCreateWallet, hasActiveMembership, getOrCreateSubscription } from "../../shared/credits.ts";
+import { isExempt, ENRICHMENT_COST, chargeCredits, getOrCreateWallet, hasEnoughCredits, hasActiveMembership, getOrCreateSubscription } from "../../shared/credits.ts";
 import { runEnrichment, findRecentSuccess } from "../../shared/providers.ts";
-import { logActivity } from "../../shared/logging.ts";
+import { logActivity, logCompliance } from "../../shared/logging.ts";
 import { unauthorized, badRequest } from "../../shared/roles.ts";
 
 // Enrichment workflow.
-// 1. Check credits (or exempt role).
+// 1. Check credits across both pools (or exempt role).
 // 2. Run enrichment.
 // 3. Confirm a valid verified result exists.
-// 4. Deduct exactly 5 credits (idempotent) only on success.
-// 5. Save enrichment result + ledger entry.
+// 4. Deduct exactly 5 credits (idempotent) only on success — monthly pool first,
+//    then pack pool once monthly is depleted.
+// 5. Save enrichment result + ledger entry + compliance audit.
 // Failed/empty/timeout/error enrichments cost 0 credits.
 export default async function(req) {
   try {
@@ -32,11 +33,16 @@ export default async function(req) {
       }
     }
 
-    // Credit pre-check (do NOT deduct yet).
+    // Credit pre-check across both pools (do NOT deduct yet).
     if (!exempt) {
       const wallet = await getOrCreateWallet(base44, user.id);
-      if ((wallet.balance || 0) < ENRICHMENT_COST) {
-        return Response.json({ error: "Insufficient credits. You need at least 5 credits to enrich a lead.", code: "insufficient_credits" }, { status: 402 });
+      if (!hasEnoughCredits(wallet, ENRICHMENT_COST)) {
+        return Response.json({
+          error: "Insufficient credits. You need at least 5 credits to enrich a lead. Purchase a credit pack to continue.",
+          code: "insufficient_credits",
+          monthly_balance: wallet.balance || 0,
+          pack_balance: wallet.pack_balance || 0
+        }, { status: 402 });
       }
     }
 
@@ -45,15 +51,16 @@ export default async function(req) {
     // result WITHOUT re-running providers or re-charging credits.
     const recent = await findRecentSuccess(base44, user.id, inputs);
     if (recent) {
-      let bal = null;
-      if (!exempt) { const w = await getOrCreateWallet(base44, user.id); bal = w.balance; }
+      let bal = null, packBal = null;
+      if (!exempt) { const w = await getOrCreateWallet(base44, user.id); bal = w.balance; packBal = w.pack_balance || 0; }
       return Response.json({
         status: "success",
         results: recent.results || {},
         data_sources: recent.data_sources || [],
         duration_ms: 0,
         credits_charged: 0,
-        balance_after: bal,
+        monthly_balance: bal,
+        pack_balance: packBal,
         enrichment_id: recent.id,
         error: "",
         duplicate: true,
@@ -66,6 +73,8 @@ export default async function(req) {
     // Only charge on a verified success.
     let creditsCharged = 0;
     let balanceAfter = null;
+    let packBalanceAfter = null;
+    let chargePool = "";
     let enrichmentRecord = null;
 
     if (providerResult.status === "success") {
@@ -89,18 +98,28 @@ export default async function(req) {
         if (charge.ok) {
           creditsCharged = ENRICHMENT_COST;
           balanceAfter = charge.balance;
+          packBalanceAfter = charge.pack_balance;
+          chargePool = charge.pool;
           await base44.asServiceRole.entities.Enrichment.update(enrichmentRecord.id, { credits_charged: ENRICHMENT_COST });
+          // Compliance audit: log which pool the deduction came from.
+          await logCompliance(base44, "credit_deducted", user.id, "", `5 credits deducted for enrichment (pool: ${charge.pool})`, {
+            enrichment_id: enrichmentRecord.id,
+            lead_id: leadId,
+            monthly_deduct: charge.monthly_deduct,
+            pack_deduct: charge.pack_deduct,
+            pool: charge.pool,
+            monthly_balance_after: charge.balance,
+            pack_balance_after: charge.pack_balance
+          });
         }
       } else {
         creditsCharged = 0;
         const wallet = await getOrCreateWallet(base44, user.id);
         balanceAfter = wallet.balance;
+        packBalanceAfter = wallet.pack_balance || 0;
       }
 
       // Update lead if provided — SECURITY: ownership is verified first.
-      // The user-scoped client enforces RLS (other users' leads are filtered out),
-      // and we additionally require the lead to belong to the caller (or an exempt
-      // admin/owner acting administratively). No cross-tenant overwrites, ever.
       if (leadId) {
         try {
           const lead = await base44.entities.Lead.get(leadId);
@@ -137,10 +156,11 @@ export default async function(req) {
       if (!exempt) {
         const wallet = await getOrCreateWallet(base44, user.id);
         balanceAfter = wallet.balance;
+        packBalanceAfter = wallet.pack_balance || 0;
       }
     }
 
-    await logActivity(base44, user, "enrichment_" + providerResult.status, "Lead enrichment " + providerResult.status, { lead_id: leadId, credits_charged: creditsCharged });
+    await logActivity(base44, user, "enrichment_" + providerResult.status, "Lead enrichment " + providerResult.status, { lead_id: leadId, credits_charged: creditsCharged, pool: chargePool });
 
     return Response.json({
       status: providerResult.status,
@@ -148,7 +168,8 @@ export default async function(req) {
       data_sources: providerResult.data_sources,
       duration_ms: providerResult.duration_ms,
       credits_charged: creditsCharged,
-      balance_after: balanceAfter,
+      monthly_balance: balanceAfter,
+      pack_balance: packBalanceAfter,
       enrichment_id: enrichmentRecord ? enrichmentRecord.id : null,
       error: providerResult.error || ""
     });

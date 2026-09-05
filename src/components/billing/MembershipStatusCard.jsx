@@ -23,7 +23,7 @@ export default function MembershipStatusCard({ data, purchases, purchasedCredits
       <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>
       <div className="text-sm">
         <Row label="Plan"><span>Leadora — $59/month</span></Row>
-        <Row label="Included Credits"><span>100 monthly credits</span></Row>
+        <Row label="Monthly Credits"><span>{data.wallet?.balance ?? 0} <span className="text-muted-foreground font-normal">/ 100 (resets each cycle)</span></span></Row>
         <Row label="Membership Status"><StatusBadge status={sub.status} /></Row>
         <Row label="Next Billing Date">
           {active ? periodEndText : cancelledStillPaid ? `Will not renew — access ends ${periodEndText}` : "—"}
@@ -31,8 +31,8 @@ export default function MembershipStatusCard({ data, purchases, purchasedCredits
         <Row label="Payment Status">
           {active ? "Auto-renew ON — monthly charge" : cancelledStillPaid ? "Auto-renew OFF — no further charges" : "No active subscription"}
         </Row>
-        <Row label="Purchased Credits">
-          {purchasedCredits === null ? "Loading…" : <span>{purchasedCredits} <span className="text-muted-foreground font-normal">(never expire)</span></span>}
+        <Row label="Pack Credits">
+          <span>{data.wallet?.pack_balance ?? purchasedCredits ?? 0} <span className="text-muted-foreground font-normal">(never expire)</span></span>
         </Row>
         <div className="py-2 border-b border-border">
           <span className="text-muted-foreground">Billing History</span>
@@ -59,7 +59,7 @@ export default function MembershipStatusCard({ data, purchases, purchasedCredits
         </Row>
       </div>
       <div className="mt-4 space-y-2">
-        <p className="text-xs text-muted-foreground">Included and purchased credits never expire.</p>
+        <p className="text-xs text-muted-foreground">Monthly credits reset to 100 each billing cycle (unused credits do not roll over). Pack credits never expire.</p>
         <p className="text-xs text-muted-foreground">
           Billing questions? Contact <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a>
         </p>

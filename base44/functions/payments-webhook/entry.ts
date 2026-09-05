@@ -12,9 +12,10 @@
 
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 import { importSPKI, jwtVerify } from "npm:jose@5.9.6";
-import { getOrCreateSubscription, grantCreditsOnce, MONTHLY_CREDITS, PLAN_ID } from "../../shared/credits.ts";
+import { getOrCreateSubscription, grantCreditsOnce, resetMonthlyCreditsOnce, MONTHLY_CREDITS, PLAN_ID } from "../../shared/credits.ts";
 import { resolveProduct, MEMBERSHIP_PRODUCT_ID } from "../../shared/products.ts";
 import { sendEnrollmentConfirmation } from "../../shared/subscriptionEmails.ts";
+import { logCompliance } from "../../shared/logging.ts";
 
 // Wix event types (verbatim from Wix docs).
 const ORDER_APPROVED = "wix.ecom.v1.order_approved";
@@ -197,9 +198,9 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
       cancelled_at: ""
     });
 
-    // Grant the 100 monthly credits exactly once per confirmed payment
-    // (idempotent, keyed on the purchase id).
-    await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
+    // Reset the monthly pool to 100 — unused monthly credits are forfeited (no rollover).
+    // Idempotent, keyed on the purchase id. Pack pool is untouched.
+    await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_payment", purchase.id, "Leadora membership credits (100/month)");
 
     // SUBSCRIPTION CONFIRMATION: acknowledgment email immediately after enrollment —
     // renewal terms, start date, next billing date, cancellation instructions, and a
@@ -215,10 +216,19 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
       }
     }
   } else if (product.kind === "credit_pack") {
-    // One-time credit pack: add exactly the purchased credits, once.
+    // One-time credit pack: add exactly the purchased credits to the Pack pool, once.
     // (Pack sales are gated to active members at checkout time.)
-    // Purchased credits are plain balance — they never expire at cycle boundaries.
-    await grantCreditsOnce(db, userId, product.credits, "base44_credit_pack", purchase.id, `Leadora credit pack (${product.credits} credits)`);
+    // Pack credits never expire and carry over across billing cycles.
+    await grantCreditsOnce(db, userId, product.credits, "base44_credit_pack", purchase.id, `Leadora credit pack (${product.credits} credits)`, "pack");
+    // Compliance audit: log every pack purchase.
+    await logCompliance(db, "credit_pack_purchased", userId, "", `Credit pack purchased: ${product.credits} credits for $${product.price}`, {
+      purchase_id: purchase.id,
+      product_id: purchase.productId,
+      credits: product.credits,
+      price: product.price,
+      currency: product.currency,
+      buyer_email: buyerEmail
+    });
   }
   // ===== END APP-SPECIFIC =====
 
@@ -326,8 +336,9 @@ async function handleRenewalOrder(db: any, userId: string, order: any, checkoutI
     });
   }
 
-  // Grant the 100 monthly credits exactly once, keyed on the renewal order id.
-  await grantCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_renewal", orderId ?? subscriptionId, "Leadora membership renewal credits (100/month)");
+  // Reset the monthly pool to 100 on renewal — unused credits forfeited (no rollover).
+  // Idempotent, keyed on the renewal order id. Pack pool is untouched.
+  await resetMonthlyCreditsOnce(db, userId, MONTHLY_CREDITS, "base44_renewal", orderId ?? subscriptionId, "Leadora membership renewal credits (100/month)");
 
   // Record the renewal as a paid purchase so the payment event is fully audited.
   await db.entities.Base44Purchase.create({

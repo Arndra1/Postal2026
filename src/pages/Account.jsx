@@ -4,9 +4,10 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Building2, Mail, Lock, Check, Loader2 } from "lucide-react";
+import { User, Building2, Mail, Lock, Check, Loader2, Coins } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
 import { CUSTOMER_TYPES } from "@/components/search/CustomerTypePrompt";
+import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -15,6 +16,7 @@ export default function Account() {
   const [customerType, setCustomerType] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
@@ -23,6 +25,7 @@ export default function Account() {
       setCompany(u.company_name || "");
       setCustomerType(u.customer_type || "");
     });
+    base44.functions.invoke("userStats", {}).then((res) => setStats(res.data)).catch(() => {});
   }, []);
 
   const save = async (e) => {
@@ -42,6 +45,16 @@ export default function Account() {
       <PageHeader title="Account" subtitle="Manage your profile and security settings." />
 
       <div className="grid lg:grid-cols-2 gap-6">
+        {stats && (
+          <div className="lg:col-span-2 bg-card rounded-2xl border border-border lady-shadow p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Coins className="w-5 h-5 text-primary" />
+              <h2 className="font-heading text-lg font-semibold">Credit Balance</h2>
+            </div>
+            <CreditBalanceDisplay wallet={stats.wallet} subscription={stats.subscription} exempt={stats.exempt} />
+          </div>
+        )}
+
         <form onSubmit={save} className="bg-card rounded-2xl border border-border lady-shadow p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Profile</h2>
           <div className="space-y-4">

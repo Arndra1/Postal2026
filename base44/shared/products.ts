@@ -15,11 +15,10 @@ export const PRODUCTS: Record<string, any> = {
     currency: "USD",
     credits: 100
   },
-  credits_250: { kind: "credit_pack", name: "250 Leadora Credits", price: "19.00", currency: "USD", credits: 250 },
-  credits_500: { kind: "credit_pack", name: "500 Leadora Credits", price: "35.00", currency: "USD", credits: 500 },
-  credits_1000: { kind: "credit_pack", name: "1,000 Leadora Credits", price: "59.00", currency: "USD", credits: 1000 },
-  credits_2500: { kind: "credit_pack", name: "2,500 Leadora Credits", price: "129.00", currency: "USD", credits: 2500 },
-  credits_5000: { kind: "credit_pack", name: "5,000 Leadora Credits", price: "229.00", currency: "USD", credits: 5000 }
+  // One-time credit packs — purchased credits go to the Pack pool (never expire).
+  credits_small: { kind: "credit_pack", name: "25 Leadora Credits", price: "19.00", currency: "USD", credits: 25 },
+  credits_medium: { kind: "credit_pack", name: "75 Leadora Credits", price: "49.00", currency: "USD", credits: 75 },
+  credits_large: { kind: "credit_pack", name: "150 Leadora Credits", price: "89.00", currency: "USD", credits: 150 }
 };
 
 export function resolveProduct(productId: string) {

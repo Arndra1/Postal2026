@@ -18,16 +18,12 @@ export default function Billing() {
   const [consent, setConsent] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [purchases, setPurchases] = useState([]);
-  const [purchasedCredits, setPurchasedCredits] = useState(null);
 
   const load = () => base44.functions.invoke("userStats", {}).then((res) => setData(res.data));
 
   useEffect(() => {
     load();
     base44.entities.Base44Purchase.list("-created_date", 10).then(setPurchases).catch(() => setPurchases([]));
-    base44.entities.CreditLedger.filter({ action: "grant", reference_type: "base44_credit_pack" })
-      .then((entries) => setPurchasedCredits(entries.reduce((sum, e) => sum + (e.amount || 0), 0)))
-      .catch(() => setPurchasedCredits(0));
   }, []);
 
   const subscribe = async () => {
@@ -150,7 +146,7 @@ export default function Billing() {
         </div>
 
         {!exempt ? (
-          <MembershipStatusCard data={data} purchases={purchases} purchasedCredits={purchasedCredits} />
+          <MembershipStatusCard data={data} purchases={purchases} />
         ) : (
           <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
             <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>

@@ -19,7 +19,8 @@
       "type": "number"
     },
     "balance_after": {
-      "type": "number"
+      "type": "number",
+      "description": "Total balance (monthly + pack) after this transaction."
     },
     "reference_type": {
       "type": "string",
@@ -32,6 +33,16 @@
     "description": {
       "type": "string",
       "default": ""
+    },
+    "pool": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "pack",
+        "monthly+pack"
+      ],
+      "default": "monthly",
+      "description": "Which credit pool this transaction affected."
     }
   },
   "required": [

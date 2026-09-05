@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2, Check, X, Mail, Phone, Globe, Linkedin, MapPin, Briefcase, Building2, ShieldCheck, AlertCircle } from "lucide-react";
+import { Sparkles, Loader2, Check, X, Mail, Phone, Globe, Linkedin, MapPin, Briefcase, Building2, ShieldCheck, AlertCircle, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
+import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 
 export default function Enrich() {
   const { user } = useAuth();
   const [form, setForm] = useState({ person_name: "", business_name: "", website: "", city: "", state: "", email: "", phone: "" });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    base44.functions.invoke("userStats", {}).then((res) => setStats(res.data)).catch(() => {});
+  }, []);
 
   const run = async (e) => {
     e.preventDefault();
@@ -20,6 +27,8 @@ export default function Enrich() {
     try {
       const res = await base44.functions.invoke("enrichLead", { inputs: form });
       setResult(res.data);
+      // Refresh balance after enrichment.
+      base44.functions.invoke("userStats", {}).then((r) => setStats(r.data)).catch(() => {});
     } catch (err) {
       setResult({ status: "failed", error: err?.response?.data?.error || "Enrichment failed. Please try again." });
     } finally {
@@ -56,10 +65,22 @@ export default function Enrich() {
             {f("email", "Email (if known)", "jordan@...", <Mail className="w-4 h-4" />)}
             {f("phone", "Phone (if known)", "+1 ...", <Phone className="w-4 h-4" />)}
           </div>
+          {stats && !stats.exempt && (
+            <div className="mb-4 p-3 rounded-xl bg-muted/50 border border-border">
+              <p className="text-xs text-muted-foreground mb-1.5 font-medium">Your Credit Balance</p>
+              <CreditBalanceDisplay wallet={stats.wallet} subscription={stats.subscription} exempt={stats.exempt} compact />
+            </div>
+          )}
           <Button type="submit" className="w-full mt-5 h-11" disabled={loading}>
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enriching...</> : <><Sparkles className="w-4 h-4 mr-2" /> Run Enrichment</>}
           </Button>
           <p className="text-xs text-muted-foreground mt-3 text-center">5 credits per successful enrichment · No charge on failed lookups</p>
+          {stats && !stats.exempt && (stats.wallet.balance || 0) <= 5 && (
+            <div className="mt-3 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">Monthly credits running low — <Link to="/billing" className="text-primary font-medium underline hover:no-underline">buy a credit pack</Link> to keep enriching.</p>
+            </div>
+          )}
         </form>
 
         <div className="bg-card rounded-2xl border border-border lady-shadow p-6">

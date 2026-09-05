@@ -1,8 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { isExempt, getOrCreateWallet, getOrCreateSubscription, hasActiveMembership } from "../../shared/credits.ts";
+import { logCompliance } from "../../shared/logging.ts";
 
-// Returns the authenticated user's dashboard stats: credits, saved leads,
-// successful enrichments, recent activity, and membership status.
+// Returns the authenticated user's dashboard stats: credits (monthly + pack),
+// saved leads, successful enrichments, recent activity, and membership status.
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -44,7 +45,13 @@ export default async function(req) {
     return Response.json({
       user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role, company_name: user.company_name || "" },
       exempt,
-      wallet: { balance: wallet.balance, lifetime_granted: wallet.lifetime_granted, lifetime_used: wallet.lifetime_used, monthly_credits: exempt ? null : 100 },
+      wallet: {
+        balance: wallet.balance || 0,
+        pack_balance: wallet.pack_balance || 0,
+        lifetime_granted: wallet.lifetime_granted || 0,
+        lifetime_used: wallet.lifetime_used || 0,
+        monthly_credits: exempt ? null : 100
+      },
       subscription: { status: sub.status, plan: sub.plan, period_end: sub.period_end, cancelled_at: sub.cancelled_at },
       membershipActive: exempt || hasActiveMembership(sub),
       savedLeads,

@@ -23,7 +23,9 @@
         "excessive_search_activity",
         "admin_compliance_review",
         "provider_enabled",
-        "provider_disabled"
+        "provider_disabled",
+        "credit_pack_purchased",
+        "credit_deducted"
       ]
     },
     "description": {

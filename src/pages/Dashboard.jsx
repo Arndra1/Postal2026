@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
-import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown } from "lucide-react";
+import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown, Zap } from "lucide-react";
+import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -23,6 +24,7 @@ export default function Dashboard() {
   if (!data) return <p className="text-muted-foreground">Unable to load dashboard.</p>;
 
   const balance = data.wallet.balance;
+  const packBalance = data.wallet.pack_balance || 0;
   const monthly = data.exempt ? "Unlimited" : "100";
 
   return (
@@ -37,10 +39,10 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={Coins} label="Credits Remaining" value={data.exempt ? "∞" : `${balance} / 100`} sub={data.exempt ? "Unlimited access" : "Monthly allocation"} />
-        <StatCard icon={FolderHeart} label="Saved Leads" value={data.savedLeads} accent />
+        <StatCard icon={Coins} label="Monthly Credits" value={data.exempt ? "∞" : `${balance} / 100`} sub={data.exempt ? "Unlimited access" : "Resets each cycle"} />
+        <StatCard icon={Zap} label="Pack Credits" value={data.exempt ? "∞" : packBalance} sub={data.exempt ? "Unlimited access" : "Never expire"} accent />
+        <StatCard icon={FolderHeart} label="Saved Leads" value={data.savedLeads} />
         <StatCard icon={Sparkles} label="Successful Enrichments" value={data.successfulEnrichments} />
-        <StatCard icon={Activity} label="Total Enrichments" value={data.totalEnrichments} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
