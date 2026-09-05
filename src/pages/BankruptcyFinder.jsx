@@ -5,7 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Loader2, AlertCircle, Scale } from "lucide-react";
+import { Search, Loader2, AlertCircle, Scale, Info } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import BankruptcyLeadCard from "@/components/search/BankruptcyLeadCard";
@@ -30,9 +30,13 @@ export default function BankruptcyFinder() {
   const [savedLeads, setSavedLeads] = useState({});
   const [enrichmentData, setEnrichmentData] = useState({});
   const [lists, setLists] = useState([]);
+  const [customerType, setCustomerType] = useState("");
 
   useEffect(() => {
-    if (user) base44.entities.LeadList.filter({ user_id: user.id }).then(setLists).catch(() => {});
+    if (user) {
+      base44.entities.LeadList.filter({ user_id: user.id }).then(setLists).catch(() => {});
+      base44.auth.me().then((u) => setCustomerType(u.customer_type || "")).catch(() => {});
+    }
   }, [user]);
 
   const keyOf = (r, i) => `${r.official_record_id || r.extra?.docket_id || r.business_name || r.person_name || ""}|${i}`;
@@ -149,6 +153,18 @@ export default function BankruptcyFinder() {
       <PageHeader title="Bankruptcy Prospects" subtitle="Find people or businesses associated with recent public bankruptcy filings — for credit-service outreach. All discovery is free; only optional contact enrichment costs 5 credits on verified success." />
 
       <ComplianceBanner text="Bankruptcy filings are factual public records. This tool is for lawful marketing prospecting only — never for credit eligibility, loan/funding/insurance/employment/housing eligibility, underwriting, or risk scoring." />
+
+      {customerType === "credit_repair" ? (
+        <div className="flex items-start gap-2.5 p-3 mb-6 text-xs rounded-xl bg-primary/5 border border-primary/20 text-foreground">
+          <Scale className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <p><span className="font-semibold">Tailored for credit-service businesses.</span> These public bankruptcy filings identify individuals and businesses who may benefit from credit-repair or financial-recovery services. A bankruptcy filing is a factual event — reach out lawfully and never characterize prospects as "high risk" or "credit denied."</p>
+        </div>
+      ) : customerType && customerType !== "credit_repair" ? (
+        <div className="flex items-start gap-2.5 p-3 mb-6 text-xs rounded-xl bg-secondary/15 border border-secondary/30 text-foreground">
+          <Info className="w-4 h-4 text-secondary-foreground shrink-0 mt-0.5" />
+          <p><span className="font-semibold">Primarily for credit-service companies.</span> Bankruptcy prospects are most relevant to credit-repair and credit-service businesses. You can still search and save these public records, but they may not align with your selected business type. You can update your business type in Account Settings.</p>
+        </div>
+      ) : null}
 
       <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
