@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "security_scan",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runSecurityScan",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run security scan",
+            "description": "Detects unusual API usage and excessive activity"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Security Scan",
+  "description": "Daily automated security monitoring \u2014 scans for excessive API activity and unusual enrichment volume, flagging accounts for admin review.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

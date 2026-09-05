@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
+import FreshnessBadge from "@/components/leads/FreshnessBadge";
 import { useToast } from "@/components/ui/use-toast";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
@@ -133,13 +134,14 @@ export default function SavedLeads() {
                 <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Location</th>
                 <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Industry</th>
                 <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Saved</th>
+                <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Freshness</th>
                 <th className="text-left font-medium px-5 py-3">Status</th>
                 <th className="text-right font-medium px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={10} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
-              {!loading && filtered.length === 0 && <tr><td colSpan={10} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
+              {loading && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
               {filtered.map((l) => (
                 <tr key={l.id} className="border-t border-border hover:bg-muted/30">
                   <td className="px-5 py-3 font-medium">{l.person_name || "—"}</td>
@@ -150,6 +152,7 @@ export default function SavedLeads() {
                   <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{[l.city, l.state].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.industry || "—"}</td>
                   <td className="px-5 py-3 hidden md:table-cell text-muted-foreground">{l.created_date ? new Date(l.created_date).toLocaleDateString() : "—"}</td>
+                  <td className="px-5 py-3 hidden lg:table-cell"><FreshnessBadge created_date={l.created_date} retrieval_timestamp={l.retrieval_timestamp} /></td>
                   <td className="px-5 py-3"><StatusBadge status={l.enrichment_status} /></td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1">

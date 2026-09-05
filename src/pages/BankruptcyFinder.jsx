@@ -10,6 +10,7 @@ import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import BankruptcyLeadCard from "@/components/search/BankruptcyLeadCard";
+import { findDuplicateLead } from "@/lib/leadDedup";
 
 const ALL_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 const CHAPTERS = ["", "7", "11", "13"];
@@ -67,6 +68,13 @@ export default function BankruptcyFinder() {
     const i = results.indexOf(r); const k = keyOf(r, i);
     setBusy(b => ({ ...b, [k]: "saving" }));
     try {
+      const dup = await findDuplicateLead(user.id, r);
+      if (dup) {
+        setSavedLeads(s => ({ ...s, [k]: dup }));
+        setBusy(b => ({ ...b, [k]: "saved" }));
+        toast({ title: "Already saved", description: "This lead is already in your saved leads." });
+        return;
+      }
       const ex = r.extra || {};
       const lead = await base44.entities.Lead.create({
         user_id: user.id,
@@ -97,6 +105,10 @@ export default function BankruptcyFinder() {
     setBusy(b => ({ ...b, [ke]: "loading" }));
     try {
       let leadId = savedLeads[k]?.id;
+      if (!leadId) {
+        const dup = await findDuplicateLead(user.id, r);
+        if (dup) { leadId = dup.id; setSavedLeads(s => ({ ...s, [k]: dup })); }
+      }
       if (!leadId) {
         const ex = r.extra || {};
         const lead = await base44.entities.Lead.create({

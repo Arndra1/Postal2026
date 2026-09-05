@@ -10,6 +10,7 @@ import { Search, Loader2, AlertCircle, Sparkles, MapPin, Building2, Scale, Heart
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
+import { findDuplicateLead } from "@/lib/leadDedup";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
 import NonprofitLeadCard from "@/components/search/NonprofitLeadCard";
 import CustomerTypePrompt, { SUGGESTED_SEARCHES } from "@/components/search/CustomerTypePrompt";
@@ -161,6 +162,13 @@ export default function FindLeadsUnified() {
     const i = results.indexOf(r); const k = keyOf(r, i);
     setBusy(b => ({ ...b, [k]: "saving" }));
     try {
+      const dup = await findDuplicateLead(user.id, r);
+      if (dup) {
+        setSavedLeads(s => ({ ...s, [k]: dup }));
+        setBusy(b => ({ ...b, [k]: "saved" }));
+        toast({ title: "Already saved", description: "This lead is already in your saved leads." });
+        return;
+      }
       let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
       let jobTitle = r.job_title || "";
       let confidence = "";
@@ -216,6 +224,10 @@ export default function FindLeadsUnified() {
     setBusy(b => ({ ...b, [ke]: "loading" }));
     try {
       let leadId = savedLeads[k]?.id;
+      if (!leadId) {
+        const dup = await findDuplicateLead(user.id, r);
+        if (dup) { leadId = dup.id; setSavedLeads(s => ({ ...s, [k]: dup })); }
+      }
       if (!leadId) {
         let personName = r.person_name || r.extra?.officer || r.extra?.registered_agent || "";
         let jobTitle = r.job_title || "";

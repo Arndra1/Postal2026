@@ -10,6 +10,7 @@ import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import StateFilingRow from "@/components/leads/StateFilingRow";
+import { findDuplicateLead } from "@/lib/leadDedup";
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
@@ -78,6 +79,13 @@ export default function NewBusinessFinder() {
     const i = rows.indexOf(r); const k = keyOf(r, i);
     setBusy((b) => ({ ...b, [k]: "saving" }));
     try {
+      const dup = await findDuplicateLead(user.id, r);
+      if (dup) {
+        setSavedLeads((s) => ({ ...s, [k]: dup }));
+        setBusy((b) => ({ ...b, [k]: "saved" }));
+        toast({ title: "Already saved", description: "This lead is already in your saved leads." });
+        return;
+      }
       const lead = await base44.entities.Lead.create({
         user_id: user.id,
         business_name: r.business_name, state: r.state, city: r.city, zip: r.zip, address: r.address,
@@ -95,6 +103,10 @@ export default function NewBusinessFinder() {
     setBusy((b) => ({ ...b, [ke]: "loading" }));
     try {
       let leadId = savedLeads[k]?.id;
+      if (!leadId) {
+        const dup = await findDuplicateLead(user.id, r);
+        if (dup) { leadId = dup.id; setSavedLeads((s) => ({ ...s, [k]: dup })); }
+      }
       if (!leadId) {
         const lead = await base44.entities.Lead.create({
           user_id: user.id, business_name: r.business_name, state: r.state, city: r.city, zip: r.zip, address: r.address,

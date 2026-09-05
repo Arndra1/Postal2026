@@ -8,6 +8,7 @@ import { User, Building2, Mail, Lock, Check, Loader2, Coins } from "lucide-react
 import { SUPPORT_EMAIL } from "@/lib/compliance";
 import { CUSTOMER_TYPES } from "@/components/search/CustomerTypePrompt";
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
+import DeleteAccountSection from "@/components/account/DeleteAccountSection";
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -104,6 +105,10 @@ export default function Account() {
             <p className="text-xs text-muted-foreground">Need account assistance, or have a privacy or security request? Contact <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-foreground">{SUPPORT_EMAIL}</a></p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <DeleteAccountSection />
       </div>
     </div>
   );
