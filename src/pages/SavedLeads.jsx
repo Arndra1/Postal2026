@@ -76,7 +76,7 @@ export default function SavedLeads() {
     const a = document.createElement("a");
     a.href = url; a.download = "leadora-saved-leads.csv"; a.click();
     URL.revokeObjectURL(url);
-    // Log all CSV exports for beta analytics.
+    // Log all CSV exports for analytics.
     base44.entities.ActivityLog.create({
       user_id: user.id,
       user_email: user.email || "",

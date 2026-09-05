@@ -6,7 +6,7 @@ import AdminTable from "@/components/AdminTable";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, Ban, CheckCircle2, FlaskConical, Coins } from "lucide-react";
+import { Search, Loader2, Ban, CheckCircle2 } from "lucide-react";
 
 const roles = ["user", "staff", "admin", "owner"];
 

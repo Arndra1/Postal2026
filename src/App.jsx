@@ -40,7 +40,6 @@ import AdminActivity from '@/pages/admin/AdminActivity';
 import AdminCompliance from '@/pages/admin/AdminCompliance';
 import NewBusinessFinder from '@/pages/NewBusinessFinder';
 import AdminDataSources from '@/pages/admin/AdminDataSources';
-import AdminBeta from '@/pages/admin/AdminBeta';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -101,7 +100,6 @@ const AuthenticatedApp = () => {
           <Route path="/admin/activity" element={<AdminGuard><AdminActivity /></AdminGuard>} />
           <Route path="/admin/compliance" element={<AdminGuard><AdminCompliance /></AdminGuard>} />
           <Route path="/admin/data-sources" element={<AdminGuard><AdminDataSources /></AdminGuard>} />
-          <Route path="/admin/beta" element={<AdminGuard><AdminBeta /></AdminGuard>} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
