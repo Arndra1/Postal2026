@@ -26,7 +26,7 @@ export default function Logo({ variant = "header", className = "", ...props }) {
         <Image src={v.src} alt="RingBellz" fittingType="fit" className={v.className} />
         <span className={`font-heading font-semibold tracking-tight ${v.textClass}`}>
           <span className="text-foreground">Ring</span>
-          <span className="text-primary">bellz</span>
+          <span className="text-gold">bellz</span>
         </span>
       </span>
     );
