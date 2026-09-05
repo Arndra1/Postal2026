@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, FlaskConical
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, FlaskConical, Gavel
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import TermsGate from "@/components/TermsGate";
@@ -14,6 +14,7 @@ import BetaFeedbackWidget from "@/components/beta/BetaFeedbackWidget";
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/find-leads-unified", label: "Find Leads", icon: Search },
+  { to: "/bankruptcy", label: "Bankruptcy Prospects", icon: Gavel },
   { to: "/find-leads", label: "Find Leads (Legacy)", icon: Search },
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/enrich", label: "Enrich", icon: Sparkles },

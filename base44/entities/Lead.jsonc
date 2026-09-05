@@ -148,6 +148,32 @@
     "original_public_fields": {
       "type": "object",
       "description": "Original public-record fields, preserved verbatim. Enrichment never overwrites these."
+    },
+    "lead_type": {
+      "type": "string",
+      "enum": [
+        "person",
+        "business"
+      ],
+      "default": "business",
+      "description": "Whether this prospect is an individual person or a business entity."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "new_business_filing",
+        "bankruptcy_filing",
+        "court_party",
+        "committee_filing",
+        "other"
+      ],
+      "default": "new_business_filing",
+      "description": "The public-record event that identified this prospect."
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of the prospecting event (filing date, bankruptcy date, etc.)."
     }
   },
   "required": [
