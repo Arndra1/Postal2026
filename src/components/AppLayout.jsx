@@ -13,7 +13,8 @@ import BetaFeedbackWidget from "@/components/beta/BetaFeedbackWidget";
 
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/find-leads", label: "Find Leads", icon: Search },
+  { to: "/find-leads-unified", label: "Find Leads", icon: Search },
+  { to: "/find-leads", label: "Find Leads (Legacy)", icon: Search },
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },

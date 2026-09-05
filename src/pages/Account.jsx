@@ -6,19 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Building2, Mail, Lock, Check, Loader2 } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
+import { CUSTOMER_TYPES } from "@/components/search/CustomerTypePrompt";
 
 export default function Account() {
   const [user, setUser] = useState(null);
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
+  const [customerType, setCustomerType] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    base44.functions.invoke("userStats", {}).then((res) => {
-      setUser(res.data.user);
-      setFullName(res.data.user.full_name || "");
-      setCompany(res.data.user.company_name || "");
+    base44.auth.me().then((u) => {
+      setUser(u);
+      setFullName(u.full_name || "");
+      setCompany(u.company_name || "");
+      setCustomerType(u.customer_type || "");
     });
   }, []);
 
@@ -26,7 +29,7 @@ export default function Account() {
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.auth.updateMe({ full_name: fullName, company_name: company });
+      await base44.auth.updateMe({ full_name: fullName, company_name: company, customer_type: customerType });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (_e) {} finally { setSaving(false); }
@@ -49,6 +52,14 @@ export default function Account() {
             <div className="space-y-1.5">
               <Label>Company Name</Label>
               <div className="relative"><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={company} onChange={(e) => setCompany(e.target.value)} className="pl-10 h-10" /></div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Business Type</Label>
+              <select value={customerType} onChange={(e) => setCustomerType(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                <option value="">Select your business type</option>
+                {CUSTOMER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+              <p className="text-xs text-muted-foreground">Personalizes suggested searches. Does not affect pricing or data access.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Email</Label>

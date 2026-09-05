@@ -19,6 +19,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import FindLeads from '@/pages/FindLeads';
+import FindLeadsUnified from '@/pages/FindLeadsUnified';
 import Enrich from '@/pages/Enrich';
 import SavedLeads from '@/pages/SavedLeads';
 import Pipeline from '@/pages/Pipeline';
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/find-leads" element={<FindLeads />} />
+          <Route path="/find-leads-unified" element={<FindLeadsUnified />} />
           <Route path="/new-businesses" element={<NewBusinessFinder />} />
           <Route path="/enrich" element={<Enrich />} />
           <Route path="/saved-leads" element={<SavedLeads />} />
