@@ -7,7 +7,7 @@
     },
     "plan": {
       "type": "string",
-      "default": "leadpulse_pro"
+      "default": "ringbellz_pro"
     },
     "status": {
       "type": "string",

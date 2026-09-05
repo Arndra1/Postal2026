@@ -1,4 +1,4 @@
-// Leadora email configuration — single source of truth.
+// RingBellz email configuration — single source of truth.
 //
 // IMPORTANT: OWNER_EMAIL is the PRIVATE owner/admin account address.
 // It must NEVER be displayed publicly or shown to customers — the owner

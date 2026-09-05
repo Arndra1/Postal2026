@@ -4,7 +4,7 @@
 // which is resolved server-side. Shared between functions so pricing and fulfillment
 // can never drift apart.
 
-export const MEMBERSHIP_PRODUCT_ID = "leadora_membership";
+export const MEMBERSHIP_PRODUCT_ID = "ringbellz_membership";
 
 // kind: "membership" (monthly, auto-renewing) | "credit_pack" (one-time)
 export const PRODUCTS: Record<string, any> = {

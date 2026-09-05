@@ -37,13 +37,13 @@ export default function Billing() {
       // recurring checkout without it.
       await base44.entities.SubscriptionConsent.create({
         user_id: data.user.id,
-        product_id: "leadora_membership",
+        product_id: "ringbellz_membership",
         price: "59.00",
         currency: "USD",
         billing_frequency: "monthly",
         consent_at: new Date().toISOString()
       });
-      const res = await base44.functions.invoke("create-checkout", { productId: "leadora_membership" });
+      const res = await base44.functions.invoke("create-checkout", { productId: "ringbellz_membership" });
       if (res.data?.redirectUrl) {
         window.location.href = res.data.redirectUrl;
       } else {

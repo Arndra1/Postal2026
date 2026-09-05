@@ -17,7 +17,7 @@ function manageLink() {
 
 function manageText() {
   const link = manageLink();
-  return link ? `Manage your subscription: ${link}` : "Manage your subscription: Account → Billing → Manage Subscription in the Leadora app.";
+  return link ? `Manage your subscription: ${link}` : "Manage your subscription: Account → Billing → Manage Subscription in the RingBellz app.";
 }
 
 function fmtDate(iso) {
@@ -28,7 +28,7 @@ function fmtDate(iso) {
   }
 }
 
-const CANCEL_TEXT = "How to cancel: In the Leadora app, go to Account → Billing → Manage Subscription and click \"Cancel Subscription\". Cancellation is online and immediate — no phone call, agent, or meeting required, and no unnecessary information is needed. Cancellation stops all future charges; you keep access and your remaining credits through the end of your paid billing period.";
+const CANCEL_TEXT = "How to cancel: In the RingBellz app, go to Account → Billing → Manage Subscription and click \"Cancel Subscription\". Cancellation is online and immediate — no phone call, agent, or meeting required, and no unnecessary information is needed. Cancellation stops all future charges; you keep access and your remaining credits through the end of your paid billing period.";
 
 async function mail(base44, to, subject, body) {
   await svc(base44).integrations.Core.SendEmail({ to, subject, body });
@@ -48,13 +48,13 @@ export async function recordNotice(base44, userId, noticeType, email, reference,
 // Sent immediately after successful enrollment (payments-webhook).
 export async function sendEnrollmentConfirmation(base44, userId, email, startDate, nextBillingDate) {
   const body = [
-    "Thank you — your Leadora Membership is active.",
+    "Thank you — your RingBellz Membership is active.",
     "",
-    "Leadora Membership",
+    "RingBellz Membership",
     "Price: $59/month",
     "Billing frequency: monthly",
-    "Automatic renewal: Your Leadora membership automatically renews every month at $59 until canceled.",
-    "Included: 100 Leadora credits each successful monthly billing cycle.",
+    "Automatic renewal: Your RingBellz membership automatically renews every month at $59 until canceled.",
+    "Included: 100 RingBellz credits each successful monthly billing cycle.",
     `Subscription start date: ${fmtDate(startDate)}`,
     `Next billing date: ${fmtDate(nextBillingDate)}`,
     "",
@@ -62,24 +62,24 @@ export async function sendEnrollmentConfirmation(base44, userId, email, startDat
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Your Leadora Membership is active", body);
+  await mail(base44, email, "Your RingBellz Membership is active", body);
   await recordNotice(base44, userId, "enrollment_confirmation", email, nextBillingDate, { start_date: startDate, next_billing_date: nextBillingDate });
 }
 
 // Sent immediately after a confirmed cancellation (billingManage).
 export async function sendCancellationConfirmation(base44, userId, email, periodEnd) {
   const body = [
-    "Your Leadora Membership cancellation is confirmed.",
+    "Your RingBellz Membership cancellation is confirmed.",
     "",
     `Cancellation date/time: ${new Date().toISOString()}`,
     periodEnd ? `You keep full access and your remaining credits through ${fmtDate(periodEnd)} (the end of your paid billing period).` : "Your paid billing period has ended.",
     "Automatic renewal is now OFF — no further recurring charges will be issued.",
     "",
-    "You can restart your membership anytime at Account → Billing in the Leadora app.",
+    "You can restart your membership anytime at Account → Billing in the RingBellz app.",
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Your Leadora Membership cancellation is confirmed", body);
+  await mail(base44, email, "Your RingBellz Membership cancellation is confirmed", body);
   await recordNotice(base44, userId, "cancellation_confirmation", email, periodEnd || "", {});
 }
 
@@ -88,7 +88,7 @@ export async function sendCancellationConfirmation(base44, userId, email, period
 export async function sendPaymentFailedNotice(base44, userId, email, periodEnd) {
   const graceEnd = new Date(new Date(periodEnd).getTime() + 3 * 86400000);
   const body = [
-    "Your Leadora Membership renewal payment didn't go through.",
+    "Your RingBellz Membership renewal payment didn't go through.",
     "",
     "We were unable to process your monthly renewal payment. Please update your payment method to avoid losing access.",
     "",
@@ -98,52 +98,52 @@ export async function sendPaymentFailedNotice(base44, userId, email, periodEnd) 
     "Update your payment method to keep your membership active:",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Action needed: your Leadora membership payment failed", body);
+  await mail(base44, email, "Action needed: your RingBellz membership payment failed", body);
   await recordNotice(base44, userId, "renewal_reminder", email, periodEnd, { type: "payment_failed", grace_end: graceEnd.toISOString() });
 }
 
 // Renewal reminder — sent N days before each billing date (sendSubscriptionReminders).
 export async function sendRenewalReminder(base44, userId, email, billingDate) {
   const body = [
-    "Your Leadora Membership renews soon.",
+    "Your RingBellz Membership renews soon.",
     "",
-    "Leadora Membership — $59/month",
+    "RingBellz Membership — $59/month",
     `Next billing date: ${fmtDate(billingDate)}`,
     "Billing frequency: monthly. Your membership automatically renews every month at $59 until canceled.",
     "Automatic renewal status: ON.",
-    "Included: 100 Leadora credits each successful monthly billing cycle.",
+    "Included: 100 RingBellz credits each successful monthly billing cycle.",
     "",
     CANCEL_TEXT,
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Your Leadora Membership renews soon", body);
+  await mail(base44, email, "Your RingBellz Membership renews soon", body);
   await recordNotice(base44, userId, "renewal_reminder", email, billingDate, {});
 }
 
 // Annual automatic-renewal reminder (sendSubscriptionReminders).
 export async function sendAnnualReminder(base44, userId, email) {
   const body = [
-    "Annual reminder about your Leadora Membership subscription.",
+    "Annual reminder about your RingBellz Membership subscription.",
     "",
-    "Leadora Membership — $59/month, billed monthly.",
+    "RingBellz Membership — $59/month, billed monthly.",
     "Automatic renewal status: ON — your membership automatically renews every month at $59 until canceled.",
-    "Included: 100 Leadora credits each successful monthly billing cycle.",
+    "Included: 100 RingBellz credits each successful monthly billing cycle.",
     "",
     CANCEL_TEXT,
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Annual reminder: your Leadora Membership auto-renewal", body);
+  await mail(base44, email, "Annual reminder: your RingBellz Membership auto-renewal", body);
   await recordNotice(base44, userId, "annual_reminder", email, "", {});
 }
 
-// Price-change notice. Leadora keeps the existing $59 price until an authorized change
+// Price-change notice. RingBellz keeps the existing $59 price until an authorized change
 // is properly implemented: advance notice + fresh affirmative consent are required
 // before any new amount is charged.
 export async function sendPriceChangeNotice(base44, userId, email, oldPrice, newPrice, effectiveDate) {
   const body = [
-    "Important: the price of your Leadora Membership is changing.",
+    "Important: the price of your RingBellz Membership is changing.",
     "",
     `Current price: $${oldPrice}/month`,
     `New price: $${newPrice}/month`,
@@ -155,22 +155,22 @@ export async function sendPriceChangeNotice(base44, userId, email, oldPrice, new
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, `Leadora Membership price change — effective ${fmtDate(effectiveDate)}`, body);
+  await mail(base44, email, `RingBellz Membership price change — effective ${fmtDate(effectiveDate)}`, body);
   await recordNotice(base44, userId, "price_change_notice", email, effectiveDate, { old_price: oldPrice, new_price: newPrice });
 }
 
 // Trial-expiration notice — ready if a free trial is ever introduced (currently unused).
 export async function sendTrialExpirationNotice(base44, userId, email, trialEndDate) {
   const body = [
-    "Your Leadora Membership free trial is ending soon.",
+    "Your RingBellz Membership free trial is ending soon.",
     "",
     `Trial end date: ${fmtDate(trialEndDate)}`,
-    "When the trial ends, your membership automatically renews every month at $59 until canceled, and includes 100 Leadora credits each successful monthly billing cycle.",
+    "When the trial ends, your membership automatically renews every month at $59 until canceled, and includes 100 RingBellz credits each successful monthly billing cycle.",
     "",
     CANCEL_TEXT,
     "",
     manageText()
   ].join("\n");
-  await mail(base44, email, "Your Leadora free trial is ending soon", body);
+  await mail(base44, email, "Your RingBellz free trial is ending soon", body);
   await recordNotice(base44, userId, "trial_expiration_notice", email, trialEndDate, {});
 }

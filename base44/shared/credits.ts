@@ -15,7 +15,7 @@ export const ENRICHMENT_COST = 5;
 export const MONTHLY_CREDITS = 100;
 export const PLAN_PRICE = 59;
 export const PLAN_CURRENCY = "USD";
-export const PLAN_ID = "leadpulse_pro";
+export const PLAN_ID = "ringbellz_pro";
 
 export function isExempt(role) {
   return EXEMPT_ROLES.includes(role);

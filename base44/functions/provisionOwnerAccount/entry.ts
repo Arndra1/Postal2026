@@ -39,7 +39,7 @@ export default async function(req) {
     if (sub.status !== "active") {
       await base44.asServiceRole.entities.Subscription.update(sub.id, {
         status: "active",
-        plan: "leadpulse_pro",
+        plan: "ringbellz_pro",
         billing_provider: "owner",
         period_start: sub.period_start || new Date().toISOString(),
         period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()

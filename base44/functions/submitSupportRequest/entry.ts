@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
 
-// Leadora support: email-based customer support only — no phone support.
+// RingBellz support: email-based customer support only — no phone support.
 // Stores the request, notifies the customer-service inboxes, and sends the
 // owner a private copy of every customer-service communication. The owner's
 // address is internal only — customers only ever see the customer-service
@@ -50,7 +50,7 @@ export default async function(req) {
     // failure never fails the request itself.
     const submittedAt = new Date().toISOString();
     const internalBody =
-      "New Leadora support request\n\n" +
+      "New RingBellz support request\n\n" +
       "Category: " + category + "\n" +
       "Subject: " + subject + "\n\n" +
       "From: " + name + " <" + accountEmail + ">\n" +
@@ -61,7 +61,7 @@ export default async function(req) {
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: to,
-          subject: "[Leadora Support] " + category + ": " + subject,
+          subject: "[RingBellz Support] " + category + ": " + subject,
           body: internalBody
         });
       } catch (_e) { /* email delivery is best-effort; the request is stored */ }
@@ -71,22 +71,22 @@ export default async function(req) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: accountEmail,
-        from_name: "Leadora Customer Service",
-        subject: "We received your Leadora support request",
+        from_name: "RingBellz Customer Service",
+        subject: "We received your RingBellz support request",
         body:
           "Hi " + name + ",\n\n" +
-          "Your Leadora support request has been received.\n\n" +
+          "Your RingBellz support request has been received.\n\n" +
           "Category: " + category + "\n" +
           "Subject: " + subject + "\n\n" +
-          "The Leadora Support Team will respond by email. Please do not submit duplicate requests for the same issue.\n\n" +
-          "— Leadora Support"
+          "The RingBellz Support Team will respond by email. Please do not submit duplicate requests for the same issue.\n\n" +
+          "— RingBellz Support"
       });
     } catch (_e) { /* best-effort */ }
 
     return Response.json({
       ok: true,
       request_id: record.id,
-      message: "Your request has been received. The Leadora Support Team will respond by email."
+      message: "Your request has been received. The RingBellz Support Team will respond by email."
     });
   } catch (error) {
     return Response.json({ error: "Could not submit your request. Please try again." }, { status: 500 });
