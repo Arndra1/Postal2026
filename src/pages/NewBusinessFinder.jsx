@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, ExternalLink, Search, Building2 } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
+import { useToast } from "@/components/ui/use-toast";
 import StateFilingRow from "@/components/leads/StateFilingRow";
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
@@ -26,6 +27,7 @@ export default function NewBusinessFinder() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState({});
   const [savedLeads, setSavedLeads] = useState({});
+  const { toast } = useToast();
 
   const loadAll = async () => {
     setLoading(true); setError(""); setView("registry");
@@ -97,6 +99,9 @@ export default function NewBusinessFinder() {
       }
       const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs: { business_name: r.business_name, state: r.state, city: r.city } });
       setBusy((b) => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
+      if (res.data.status === "provider_error") {
+        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
+      }
     } catch (_e) { setBusy((b) => ({ ...b, [ke]: "failed" })); }
   };
 

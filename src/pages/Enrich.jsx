@@ -89,8 +89,10 @@ export default function Enrich() {
           {loading && <div className="flex flex-col items-center justify-center py-16"><Loader2 className="w-8 h-8 text-primary animate-spin mb-3" /><p className="text-sm text-muted-foreground">Contacting provider...</p></div>}
           {result && !success && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-3"><AlertCircle className="w-6 h-6 text-destructive" /></div>
-              <p className="font-medium">No verified data found</p>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${result.status === "provider_error" ? "bg-amber-100" : "bg-destructive/10"}`}>
+                <AlertCircle className={`w-6 h-6 ${result.status === "provider_error" ? "text-amber-600" : "text-destructive"}`} />
+              </div>
+              <p className="font-medium">{result.status === "provider_error" ? "Provider temporarily unavailable" : "No verified data found"}</p>
               <p className="text-sm text-muted-foreground mt-1">{result.error || "The provider returned no verified contact information."}</p>
               <p className="text-xs text-accent mt-3 font-medium">0 credits charged</p>
             </div>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Search, Loader2, AlertCircle, Scale, Info } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
+import { useToast } from "@/components/ui/use-toast";
 import BankruptcyLeadCard from "@/components/search/BankruptcyLeadCard";
 
 const ALL_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
@@ -31,6 +32,7 @@ export default function BankruptcyFinder() {
   const [enrichmentData, setEnrichmentData] = useState({});
   const [lists, setLists] = useState([]);
   const [customerType, setCustomerType] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -127,6 +129,8 @@ export default function BankruptcyFinder() {
       setBusy(b => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
       if (res.data.status === "success" && res.data.results) {
         setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
+      } else if (res.data.status === "provider_error") {
+        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
       }
     } catch (_e) { setBusy(b => ({ ...b, [ke]: "failed" })); }
   };

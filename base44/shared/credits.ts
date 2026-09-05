@@ -197,6 +197,8 @@ export function hasEnoughCredits(wallet, amount) {
 
 export function hasActiveMembership(subscription) {
   if (!subscription) return false;
+  // Comped memberships (admin-granted) have full access with no billing cycle.
+  if (subscription.status === "comped") return true;
   // Access only counts while the paid period is current.
   // (Owner/admin accounts are exempt regardless — see isExempt.)
   const paidThrough = !subscription.period_end || new Date(subscription.period_end) > new Date();

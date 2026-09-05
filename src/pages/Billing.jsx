@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Check, Crown, CreditCard, Loader2, XCircle } from "lucide-react";
+import { Check, Crown, CreditCard, Loader2, XCircle, Gift } from "lucide-react";
 import CreditPackGrid from "@/components/billing/CreditPackGrid";
 import RenewalDisclosures from "@/components/billing/RenewalDisclosures";
 import MembershipStatusCard from "@/components/billing/MembershipStatusCard";
@@ -72,8 +72,9 @@ export default function Billing() {
   const status = data.subscription.status;
   const sub = data.subscription;
   const paidThrough = !sub.period_end || new Date(sub.period_end) > new Date();
-  const memberLike = ["active", "trialing", "cancelled"].includes(status) && paidThrough;
-  const isSubscribed = ["active", "trialing"].includes(status);
+  const isComp = status === "comped";
+  const memberLike = isComp || (["active", "trialing", "cancelled"].includes(status) && paidThrough);
+  const isSubscribed = isComp || ["active", "trialing"].includes(status);
   const periodEndText = sub.period_end ? new Date(sub.period_end).toLocaleDateString() : "";
 
   return (
@@ -84,6 +85,13 @@ export default function Billing() {
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">
           <Crown className="w-5 h-5 text-accent" />
           <p className="text-sm">You have permanent owner/admin access — no subscription required. This account is not part of the recurring-billing flow.</p>
+        </div>
+      )}
+
+      {isComp && !exempt && (
+        <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">
+          <Gift className="w-5 h-5 text-accent" />
+          <p className="text-sm">Your account has a comped membership — full access with 100 monthly credits, no billing required.</p>
         </div>
       )}
 
@@ -107,7 +115,9 @@ export default function Billing() {
               <h3 className="font-heading text-lg font-semibold mb-4">Manage Subscription</h3>
               <RenewalDisclosures consent={consent} onConsentChange={setConsent} showCheckbox={!isSubscribed} />
 
-              {confirmingCancel ? (
+              {isComp ? (
+                <p className="text-sm text-muted-foreground">Your comped membership is active — 100 monthly credits included, no billing required.</p>
+              ) : confirmingCancel ? (
                 <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3">
                   <p className="font-medium text-sm">Cancel your membership?</p>
                   <ul className="text-sm text-muted-foreground space-y-1">

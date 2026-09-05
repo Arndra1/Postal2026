@@ -1,52 +1,38 @@
 {
-  "name": "Subscription",
+  "name": "BetaFeedback",
   "type": "object",
   "properties": {
     "user_id": {
       "type": "string"
     },
-    "plan": {
-      "type": "string",
-      "default": "leadpulse_pro"
-    },
-    "status": {
+    "feedback_type": {
       "type": "string",
       "enum": [
-        "active",
-        "cancelled",
-        "expired",
-        "past_due",
-        "trialing",
-        "comped",
-        "none"
-      ],
-      "default": "none"
+        "useful_result",
+        "poor_result",
+        "missing_information",
+        "enrichment_issue",
+        "confusing_page",
+        "bug",
+        "other"
+      ]
     },
-    "billing_provider": {
+    "message": {
       "type": "string",
       "default": ""
     },
-    "provider_subscription_id": {
+    "lead_id": {
       "type": "string",
       "default": ""
     },
-    "period_start": {
+    "enrichment_id": {
       "type": "string",
-      "format": "date-time"
-    },
-    "period_end": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "cancelled_at": {
-      "type": "string",
-      "format": "date-time"
+      "default": ""
     }
   },
   "required": [
     "user_id",
-    "plan",
-    "status"
+    "feedback_type"
   ],
   "rls": {
     "read": {
@@ -72,21 +58,7 @@
       ]
     },
     "create": {
-      "$or": [
-        {
-          "data.user_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "owner"
-          }
-        }
-      ]
+      "data.user_id": "{{user.id}}"
     },
     "update": {
       "$or": [
@@ -104,6 +76,9 @@
     },
     "delete": {
       "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
         {
           "user_condition": {
             "role": "admin"

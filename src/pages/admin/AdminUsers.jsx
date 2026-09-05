@@ -6,7 +6,7 @@ import AdminTable from "@/components/AdminTable";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, Ban, CheckCircle2 } from "lucide-react";
+import { Search, Loader2, Ban, CheckCircle2, Gift } from "lucide-react";
 
 const roles = ["user", "staff", "admin", "owner"];
 
@@ -16,47 +16,31 @@ export default function AdminUsers() {
   const [subs, setSubs] = useState([]);
   const [wallets, setWallets] = useState([]);
   const [leads, setLeads] = useState([]);
-  const [betaUsers, setBetaUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState({});
 
   const load = async () => {
-    const [u, s, w, l, b] = await Promise.all([
+    const [u, s, w, l] = await Promise.all([
       base44.entities.User.list(),
       base44.entities.Subscription.list(),
       base44.entities.CreditWallet.list(),
       base44.entities.Lead.list(),
-      base44.entities.BetaUser.list(),
     ]);
-    setUsers(u); setSubs(s); setWallets(w); setLeads(l); setBetaUsers(b);
+    setUsers(u); setSubs(s); setWallets(w); setLeads(l);
   };
   useEffect(() => { load(); }, []);
 
   const subFor = (uid) => subs.find(s => s.user_id === uid);
   const walletFor = (uid) => wallets.find(w => w.user_id === uid);
   const leadCount = (uid) => leads.filter(l => l.user_id === uid).length;
-  const betaFor = (uid) => betaUsers.find(b => b.user_id === uid);
 
-  const grantBeta = async (u) => {
-    setBusy(b => ({ ...b, [u.id + "beta"]: true }));
+  const toggleComp = async (u) => {
+    const isComp = subFor(u.id)?.status === "comped";
+    setBusy(b => ({ ...b, [u.id + "comp"]: true }));
     try {
-      await base44.functions.invoke("adminBetaGrant", { user_id: u.id, action: "grant", credits: 50 });
+      await base44.functions.invoke("adminUpdateUser", { user_id: u.id, action: isComp ? "revoke_comp" : "grant_comp" });
       await load();
-    } catch (_e) {} finally { setBusy(b => ({ ...b, [u.id + "beta"]: undefined })); }
-  };
-  const revokeBeta = async (u) => {
-    setBusy(b => ({ ...b, [u.id + "beta"]: true }));
-    try {
-      await base44.functions.invoke("adminBetaGrant", { user_id: u.id, action: "revoke" });
-      await load();
-    } catch (_e) {} finally { setBusy(b => ({ ...b, [u.id + "beta"]: undefined })); }
-  };
-  const addBetaCredits = async (u) => {
-    setBusy(b => ({ ...b, [u.id + "cred"]: true }));
-    try {
-      await base44.functions.invoke("adminBetaGrant", { user_id: u.id, action: "grant_credits", credits: 50 });
-      await load();
-    } catch (_e) {} finally { setBusy(b => ({ ...b, [u.id + "cred"]: undefined })); }
+    } catch (_e) {} finally { setBusy(b => ({ ...b, [u.id + "comp"]: undefined })); }
   };
 
   const filtered = users.filter(u => {
@@ -86,26 +70,13 @@ export default function AdminUsers() {
     { key: "status", label: "Subscription", hidden: "hidden lg:table-cell", render: (u) => <StatusBadge status={subFor(u.id)?.status || "none"} /> },
     { key: "balance", label: "Credits", align: "right", render: (u) => walletFor(u.id)?.balance ?? 0 },
     { key: "leads", label: "Leads", align: "right", hidden: "hidden xl:table-cell", render: (u) => leadCount(u.id) },
-    { key: "beta", label: "Beta", hidden: "hidden lg:table-cell", render: (u) => {
-      const b = betaFor(u.id);
-      if (!b) return <span className="text-muted-foreground text-xs">—</span>;
-      return b.status === "active"
-        ? <span className="text-accent text-xs font-medium">Active</span>
-        : <span className="text-destructive text-xs font-medium">Revoked</span>;
-    }},
     { key: "disabled", label: "Status", render: (u) => u.disabled ? <span className="text-destructive text-xs font-medium">Disabled</span> : <span className="text-accent text-xs font-medium">Active</span> },
     { key: "act", label: "", align: "right", render: (u) => {
-      const beta = betaFor(u.id);
-      const isActive = beta?.status === "active";
+      const isComp = subFor(u.id)?.status === "comped";
       return (
         <div className="flex items-center justify-end gap-1">
-          {isActive && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addBetaCredits(u)} disabled={busy[u.id + "cred"]} title="Grant 50 beta credits">
-              {busy[u.id + "cred"] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Coins className="w-4 h-4 text-primary" />}
-            </Button>
-          )}
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => isActive ? revokeBeta(u) : grantBeta(u)} disabled={busy[u.id + "beta"]} title={isActive ? "Revoke beta access" : "Grant beta access + 50 credits"}>
-            {busy[u.id + "beta"] ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlaskConical className={`w-4 h-4 ${isActive ? "text-accent" : "text-muted-foreground"}`} />}
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleComp(u)} disabled={busy[u.id + "comp"]} title={isComp ? "Revoke comped membership" : "Grant comped membership + 100 credits"}>
+            {busy[u.id + "comp"] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className={`w-4 h-4 ${isComp ? "text-accent" : "text-muted-foreground"}`} />}
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleDisable(u)} disabled={u.id === me.id || busy[u.id + "d"]} title={u.disabled ? "Enable account" : "Disable account"}>
             {busy[u.id + "d"] ? <Loader2 className="w-4 h-4 animate-spin" /> : u.disabled ? <CheckCircle2 className="w-4 h-4 text-accent" /> : <Ban className="w-4 h-4 text-destructive" />}

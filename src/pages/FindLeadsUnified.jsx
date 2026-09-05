@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Search, Loader2, AlertCircle, Sparkles, MapPin, Building2, Scale, Heart } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
+import { useToast } from "@/components/ui/use-toast";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
 import NonprofitLeadCard from "@/components/search/NonprofitLeadCard";
 import CustomerTypePrompt, { SUGGESTED_SEARCHES } from "@/components/search/CustomerTypePrompt";
@@ -73,6 +74,7 @@ export default function FindLeadsUnified() {
   const [savedLeads, setSavedLeads] = useState({});
   const [enrichmentData, setEnrichmentData] = useState({});
   const [lists, setLists] = useState([]);
+  const { toast } = useToast();
 
   // Allow deep-linking to a specific tab (e.g. from Need-Oriented Search).
   useEffect(() => {
@@ -253,6 +255,8 @@ export default function FindLeadsUnified() {
       setBusy(b => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
       if (res.data.status === "success" && res.data.results) {
         setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
+      } else if (res.data.status === "provider_error") {
+        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
       }
     } catch (_e) { setBusy(b => ({ ...b, [ke]: "failed" })); }
   };

@@ -20,6 +20,7 @@
         "failed",
         "timeout",
         "empty",
+        "provider_error",
         "validation_error"
       ],
       "default": "failed"

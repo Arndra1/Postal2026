@@ -1,12 +1,11 @@
 // Enrichment orchestrator — server-side waterfall over configured providers.
 //
 // Waterfall:
-//   1. Check the lead's existing data (inputs) — if already verified, skip paid calls.
-//   2. People Data Labs (person/company).
-//   3. Enrich.so (person/company) — only if important fields are still missing.
-//   4. Tracerfy (address-based property owner) — only if contact data is still
-//      missing AND an address is available.
-//   5. NumVerify — validates any candidate phone before it counts as verified.
+//   1. Geoapify  — normalize/clean the address first (before Tracerfy).
+//   2. Tracerfy  — cheapest contact provider; runs first when an address is
+//                  available. Returns owner phone/email.
+//   3. PDL       — called only if Tracerfy didn't fill both email AND phone.
+//   4. NumVerify — validates any candidate phone before it counts as verified.
 //
 // Stops calling paid providers as soon as a verified email or candidate phone
 // is obtained. Fail-closed (0 credits) when no provider key is configured or
@@ -263,6 +262,25 @@ export async function runEnrichment(base44, inputs) {
   // fields (linkedin, job_title, etc.) are returned but do not alone
   // trigger a credit charge.
   if (!isVerified(merged)) {
+    // Distinguish a genuine "no match" from a provider error (auth failure,
+    // 401/403, timeout, or other non-200). If ANY provider in the waterfall
+    // errored, surface a provider-error status so the UI can show a distinct
+    // message — the user should NOT see "no results found" when a provider is
+    // actually down or misconfigured. The detailed error (provider name, status
+    // code, auth failure) stays in provider_breakdown for admin/debugging only.
+    const anyProviderError = provider_breakdown.some(
+      (p) => p.status === "failed" || p.status === "timeout" || p.status === "validation_error"
+    );
+    if (anyProviderError) {
+      return {
+        status: "provider_error",
+        results: null,
+        data_sources,
+        provider_breakdown,
+        duration_ms: Date.now() - start,
+        error: "We're having trouble reaching one of our data providers right now. Your credits were not charged. Please try again shortly or contact support if this continues.",
+      };
+    }
     return {
       status: "empty",
       results: null,

@@ -4,6 +4,7 @@ const styles = {
   verified: "bg-accent/15 text-accent",
   enriched: "bg-accent/15 text-accent",
   active: "bg-accent/15 text-accent",
+  comped: "bg-accent/15 text-accent",
   success: "bg-accent/15 text-accent",
   unverified: "bg-secondary/25 text-primary",
   pending: "bg-secondary/25 text-primary",
@@ -17,6 +18,7 @@ const styles = {
   expired: "bg-destructive/10 text-destructive",
   past_due: "bg-destructive/10 text-destructive",
   validation_error: "bg-destructive/10 text-destructive",
+  provider_error: "bg-amber-100 text-amber-800",
   empty: "bg-muted text-muted-foreground",
 };
 

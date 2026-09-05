@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { isAdmin, isOwner, unauthorized, forbidden, badRequest } from "../../shared/roles.ts";
 import { logActivity, logCompliance } from "../../shared/logging.ts";
+import { getOrCreateSubscription, resetMonthlyCreditsOnce, MONTHLY_CREDITS } from "../../shared/credits.ts";
 
 // Admin/owner user management: change role or disable/enable an account.
 // Only owner can grant admin/owner roles. Admins can manage staff/user roles.
@@ -48,6 +49,38 @@ export default async function(req) {
       await logActivity(base44, user, disabled ? "account_disabled" : "account_enabled", disabled ? "Account disabled" : "Account enabled", { target_user_id: targetUserId });
       await logCompliance(base44, disabled ? "account_suspended" : "account_reinstated", targetUserId, user.id, disabled ? "Account suspended by admin" : "Account reinstated by admin", { target_user_id: targetUserId });
       return Response.json({ ok: true, user: updated });
+    }
+
+    // Admin-grant a comped membership: full access + 100 monthly credits,
+    // no billing required. Used to convert former beta users or designate
+    // specific accounts for free access. Admin-only, not self-serve.
+    if (action === "grant_comp") {
+      const sub = await getOrCreateSubscription(base44, targetUserId);
+      await base44.asServiceRole.entities.Subscription.update(sub.id, {
+        status: "comped",
+        billing_provider: "comped",
+        period_start: new Date().toISOString(),
+      });
+      // Grant the standard 100 monthly credits (same reset/no-rollover behavior
+      // as a paid subscriber). Idempotent via a unique reference id.
+      await resetMonthlyCreditsOnce(
+        base44, targetUserId, MONTHLY_CREDITS,
+        "admin_comp", `comp:${targetUserId}:${Date.now()}`,
+        "Admin-granted comped membership — 100 monthly credits"
+      );
+      await logActivity(base44, user, "comp_granted", "Admin granted comped membership + 100 monthly credits", { target_user_id: targetUserId });
+      await logCompliance(base44, "account_reinstated", targetUserId, user.id, "Admin granted comped membership", { target_user_id: targetUserId });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "revoke_comp") {
+      const sub = await getOrCreateSubscription(base44, targetUserId);
+      if (sub.status === "comped") {
+        await base44.asServiceRole.entities.Subscription.update(sub.id, { status: "none" });
+        await logActivity(base44, user, "comp_revoked", "Admin revoked comped membership", { target_user_id: targetUserId });
+        await logCompliance(base44, "account_suspended", targetUserId, user.id, "Admin revoked comped membership", { target_user_id: targetUserId });
+      }
+      return Response.json({ ok: true });
     }
 
     return badRequest("Unknown action.");
