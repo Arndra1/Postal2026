@@ -57,7 +57,13 @@ export async function searchNonprofits(inputs) {
   const params = new URLSearchParams();
   if (inputs.keyword) params.set("q", inputs.keyword);
   if (inputs.state) params.set("state[id]", inputs.state.toUpperCase());
-  if (inputs.ntee) params.set("ntee[id]", String(inputs.ntee));
+  if (inputs.ntee) {
+    const nteeNum = Number(inputs.ntee);
+    if (isNaN(nteeNum) || nteeNum < 1 || nteeNum > 10) {
+      return { status: "failed", error: "Invalid NTEE category. Please select a major group (1-10).", results: [] };
+    }
+    params.set("ntee[id]", String(nteeNum));
+  }
   if (!inputs.keyword && !inputs.state && !inputs.ntee) {
     return { status: "failed", error: "Provide a keyword, state, or category.", results: [] };
   }

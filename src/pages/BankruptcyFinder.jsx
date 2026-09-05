@@ -56,7 +56,10 @@ export default function BankruptcyFinder() {
       const d = res.data;
       if (d.status === "success") setResults(d.results || []);
       else setError(d.error || "No results found.");
-    } catch (_e) { setError("Source temporarily unavailable. CourtListener allows a limited number of searches per minute — please wait a moment and try again."); }
+    } catch (_e) {
+      setError("Source temporarily unavailable. CourtListener allows a limited number of searches per minute — please wait a moment and try again.");
+      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+    }
     finally { setLoading(false); }
   };
 
@@ -130,7 +133,7 @@ export default function BankruptcyFinder() {
       if (res.data.status === "success" && res.data.results) {
         setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
       } else if (res.data.status === "provider_error") {
-        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
       }
     } catch (_e) { setBusy(b => ({ ...b, [ke]: "failed" })); }
   };

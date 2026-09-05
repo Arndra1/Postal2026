@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
+import { useToast } from "@/components/ui/use-toast";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
 
@@ -19,6 +20,7 @@ export default function SavedLeads() {
   const [sort, setSort] = useState("created_date");
   const [busy, setBusy] = useState({});
   const [detail, setDetail] = useState(null);
+  const { toast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -59,17 +61,21 @@ export default function SavedLeads() {
   const enrich = async (l) => {
     setBusy(b => ({ ...b, [l.id]: "loading" }));
     try {
-      await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
-      setBusy(b => ({ ...b, [l.id]: "enriched" }));
-      load();
+      const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
+      if (res.data.status === "provider_error") {
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+      }
+      setBusy(b => ({ ...b, [l.id]: res.data.status === "success" ? "enriched" : "failed" }));
+      if (res.data.status === "success") load();
     } catch (_e) {
+      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
       setBusy(b => ({ ...b, [l.id]: "failed" }));
     }
   };
 
   const exportCsv = () => {
-    const headers = ["Name", "Company", "Email", "Phone", "Website", "City", "State", "Industry", "Date Saved", "Enrichment Status"];
-    const rows = filtered.map(l => [l.person_name, l.business_name, l.email, l.phone, l.website, l.city, l.state, l.industry, l.created_date ? new Date(l.created_date).toISOString() : "", l.enrichment_status]);
+    const headers = ["Name", "Company", "Email", "Phone", "Website", "City", "State", "Industry", "Date Saved", "Enrichment Status", "Record Label"];
+    const rows = filtered.map(l => [l.person_name, l.business_name, l.email, l.phone, l.website, l.city, l.state, l.industry, l.created_date ? new Date(l.created_date).toISOString() : "", l.enrichment_status, l.record_label || "PUBLIC RECORD"]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

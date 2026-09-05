@@ -199,9 +199,18 @@ export function hasActiveMembership(subscription) {
   if (!subscription) return false;
   // Comped memberships (admin-granted) have full access with no billing cycle.
   if (subscription.status === "comped") return true;
+  const now = new Date();
+  const periodEnd = subscription.period_end ? new Date(subscription.period_end) : null;
+  // Failed-payment grace: past_due memberships keep access for 3 days past
+  // period_end, giving the member time to update their payment method.
+  if (subscription.status === "past_due") {
+    if (!periodEnd) return false;
+    const graceEnd = new Date(periodEnd.getTime() + 3 * 86400000);
+    return graceEnd > now;
+  }
   // Access only counts while the paid period is current.
   // (Owner/admin accounts are exempt regardless — see isExempt.)
-  const paidThrough = !subscription.period_end || new Date(subscription.period_end) > new Date();
+  const paidThrough = !periodEnd || periodEnd > now;
   if (["active", "trialing"].includes(subscription.status)) return paidThrough;
   // Cancelled-but-still-paid-through memberships keep access until period end.
   if (subscription.status === "cancelled") return paidThrough;

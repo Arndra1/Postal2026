@@ -83,6 +83,25 @@ export async function sendCancellationConfirmation(base44, userId, email, period
   await recordNotice(base44, userId, "cancellation_confirmation", email, periodEnd || "", {});
 }
 
+// Payment-failed notice — sent when a renewal payment fails and the subscription
+// enters the past_due grace period (sendSubscriptionReminders detects this).
+export async function sendPaymentFailedNotice(base44, userId, email, periodEnd) {
+  const graceEnd = new Date(new Date(periodEnd).getTime() + 3 * 86400000);
+  const body = [
+    "Your Leadora Membership renewal payment didn't go through.",
+    "",
+    "We were unable to process your monthly renewal payment. Please update your payment method to avoid losing access.",
+    "",
+    `Your billing period ended: ${fmtDate(periodEnd)}`,
+    `Grace period ends: ${fmtDate(graceEnd.toISOString())}`,
+    "",
+    "Update your payment method to keep your membership active:",
+    manageText()
+  ].join("\n");
+  await mail(base44, email, "Action needed: your Leadora membership payment failed", body);
+  await recordNotice(base44, userId, "renewal_reminder", email, periodEnd, { type: "payment_failed", grace_end: graceEnd.toISOString() });
+}
+
 // Renewal reminder — sent N days before each billing date (sendSubscriptionReminders).
 export async function sendRenewalReminder(base44, userId, email, billingDate) {
   const body = [

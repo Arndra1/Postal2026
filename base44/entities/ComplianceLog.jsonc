@@ -25,7 +25,8 @@
         "provider_enabled",
         "provider_disabled",
         "credit_pack_purchased",
-        "credit_deducted"
+        "credit_deducted",
+        "payment_failed"
       ]
     },
     "description": {

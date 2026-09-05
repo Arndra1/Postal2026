@@ -6,6 +6,7 @@ import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown, Zap } from "lucide-react";
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
+import PastDueBanner from "@/components/PastDueBanner";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -30,6 +31,8 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Your lead intelligence at a glance." />
+
+      {data.subscription?.status === "past_due" && !data.exempt && <PastDueBanner />}
 
       {data.exempt && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">

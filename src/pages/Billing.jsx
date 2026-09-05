@@ -7,6 +7,7 @@ import { Check, Crown, CreditCard, Loader2, XCircle, Gift } from "lucide-react";
 import CreditPackGrid from "@/components/billing/CreditPackGrid";
 import RenewalDisclosures from "@/components/billing/RenewalDisclosures";
 import MembershipStatusCard from "@/components/billing/MembershipStatusCard";
+import PastDueBanner from "@/components/PastDueBanner";
 
 const includes = ["100 credits every month", "Lead search", "Lead enrichment", "Saved leads", "CSV export", "Dashboard analytics", "Lead management", "Account history"];
 
@@ -87,6 +88,8 @@ export default function Billing() {
           <p className="text-sm">You have permanent owner/admin access — no subscription required. This account is not part of the recurring-billing flow.</p>
         </div>
       )}
+
+      {status === "past_due" && !exempt && <PastDueBanner />}
 
       {isComp && !exempt && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">

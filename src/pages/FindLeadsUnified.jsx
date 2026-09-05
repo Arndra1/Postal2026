@@ -127,9 +127,18 @@ export default function FindLeadsUnified() {
       setError("Select a state to search live business records.");
       return;
     }
-    if (tab === "nonprofits" && !filters.state && !filters.ntee && !filters.keyword) {
-      setError("Enter a keyword, select a state, or choose a category to search nonprofits.");
-      return;
+    if (tab === "nonprofits") {
+      if (!filters.state && !filters.ntee && !filters.keyword) {
+        setError("Enter a keyword, select a state, or choose a category to search nonprofits.");
+        return;
+      }
+      if (filters.ntee) {
+        const n = Number(filters.ntee);
+        if (isNaN(n) || n < 1 || n > 10) {
+          setError("Please select a valid NTEE category (1-10).");
+          return;
+        }
+      }
     }
     setLoading(true); setError(""); setResults([]); setSearched(true);
     try {
@@ -137,8 +146,14 @@ export default function FindLeadsUnified() {
       const res = await base44.functions.invoke(fnName, buildSearchPayload());
       const d = res.data;
       if (d.status === "success") setResults(d.results || []);
-      else setError(d.error || "No results found.");
-    } catch (_e) { setError("Source temporarily unavailable."); }
+      else {
+        setError("No results found.");
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+      }
+    } catch (_e) {
+      setError("Source temporarily unavailable.");
+      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+    }
     finally { setLoading(false); }
   };
 
@@ -256,7 +271,7 @@ export default function FindLeadsUnified() {
       if (res.data.status === "success" && res.data.results) {
         setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
       } else if (res.data.status === "provider_error") {
-        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
       }
     } catch (_e) { setBusy(b => ({ ...b, [ke]: "failed" })); }
   };

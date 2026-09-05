@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { hasActiveMembership } from "../../shared/credits.ts";
-import { sendRenewalReminder, sendAnnualReminder } from "../../shared/subscriptionEmails.ts";
+import { sendRenewalReminder, sendAnnualReminder, sendPaymentFailedNotice } from "../../shared/subscriptionEmails.ts";
+import { logCompliance } from "../../shared/logging.ts";
 
 // Automatic-renewal compliance reminder job — run daily by the "Subscription Reminders"
 // workflow. Sends the notices required by applicable U.S. state automatic-renewal laws:
@@ -82,7 +83,44 @@ export default async function(req) {
       }
     }
 
-    return Response.json({ ok: true, renewalReminders: renewalSent, annualReminders: annualSent, errors });
+    // 3) Failed-payment detection: active subs whose period_end has passed but no
+    //    renewal ORDER_APPROVED arrived. Transition to past_due (3-day grace before
+    //    expiry) and notify the member to update their payment method.
+    let pastDueDetected = 0;
+    for (const sub of subs) {
+      try {
+        if (!sub.period_end || new Date(sub.period_end) > now) continue;
+        await db.entities.Subscription.update(sub.id, { status: "past_due" });
+        pastDueDetected++;
+        if (sub.user_id) {
+          const users = await db.entities.User.filter({ id: sub.user_id });
+          const email = users?.[0]?.email;
+          if (email) {
+            try { await sendPaymentFailedNotice(db, sub.user_id, email, sub.period_end); } catch (_e) {}
+          }
+          await logCompliance(db, "payment_failed", sub.user_id, "", "Subscription renewal payment failed — entered past_due grace period.", { period_end: sub.period_end });
+        }
+      } catch (e) { errors.push(String(e?.message || e)); }
+    }
+
+    // 4) Expiry: past_due subs whose 3-day grace has ended without a successful
+    //    payment → transition to expired (access revoked).
+    let expiredCount = 0;
+    const pastDueSubs = await db.entities.Subscription.filter({ status: "past_due" });
+    for (const sub of pastDueSubs) {
+      try {
+        if (!sub.period_end) continue;
+        const graceEnd = new Date(new Date(sub.period_end).getTime() + 3 * 86400000);
+        if (graceEnd > now) continue;
+        await db.entities.Subscription.update(sub.id, { status: "expired" });
+        expiredCount++;
+        if (sub.user_id) {
+          await logCompliance(db, "payment_failed", sub.user_id, "", "Subscription expired — grace period ended without successful payment.", { period_end: sub.period_end });
+        }
+      } catch (e) { errors.push(String(e?.message || e)); }
+    }
+
+    return Response.json({ ok: true, renewalReminders: renewalSent, annualReminders: annualSent, pastDueDetected, expiredCount, errors });
   } catch (error) {
     console.error("sendSubscriptionReminders failed", error);
     return Response.json({ error: "Reminder run failed." }, { status: 500 });

@@ -34,7 +34,11 @@ export default function NewBusinessFinder() {
     try {
       const res = await base44.functions.invoke("searchPublicLeads", { category: "new_businesses", state: "" });
       setRows(res.data.results || []);
-    } catch (_e) { setError("Source temporarily unavailable."); setRows([]); }
+    } catch (_e) {
+      setError("Source temporarily unavailable.");
+      setRows([]);
+      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+    }
     finally { setLoading(false); }
   };
 
@@ -60,7 +64,11 @@ export default function NewBusinessFinder() {
         setRows(d.results || []);
         setView(d.results && d.results[0] && d.results[0].record_type === "state_filing" ? "records" : "registry");
       }
-    } catch (_e) { setError("Source temporarily unavailable."); setView("registry"); }
+    } catch (_e) {
+      setError("Source temporarily unavailable.");
+      setView("registry");
+      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+    }
     finally { setLoading(false); }
   };
 
@@ -100,7 +108,7 @@ export default function NewBusinessFinder() {
       const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs: { business_name: r.business_name, state: r.state, city: r.city } });
       setBusy((b) => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
       if (res.data.status === "provider_error") {
-        toast({ title: "Provider temporarily unavailable", description: res.data.error, variant: "destructive" });
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
       }
     } catch (_e) { setBusy((b) => ({ ...b, [ke]: "failed" })); }
   };
