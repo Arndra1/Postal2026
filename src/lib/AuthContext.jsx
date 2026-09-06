@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
-        
+
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
@@ -53,13 +53,14 @@ export const AuthProvider = ({ children }) => {
             });
           } else {
             setAuthError({
-              type: reason,
-              message: appError.message
+              type: 'server_error',
+              message: appError.message || 'Failed to load app'
             });
           }
         } else {
+          // Non-403 errors (503, network, etc.) are server issues, not auth issues
           setAuthError({
-            type: 'unknown',
+            type: 'server_error',
             message: appError.message || 'Failed to load app'
           });
         }
@@ -81,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
+      setAuthError(null);
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
@@ -91,12 +93,20 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
       setAuthChecked(true);
-      
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
+
+      const status = error?.status || error?.response?.status;
+      // 401/403 = token is actually invalid/expired → redirect to login
+      if (status === 401 || status === 403) {
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'
+        });
+      } else {
+        // Any other failure (503, network error, etc.) = server issue, NOT an auth problem
+        // Don't redirect to login — let the user retry instead
+        setAuthError({
+          type: 'server_error',
+          message: error?.message || 'Unable to reach the server. Please try again.'
         });
       }
     }
@@ -120,6 +130,15 @@ export const AuthProvider = ({ children }) => {
     base44.auth.redirectToLogin(window.location.href);
   };
 
+  const retryAuth = () => {
+    setAuthError(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    setAuthChecked(false);
+    setIsLoadingAuth(true);
+    checkAppState();
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -131,6 +150,7 @@ export const AuthProvider = ({ children }) => {
       authChecked,
       logout,
       navigateToLogin,
+      retryAuth,
       checkUserAuth,
       checkAppState
     }}>

@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, RotateCw } from 'lucide-react';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from '@/components/AppLayout';
@@ -48,7 +50,7 @@ import AdminDataSources from '@/pages/admin/AdminDataSources';
 import AdminSupport from '@/pages/admin/AdminSupport';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, retryAuth } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -67,6 +69,23 @@ const AuthenticatedApp = () => {
       // Redirect to login automatically
       navigateToLogin();
       return null;
+    } else if (authError.type === 'server_error') {
+      // Server/network error — show retry screen, don't redirect to login
+      return (
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <div className="max-w-md text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="text-xl font-heading font-semibold">Connection issue</h2>
+            <p className="text-muted-foreground text-sm">{authError.message || "We couldn't reach the server. This is usually temporary."}</p>
+            <Button onClick={retryAuth} className="h-11">
+              <RotateCw className="w-4 h-4 mr-2" />
+              Try again
+            </Button>
+          </div>
+        </div>
+      );
     }
   }
 
