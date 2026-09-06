@@ -97,9 +97,10 @@ export default function FederalGrants() {
 
       // Duplicate detection against saved leads
       const saved = await base44.entities.Lead.filter({ user_id: user.id, saved: true });
-      const savedIds = new Set(saved.map((s) => (s.official_record_id || "").toLowerCase()).filter(Boolean));
-      const results = mapped.map((r) => ({ ...r, possible_duplicate: r.official_record_id && savedIds.has(r.official_record_id.toLowerCase()) }));
-      setResults(results);
+      const savedIdSet = new Set(saved.map((s) => (s.official_record_id || "").toLowerCase()).filter(Boolean));
+      const mappedWithDupes = mapped.map((r) => ({ ...r, possible_duplicate: r.official_record_id && savedIdSet.has(r.official_record_id.toLowerCase()) }));
+      setResults(mappedWithDupes);
+      setSavedIds(savedIdSet);
     } catch (e) {
       if (e.name === "AbortError") setError("Search timed out. Please try a more specific keyword.");
       else setError("Source temporarily unavailable. Please try again.");
@@ -134,7 +135,7 @@ export default function FederalGrants() {
       pipeline_status: "new",
     };
     await base44.entities.Lead.create(lead);
-    setSavedIds((prev) => new Set(prev).add(r.official_record_id));
+    setSavedIds((prev) => new Set(prev).add((r.official_record_id || "").toLowerCase()));
     toast({ title: "Lead saved!", description: r.business_name || "Lead added to your saved leads." });
   };
 
@@ -187,10 +188,15 @@ export default function FederalGrants() {
             {results.map((r, i) => (
               <UnifiedLeadCard
                 key={r.official_record_id || i}
-                lead={r}
-                onSave={() => saveLead(r)}
-                saved={savedIds.has(r.official_record_id)}
-                sourceLabel="USASpending.gov"
+                r={r}
+                k={`fg-${i}`}
+                busy={{}}
+                savedLead={savedIds.has((r.official_record_id || "").toLowerCase()) ? { id: r.official_record_id } : null}
+                onSave={saveLead}
+                onEnrich={() => {}}
+                onStar={() => {}}
+                onPipeline={() => {}}
+                onTagsChange={() => {}}
               />
             ))}
           </div>
