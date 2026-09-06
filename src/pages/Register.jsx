@@ -51,8 +51,12 @@ export default function Register() {
         try {
           await base44.auth.updateMe({ full_name: fullName, company_name: companyName });
         } catch (_e) { /* non-blocking */ }
+        const dest = safeReturnTo();
+        const sep = dest.includes("?") ? "&" : "?";
+        window.location.href = `${dest}${sep}access_token=${encodeURIComponent(result.access_token)}`;
+      } else {
+        setError("Verification succeeded but no access token was returned.");
       }
-      window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {

@@ -23,17 +23,11 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      // The SDK's loginViaEmailPassword does its own hard redirect, reading
-      // ?returnTo= from the URL (falling back to "/"). Put our resolved
-      // destination into the URL so the SDK lands on /dashboard, not "/".
-      const url = new URL(window.location.href);
-      if (!url.searchParams.get("returnTo")) {
-        url.searchParams.set("returnTo", returnTo);
-        window.history.replaceState({}, "", url.toString());
-      }
-      await base44.auth.loginViaEmailPassword(email, password);
-      // Fallback in case the SDK's redirect doesn't fire.
-      window.location.href = returnTo;
+      const result = await base44.auth.loginViaEmailPassword(email, password);
+      // Pass the access_token in the URL so getAccessToken() picks it up on
+      // the next page load (same pattern the SDK uses for OAuth callbacks).
+      const sep = returnTo.includes("?") ? "&" : "?";
+      window.location.href = `${returnTo}${sep}access_token=${encodeURIComponent(result.access_token)}`;
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
