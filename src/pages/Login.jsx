@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,15 @@ import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { checkUserAuth } = useAuth();
+  const navigate = useNavigate();
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
@@ -27,8 +30,11 @@ export default function Login() {
       if (!result?.access_token) {
         throw new Error("Login succeeded but no token was returned.");
       }
-      // SDK already saved token to localStorage via setToken. Redirect now.
-      window.location.href = returnTo;
+      // SDK's setToken already saved the token and updated axios headers.
+      // Refresh the React auth state (me() uses the live SDK headers, not
+      // the stale appParams.token from page-load), then navigate.
+      await checkUserAuth();
+      navigate(returnTo, { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
