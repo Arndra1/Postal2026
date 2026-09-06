@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import FaqList from "@/components/support/FaqList";
 import SupportForm from "@/components/support/SupportForm";
+import SupportThreads from "@/components/support/SupportThreads";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,6 +75,9 @@ export default function Help() {
         <h2 className="font-heading text-lg font-semibold mb-4 flex items-center gap-2"><HelpCircle className="w-5 h-5 text-primary" /> Frequently Asked Questions</h2>
         {visibleFaqs.length > 0 ? <FaqList faqs={visibleFaqs} /> : <p className="text-sm text-muted-foreground">No FAQs matched your search. Try a different term or contact support below.</p>}
       </div>
+
+      {/* User's conversations */}
+      <SupportThreads />
 
       {/* Contact Support */}
       <div className="grid lg:grid-cols-3 gap-6 mb-6">

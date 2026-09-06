@@ -1,0 +1,134 @@
+{
+  "name": "SupportMessage",
+  "type": "object",
+  "properties": {
+    "support_request_id": {
+      "type": "string",
+      "description": "The SupportRequest this message belongs to."
+    },
+    "ticket_user_id": {
+      "type": "string",
+      "description": "The ticket owner's user id, copied from SupportRequest.user_id for RLS scoping."
+    },
+    "author_id": {
+      "type": "string",
+      "description": "User id of the message author."
+    },
+    "author_name": {
+      "type": "string",
+      "default": ""
+    },
+    "author_email": {
+      "type": "string",
+      "default": ""
+    },
+    "sender": {
+      "type": "string",
+      "enum": [
+        "user",
+        "staff"
+      ],
+      "default": "user",
+      "description": "Whether the author is the end user or a customer-service staff member."
+    },
+    "body": {
+      "type": "string"
+    },
+    "read_by_user": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the end user has seen this message."
+    },
+    "read_by_staff": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether staff have seen this message."
+    }
+  },
+  "required": [
+    "support_request_id",
+    "ticket_user_id",
+    "author_id",
+    "sender",
+    "body"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.ticket_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.ticket_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

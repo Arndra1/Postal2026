@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
@@ -42,6 +42,7 @@ const adminNav = [
   { to: "/admin/activity", label: "System Activity", icon: ShieldCheck },
   { to: "/admin/compliance", label: "Compliance", icon: Scale },
   { to: "/admin/data-sources", label: "Data Sources", icon: Database },
+  { to: "/admin/support", label: "Support Inbox", icon: Headset },
 ];
 
 export default function AppLayout() {

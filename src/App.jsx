@@ -45,6 +45,7 @@ import AdminActivity from '@/pages/admin/AdminActivity';
 import AdminCompliance from '@/pages/admin/AdminCompliance';
 import NewBusinessFinder from '@/pages/NewBusinessFinder';
 import AdminDataSources from '@/pages/admin/AdminDataSources';
+import AdminSupport from '@/pages/admin/AdminSupport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -110,6 +111,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/activity" element={<AdminGuard><AdminActivity /></AdminGuard>} />
           <Route path="/admin/compliance" element={<AdminGuard><AdminCompliance /></AdminGuard>} />
           <Route path="/admin/data-sources" element={<AdminGuard><AdminDataSources /></AdminGuard>} />
+          <Route path="/admin/support" element={<AdminGuard><AdminSupport /></AdminGuard>} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
