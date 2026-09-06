@@ -53,7 +53,7 @@ export default function OnboardingChecklist({ savedLeads, enrichments }) {
           <div key={i} className={`rounded-xl border p-4 transition ${step.done ? "bg-emerald-50/50 border-emerald-200" : "bg-white/30 border-white/40"}`}>
             <div className="flex items-center justify-between mb-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${step.done ? "bg-emerald-100 text-emerald-600" : "bg-primary/10 text-primary"}`}>
-                {step.done ? <CheckCircle2 className="w-4.5 h-4.5" /> : <step.icon className="w-4.5 h-4.5" />}
+                {step.done ? <CheckCircle2 className="w-4 h-4" /> : <step.icon className="w-4 h-4" />}
               </div>
               {step.done && <span className="text-xs font-medium text-emerald-600">Done</span>}
             </div>

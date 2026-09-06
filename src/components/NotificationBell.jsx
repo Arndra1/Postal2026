@@ -22,7 +22,7 @@ export default function NotificationBell() {
 
   return (
     <Link to="/notifications" className="relative flex items-center justify-center w-9 h-9 rounded-lg hover:bg-secondary/15 transition" title="Notifications">
-      <Bell className="w-4.5 h-4.5 text-muted-foreground" />
+      <Bell className="w-5 h-5 text-muted-foreground" />
       {unread > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
           {unread > 9 ? "9+" : unread}
