@@ -46,17 +46,15 @@ export default function Register() {
     setLoading(true);
     try {
       const result = await base44.auth.verifyOtp({ email, otpCode });
-      if (result?.access_token) {
-        base44.auth.setToken(result.access_token);
-        try {
-          await base44.auth.updateMe({ full_name: fullName, company_name: companyName });
-        } catch (_e) { /* non-blocking */ }
+      if (!result?.access_token) {
+        throw new Error("Verification succeeded but no access token was returned.");
       }
-      // The SDK's verifyOtp may do its own redirect. If not, the Landing page
-      // redirect catches authenticated users and sends them to /dashboard.
-      setTimeout(() => {
-        window.location.href = safeReturnTo();
-      }, 500);
+      base44.auth.setToken(result.access_token);
+      try {
+        await base44.auth.updateMe({ full_name: fullName, company_name: companyName });
+      } catch (_e) { /* non-blocking */ }
+      // Hard redirect immediately so the app re-initializes with the new token.
+      window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || "Invalid verification code");
       setLoading(false);
