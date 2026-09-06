@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
 import KanbanCard from "@/components/pipeline/KanbanCard";
+import MobilePipeline from "@/components/pipeline/MobilePipeline";
 import LeadDetailPanel, { PIPELINE_STAGES } from "@/components/leads/LeadDetailPanel";
 import { Loader2, FolderHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,14 @@ export default function Pipeline() {
     return grouped;
   }, [leads]);
 
+  const onMoveMobile = (lead, stage) => {
+    const current = PIPELINE_STAGES.some((s) => s.key === lead.pipeline_status) ? lead.pipeline_status : "new";
+    if (current === stage) return;
+    const updated = { ...lead, pipeline_status: stage };
+    setLeads((prev) => prev.map((l) => (l.id === lead.id ? updated : l)));
+    base44.entities.Lead.update(lead.id, { pipeline_status: stage }).catch(() => {});
+  };
+
   const onDragEnd = (result) => {
     const { destination, draggableId } = result;
     if (!destination) return;
@@ -73,42 +82,49 @@ export default function Pipeline() {
           <Button asChild><Link to="/find-leads">Find Leads</Link></Button>
         </div>
       ) : (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-4 overflow-x-auto pb-4 min-h-[60vh] items-start">
-            {PIPELINE_STAGES.map((stage) => (
-              <div key={stage.key} className="flex-1 min-w-[250px] max-w-[340px]">
-                <div className="flex items-center gap-2 px-1 mb-2.5">
-                  <span className={"w-2 h-2 rounded-full " + STAGE_DOT[stage.key]} />
-                  <span className="text-sm font-semibold">{stage.label}</span>
-                  <span className="text-xs text-muted-foreground ml-auto">{byStage[stage.key].length}</span>
-                </div>
-                <Droppable droppableId={stage.key}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={"rounded-2xl border p-2.5 min-h-[200px] transition " + (snapshot.isDraggingOver ? "bg-secondary/15 border-primary/40" : "bg-white/20 border-white/30")}
-                    >
-                      {byStage[stage.key].map((l, i) => (
-                        <Draggable key={l.id} draggableId={l.id} index={i}>
-                          {(provided) => (
-                            <div ref={provided.innerRef} {...provided.draggableProps} className="mb-2.5">
-                              <KanbanCard lead={l} dragHandleProps={provided.dragHandleProps} onOpen={() => setDetail(l)} />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                      {byStage[stage.key].length === 0 && !snapshot.isDraggingOver && (
-                        <p className="text-xs text-muted-foreground text-center py-6">Drop leads here</p>
-                      )}
+        <>
+          {/* Mobile: stacked stage view with tap-to-move */}
+          <MobilePipeline byStage={byStage} onMove={onMoveMobile} onOpen={(l) => setDetail(l)} />
+          {/* Desktop: drag-and-drop Kanban */}
+          <div className="hidden lg:block">
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div className="flex gap-4 overflow-x-auto pb-4 min-h-[60vh] items-start">
+                {PIPELINE_STAGES.map((stage) => (
+                  <div key={stage.key} className="flex-1 min-w-[250px] max-w-[340px]">
+                    <div className="flex items-center gap-2 px-1 mb-2.5">
+                      <span className={"w-2 h-2 rounded-full " + STAGE_DOT[stage.key]} />
+                      <span className="text-sm font-semibold">{stage.label}</span>
+                      <span className="text-xs text-muted-foreground ml-auto">{byStage[stage.key].length}</span>
                     </div>
-                  )}
-                </Droppable>
+                    <Droppable droppableId={stage.key}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={"rounded-2xl border p-2.5 min-h-[200px] transition " + (snapshot.isDraggingOver ? "bg-secondary/15 border-primary/40" : "bg-white/20 border-white/30")}
+                        >
+                          {byStage[stage.key].map((l, i) => (
+                            <Draggable key={l.id} draggableId={l.id} index={i}>
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.draggableProps} className="mb-2.5">
+                                  <KanbanCard lead={l} dragHandleProps={provided.dragHandleProps} onOpen={() => setDetail(l)} />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                          {byStage[stage.key].length === 0 && !snapshot.isDraggingOver && (
+                            <p className="text-xs text-muted-foreground text-center py-6">Drop leads here</p>
+                          )}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                ))}
               </div>
-            ))}
+            </DragDropContext>
           </div>
-        </DragDropContext>
+        </>
       )}
 
       {detail && (

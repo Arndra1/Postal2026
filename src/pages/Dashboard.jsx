@@ -10,6 +10,7 @@ import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 import PastDueBanner from "@/components/PastDueBanner";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -40,6 +41,8 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Your lead intelligence at a glance." />
+
+      <OnboardingChecklist savedLeads={data.savedLeads} enrichments={data.successfulEnrichments} />
 
       {data.subscription?.status === "past_due" && !data.exempt && <PastDueBanner />}
 
