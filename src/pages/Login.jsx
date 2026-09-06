@@ -32,10 +32,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.loginViaEmailPassword(email, password);
-      if (!result?.access_token) {
-        throw new Error("Login succeeded but no access token was returned.");
-      }
+      await base44.auth.loginViaEmailPassword(email, password);
       setStatus("Login successful — loading your dashboard...");
       // Hard redirect so the app fully re-initializes with the token.
       window.location.href = returnTo;
