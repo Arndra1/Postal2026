@@ -4,7 +4,7 @@
 // It must NEVER be displayed publicly or shown to customers — the owner
 // receives internal copies of customer-service communications instead.
 // Privileges are enforced by the database "owner" role, never by the email.
-export const OWNER_EMAIL = "support@abundance-consultants.com";
+export const OWNER_EMAIL = "arndra@iwantgoodcredit.solutions";
 
 // Public customer-service addresses (shown to customers).
 export const CUSTOMER_SERVICE_EMAIL = "customerservice@abundance-consultants.com";
