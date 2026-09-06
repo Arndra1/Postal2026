@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
       setAuthChecked(true);
+      return true;
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
@@ -95,8 +96,10 @@ export const AuthProvider = ({ children }) => {
       setAuthChecked(true);
 
       const status = error?.status || error?.response?.status;
-      // 401/403 = token is actually invalid/expired → redirect to login
+      // 401/403 = token is actually invalid/expired → clear the stale token
+      // so the redirect to /login doesn't immediately re-read it and loop.
       if (status === 401 || status === 403) {
+        base44.auth.logout();
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'
@@ -109,6 +112,7 @@ export const AuthProvider = ({ children }) => {
           message: error?.message || 'Unable to reach the server. Please try again.'
         });
       }
+      return false;
     }
   };
 
