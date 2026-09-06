@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
@@ -19,6 +19,7 @@ const userNav = [
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },
+  { to: "/outreach", label: "Outreach Templates", icon: Mail },
   { to: "/pipeline", label: "Pipeline", icon: Columns3 },
   { to: "/credits", label: "Credits", icon: Coins },
   { to: "/billing", label: "Billing", icon: CreditCard },

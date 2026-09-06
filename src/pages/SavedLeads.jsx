@@ -5,7 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star } from "lucide-react";
+import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star, Zap, X } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import FreshnessBadge from "@/components/leads/FreshnessBadge";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,6 +21,8 @@ export default function SavedLeads() {
   const [sort, setSort] = useState("created_date");
   const [busy, setBusy] = useState({});
   const [detail, setDetail] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkProgress, setBulkProgress] = useState(null);
   const { toast } = useToast();
 
   const load = () => {
@@ -57,6 +59,49 @@ export default function SavedLeads() {
   const updateLead = async (id, partial) => {
     setLeads(prev => prev.map(l => (l.id === id ? { ...l, ...partial } : l)));
     await base44.entities.Lead.update(id, partial);
+  };
+
+  const toggleSelect = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map(l => l.id)));
+  };
+
+  const bulkEnrich = async () => {
+    const toEnrich = filtered.filter(l => selected.has(l.id));
+    if (toEnrich.length === 0) return;
+    setBulkProgress({ done: 0, total: toEnrich.length });
+    let successCount = 0;
+    for (let i = 0; i < toEnrich.length; i++) {
+      const l = toEnrich[i];
+      setBusy(b => ({ ...b, [l.id]: "loading" }));
+      try {
+        const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
+        if (res.data.status === "success") {
+          successCount++;
+          setBusy(b => ({ ...b, [l.id]: "enriched" }));
+        } else {
+          setBusy(b => ({ ...b, [l.id]: "failed" }));
+        }
+      } catch (_e) {
+        setBusy(b => ({ ...b, [l.id]: "failed" }));
+      }
+      setBulkProgress({ done: i + 1, total: toEnrich.length });
+    }
+    load();
+    setBulkProgress(null);
+    setSelected(new Set());
+    toast({
+      title: "Bulk enrichment complete",
+      description: `${successCount} of ${toEnrich.length} leads enriched successfully. ${successCount * 5} credits charged.`,
+    });
   };
 
   const enrich = async (l) => {
@@ -121,11 +166,33 @@ export default function SavedLeads() {
         </select>
       </div>
 
+      {selected.size > 0 && (
+        <div className="glass-panel p-3 mb-4 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Zap className="w-4 h-4 text-primary" />
+            {selected.size} lead{selected.size !== 1 ? "s" : ""} selected
+            {bulkProgress && <span className="text-muted-foreground"> · {bulkProgress.done}/{bulkProgress.total} enriching...</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={bulkEnrich} disabled={!!bulkProgress}>
+              {bulkProgress ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1.5" />}
+              {bulkProgress ? "Enriching..." : "Bulk Enrich"}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={!!bulkProgress}>
+              <X className="w-4 h-4 mr-1.5" /> Clear
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="glass-panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-white/30 text-muted-foreground">
               <tr>
+                <th className="px-3 py-3 w-8">
+                  <input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-primary cursor-pointer" />
+                </th>
                 <th className="text-left font-medium px-5 py-3">Name</th>
                 <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Company</th>
                 <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Email</th>
@@ -140,10 +207,11 @@ export default function SavedLeads() {
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
-              {!loading && filtered.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
+              {loading && <tr><td colSpan={12} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan={12} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
               {filtered.map((l) => (
                 <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
+                  <td className="px-3 py-3"><input type="checkbox" checked={selected.has(l.id)} onChange={() => toggleSelect(l.id)} className="w-4 h-4 rounded accent-primary cursor-pointer" /></td>
                   <td className="px-5 py-3 font-medium">{l.person_name || "—"}</td>
                   <td className="px-5 py-3 hidden md:table-cell">{l.business_name || "—"}</td>
                   <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.email || "—"}</td>

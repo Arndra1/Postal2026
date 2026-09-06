@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown, Zap } from "lucide-react";
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 import PastDueBanner from "@/components/PastDueBanner";
+import DashboardCharts from "@/components/dashboard/DashboardCharts";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.functions.invoke("userStats", {}).then((res) => {
+    Promise.all([
+      base44.functions.invoke("userStats", {}),
+      base44.entities.Lead.filter({ user_id: user.id, saved: true }, "-created_date", 200),
+    ]).then(([res, leadRes]) => {
       setData(res.data);
+      setLeads(leadRes);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -47,6 +55,8 @@ export default function Dashboard() {
         <StatCard icon={FolderHeart} label="Saved Leads" value={data.savedLeads} />
         <StatCard icon={Sparkles} label="Successful Enrichments" value={data.successfulEnrichments} />
       </div>
+
+      <DashboardCharts leads={leads} />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 glass-panel overflow-hidden">
