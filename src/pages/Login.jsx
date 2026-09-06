@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,15 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(""); // visible debug for redirect step
+  const [showManualLink, setShowManualLink] = useState(false);
+
+  // If redirect hasn't fired within 3s, show a manual link as fallback
+  useEffect(() => {
+    if (!status) return;
+    const t = setTimeout(() => setShowManualLink(true), 3000);
+    return () => clearTimeout(t);
+  }, [status]);
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
@@ -23,11 +32,12 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
-      // SDK's setToken saved the token to localStorage and updated the
-      // axios Authorization header. Hard redirect so the app fully
-      // re-initializes with the token (appParams reads from localStorage
-      // at module-load time, which only happens on a fresh page load).
+      const result = await base44.auth.loginViaEmailPassword(email, password);
+      if (!result?.access_token) {
+        throw new Error("Login succeeded but no access token was returned.");
+      }
+      setStatus("Login successful — loading your dashboard...");
+      // Hard redirect so the app fully re-initializes with the token.
       window.location.href = returnTo;
     } catch (err) {
       console.error("Login error:", err);
@@ -78,6 +88,18 @@ export default function Login() {
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
+        </div>
+      )}
+
+      {status && (
+        <div className="mb-4 p-3 rounded-lg bg-primary/10 text-primary text-sm flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          {status}
+          {showManualLink && (
+            <Link to={returnTo} className="ml-auto underline font-medium">
+              Click here to continue →
+            </Link>
+          )}
         </div>
       )}
 
