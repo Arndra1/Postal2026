@@ -23,14 +23,14 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
-      // The SDK sets the token and does its own redirect. If it redirects to
-      // "/", the Landing page catches authenticated users and sends them to
-      // /dashboard. If the SDK doesn't redirect, fall back here.
-      setTimeout(() => {
-        window.location.href = returnTo;
-      }, 500);
+      const result = await base44.auth.loginViaEmailPassword(email, password);
+      if (!result?.access_token) {
+        throw new Error("Login succeeded but no token was returned.");
+      }
+      // SDK already saved token to localStorage via setToken. Redirect now.
+      window.location.href = returnTo;
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
       setLoading(false);
     }
