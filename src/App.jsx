@@ -32,6 +32,8 @@ import Help from '@/pages/Help';
 import OutreachTemplates from '@/pages/OutreachTemplates';
 import AddLead from '@/pages/AddLead';
 import Notifications from '@/pages/Notifications';
+import FederalGrants from '@/pages/FederalGrants';
+import SavedSearches from '@/pages/SavedSearches';
 import ThankYou from '@/pages/ThankYou';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminUsers from '@/pages/admin/AdminUsers';
@@ -97,6 +99,8 @@ const AuthenticatedApp = () => {
           <Route path="/outreach" element={<OutreachTemplates />} />
           <Route path="/add-lead" element={<AddLead />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/federal-grants" element={<FederalGrants />} />
+          <Route path="/saved-searches" element={<SavedSearches />} />
           <Route path="/admin/overview" element={<AdminGuard><AdminOverview /></AdminGuard>} />
           <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
           <Route path="/admin/subscriptions" element={<AdminGuard><AdminSubscriptions /></AdminGuard>} />

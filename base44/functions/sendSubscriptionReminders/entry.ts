@@ -120,7 +120,96 @@ export default async function(req) {
       } catch (e) { errors.push(String(e?.message || e)); }
     }
 
-    return Response.json({ ok: true, renewalReminders: renewalSent, annualReminders: annualSent, pastDueDetected, expiredCount, errors });
+    // 5) Low-credit notification: wallets below threshold get in-app + email alert.
+    let lowCreditSent = 0;
+    const LOW_CREDIT_THRESHOLD = 10;
+    try {
+      const wallets = await db.entities.CreditWallet.filter({});
+      for (const w of wallets) {
+        if (!w.user_id) continue;
+        const total = (w.balance || 0) + (w.pack_balance || 0);
+        if (total >= LOW_CREDIT_THRESHOLD) continue;
+        // Only notify once per day per user.
+        const existing = await db.entities.Notification.filter({
+          user_id: w.user_id,
+          type: "credit_low",
+        });
+        const recent = (existing || []).find((n) => {
+          if (!n.created_date) return false;
+          return (now.getTime() - new Date(n.created_date).getTime()) < 86400000;
+        });
+        if (recent) continue;
+
+        await db.entities.Notification.create({
+          user_id: w.user_id,
+          type: "credit_low",
+          title: "Your credits are running low",
+          body: `You have ${total} credit${total !== 1 ? "s" : ""} remaining. Purchase a credit pack to continue enriching leads.`,
+          action_url: "/billing",
+          read: false,
+        }).catch(() => {});
+
+        const users = await db.entities.User.filter({ id: w.user_id });
+        const email = users?.[0]?.email;
+        if (email) {
+          try {
+            await db.integrations.Core.SendEmail({
+              to: email,
+              subject: "🔔 Your RingBellz credits are running low",
+              body: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#5B2A6E">Low credit balance</h2><p>You have <strong>${total} credit${total !== 1 ? "s" : ""}</strong> remaining in your RingBellz account.</p><p>Enrichment costs 5 credits per lead. Purchase a credit pack to keep prospecting without interruption.</p><a href="https://horned-pulse-lead-flow.base44.app/billing" style="display:inline-block;background:#5B2A6E;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:12px">Buy Credits</a></div>`,
+            });
+            lowCreditSent++;
+          } catch (_e) { /* email may fail for unregistered */ }
+        }
+      }
+    } catch (e) { errors.push("low_credit: " + String(e?.message || e)); }
+
+    // 6) Subscription cancelled/ended notifications.
+    let cancelNotified = 0;
+    try {
+      const endedSubs = await db.entities.Subscription.filter({});
+      for (const sub of endedSubs) {
+        if (!sub.user_id) continue;
+        if (!["cancelled", "expired"].includes(sub.status)) continue;
+        const noticeType = sub.status === "cancelled" ? "subscription_canceled" : "subscription_ended";
+        const existing = await db.entities.Notification.filter({
+          user_id: sub.user_id,
+          type: noticeType,
+        });
+        if ((existing || []).length > 0) continue;
+
+        const title = sub.status === "cancelled"
+          ? "Subscription cancelled"
+          : "Subscription expired";
+        const body = sub.status === "cancelled"
+          ? "Your RingBellz subscription has been cancelled. You'll retain access until the end of your current billing period."
+          : "Your RingBellz subscription has expired. Re-subscribe to continue accessing lead intelligence tools.";
+
+        await db.entities.Notification.create({
+          user_id: sub.user_id,
+          type: noticeType,
+          title,
+          body,
+          action_url: "/billing",
+          read: false,
+        }).catch(() => {});
+
+        const users = await db.entities.User.filter({ id: sub.user_id });
+        const email = users?.[0]?.email;
+        if (email) {
+          try {
+            await db.integrations.Core.SendEmail({
+              to: email,
+              subject: "🔔 " + title,
+              body: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#5B2A6E">${title}</h2><p>${body}</p><a href="https://horned-pulse-lead-flow.base44.app/billing" style="display:inline-block;background:#5B2A6E;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:12px">Manage Subscription</a></div>`,
+            });
+            cancelNotified++;
+          } catch (_e) { /* email may fail */ }
+        }
+      }
+    } catch (e) { errors.push("cancel_notice: " + String(e?.message || e)); }
+
+    return Response.json({ ok: true, renewalReminders: renewalSent, annualReminders: annualSent, pastDueDetected, expiredCount, lowCreditSent, cancelNotified, errors });
   } catch (error) {
     console.error("sendSubscriptionReminders failed", error);
     return Response.json({ error: "Reminder run failed." }, { status: 500 });

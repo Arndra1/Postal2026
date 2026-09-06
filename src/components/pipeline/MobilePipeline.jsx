@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import KanbanCard from "@/components/pipeline/KanbanCard";
 import { PIPELINE_STAGES } from "@/components/leads/LeadDetailPanel";
 
@@ -73,32 +74,68 @@ export default function MobilePipeline({ byStage, onMove, onOpen }) {
           ) : (
             <div className="space-y-2.5">
               {leads.map((l) => (
-                <div key={l.id} className="relative">
-                  <KanbanCard lead={l} onOpen={() => onOpen(l)} />
-                  <div className="flex gap-1.5 mt-1.5">
-                    {canPrev && (
-                      <button
-                        onClick={() => onMove(l, PIPELINE_STAGES[activeStage - 1].key)}
-                        className="flex-1 text-xs py-1.5 rounded-lg bg-white/50 border border-white/40 font-medium hover:border-primary/30"
-                      >
-                        ← {PIPELINE_STAGES[activeStage - 1].label}
-                      </button>
-                    )}
-                    {canNext && (
-                      <button
-                        onClick={() => onMove(l, PIPELINE_STAGES[activeStage + 1].key)}
-                        className="flex-1 text-xs py-1.5 rounded-lg bg-white/50 border border-white/40 font-medium hover:border-primary/30"
-                      >
-                        {PIPELINE_STAGES[activeStage + 1].label} →
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <SwipeableKanbanCard
+                  key={l.id}
+                  lead={l}
+                  onOpen={() => onOpen(l)}
+                  onSwipeRight={() => canNext && onMove(l, PIPELINE_STAGES[activeStage + 1].key)}
+                  onSwipeLeft={() => canPrev && onMove(l, PIPELINE_STAGES[activeStage - 1].key)}
+                  nextLabel={canNext ? PIPELINE_STAGES[activeStage + 1].label : ""}
+                  prevLabel={canPrev ? PIPELINE_STAGES[activeStage - 1].label : ""}
+                />
               ))}
             </div>
           )}
         </div>
+
+        <p className="text-center text-xs text-muted-foreground/60 mt-3">
+          ← Swipe a card left to move back · right to advance →
+        </p>
       </div>
+    </div>
+  );
+}
+
+function SwipeableKanbanCard({ lead, onOpen, onSwipeLeft, onSwipeRight, nextLabel, prevLabel }) {
+  const x = useMotionValue(0);
+  const rightBg = useTransform(x, [20, 80], ["rgba(91,42,110,0)", "rgba(91,42,110,0.15)"]);
+  const leftBg = useTransform(x, [-80, -20], ["rgba(201,167,199,0.15)", "rgba(201,167,199,0)"]);
+
+  const handleDragEnd = (_, info) => {
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+    if ((offset > 60 || velocity > 400) && onSwipeRight) {
+      if (navigator.vibrate) navigator.vibrate(10);
+      onSwipeRight();
+    } else if ((offset < -60 || velocity < -400) && onSwipeLeft) {
+      if (navigator.vibrate) navigator.vibrate(10);
+      onSwipeLeft();
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-xl">
+      {/* Swipe right indicator */}
+      <motion.div className="absolute inset-0 flex items-center justify-end pr-3" style={{ background: rightBg }}>
+        <span className="text-xs font-medium text-primary">{nextLabel} →</span>
+      </motion.div>
+      {/* Swipe left indicator */}
+      <motion.div className="absolute inset-0 flex items-center pl-3" style={{ background: leftBg }}>
+        <span className="text-xs font-medium text-secondary">← {prevLabel}</span>
+      </motion.div>
+
+      <motion.div
+        drag="x"
+        style={{ x }}
+        dragConstraints={{ left: -120, right: 120 }}
+        dragElastic={0.5}
+        onDragEnd={handleDragEnd}
+        onClick={onOpen}
+        className="relative cursor-grab active:cursor-grabbing"
+        whileTap={{ cursor: "grabbing" }}
+      >
+        <KanbanCard lead={lead} onOpen={onOpen} />
+      </motion.div>
     </div>
   );
 }

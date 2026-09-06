@@ -1,0 +1,116 @@
+{
+  "name": "SavedSearch",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "search_type": {
+      "type": "string",
+      "enum": [
+        "new_businesses",
+        "bankruptcy",
+        "nonprofits",
+        "public_records",
+        "government_open_data",
+        "geographic",
+        "federal_grants",
+        "find_leads"
+      ],
+      "default": "find_leads"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Search filter criteria snapshot (state, keyword, category, etc.)."
+    },
+    "alert_cadence": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "none"
+      ],
+      "default": "daily"
+    },
+    "last_run_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen_lead_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Composite keys of leads seen in the last run, for new-match detection."
+    },
+    "email_alerts": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "search_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

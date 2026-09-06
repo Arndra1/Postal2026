@@ -1,0 +1,45 @@
+{
+  "name": "Saved Search Alerts",
+  "description": "Daily job that re-runs saved searches and emails users about new matching leads.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "saved_search_alerts",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_alerts": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runSavedSearchAlerts",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run saved search alerts",
+            "description": "Email new lead matches"
+          }
+        }
+      }
+    ]
+  }
+}

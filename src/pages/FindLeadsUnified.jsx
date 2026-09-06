@@ -14,6 +14,7 @@ import { findDuplicateLead } from "@/lib/leadDedup";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
 import NonprofitLeadCard from "@/components/search/NonprofitLeadCard";
 import CustomerTypePrompt, { SUGGESTED_SEARCHES } from "@/components/search/CustomerTypePrompt";
+import SaveSearchButton from "@/components/search/SaveSearchButton";
 
 const NTEE_GROUPS = [
   { id: "", label: "All categories" },
@@ -484,9 +485,12 @@ export default function FindLeadsUnified() {
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">{TABS.find(t => t.key === tab)?.hint}</p>
-          <Button type="submit" className="h-10" disabled={loading}>
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Searching...</> : <><Search className="w-4 h-4 mr-2" /> Search</>}
-          </Button>
+          <div className="flex items-center gap-2">
+            <SaveSearchButton searchType={tab} filters={buildSearchPayload()} disabled={results.length === 0} />
+            <Button type="submit" className="h-10" disabled={loading}>
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Searching...</> : <><Search className="w-4 h-4 mr-2" /> Search</>}
+            </Button>
+          </div>
         </div>
       </form>
 

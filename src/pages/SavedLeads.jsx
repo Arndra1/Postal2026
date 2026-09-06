@@ -13,6 +13,7 @@ import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
 import { useToast } from "@/components/ui/use-toast";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
+import SwipeableSavedLeadRow from "@/components/leads/SwipeableSavedLeadRow";
 
 export default function SavedLeads() {
   const { user } = useAuth();
@@ -200,7 +201,24 @@ export default function SavedLeads() {
         </div>
       )}
 
-      <div className="glass-panel overflow-hidden">
+      {/* Mobile swipeable cards */}
+      {!loading && filtered.length > 0 && (
+        <div className="lg:hidden space-y-2.5 mb-6">
+          {filtered.map((l) => (
+            <SwipeableSavedLeadRow
+              key={l.id}
+              lead={l}
+              busy={busy[l.id]}
+              onStar={() => updateLead(l.id, { starred: !l.starred })}
+              onEnrich={() => enrich(l)}
+              onDelete={() => remove(l.id)}
+              onOpen={() => setDetail(l)}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="glass-panel overflow-hidden hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-white/30 text-muted-foreground">
