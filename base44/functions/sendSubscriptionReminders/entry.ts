@@ -155,6 +155,7 @@ export default async function(req) {
           try {
             await db.integrations.Core.SendEmail({
               to: email,
+              from_name: "RingBellz",
               subject: "🔔 Your RingBellz credits are running low",
               body: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#5B2A6E">Low credit balance</h2><p>You have <strong>${total} credit${total !== 1 ? "s" : ""}</strong> remaining in your RingBellz account.</p><p>Enrichment costs 5 credits per lead. Purchase a credit pack to keep prospecting without interruption.</p><a href="https://horned-pulse-lead-flow.base44.app/billing" style="display:inline-block;background:#5B2A6E;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:12px">Buy Credits</a></div>`,
             });
@@ -200,6 +201,7 @@ export default async function(req) {
           try {
             await db.integrations.Core.SendEmail({
               to: email,
+              from_name: "RingBellz",
               subject: "🔔 " + title,
               body: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#5B2A6E">${title}</h2><p>${body}</p><a href="https://horned-pulse-lead-flow.base44.app/billing" style="display:inline-block;background:#5B2A6E;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:12px">Manage Subscription</a></div>`,
             });

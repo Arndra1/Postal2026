@@ -31,7 +31,7 @@ function fmtDate(iso) {
 const CANCEL_TEXT = "How to cancel: In the RingBellz app, go to Account → Billing → Manage Subscription and click \"Cancel Subscription\". Cancellation is online and immediate — no phone call, agent, or meeting required, and no unnecessary information is needed. Cancellation stops all future charges; you keep access and your remaining credits through the end of your paid billing period.";
 
 async function mail(base44, to, subject, body) {
-  await svc(base44).integrations.Core.SendEmail({ to, subject, body });
+  await svc(base44).integrations.Core.SendEmail({ to, subject, body, from_name: "RingBellz" });
 }
 
 export async function recordNotice(base44, userId, noticeType, email, reference, details) {
