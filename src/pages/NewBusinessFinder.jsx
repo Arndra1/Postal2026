@@ -10,6 +10,7 @@ import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import StateFilingRow from "@/components/leads/StateFilingRow";
+import SaveSearchButton from "@/components/search/SaveSearchButton";
 import { findDuplicateLead } from "@/lib/leadDedup";
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
@@ -139,7 +140,9 @@ export default function NewBusinessFinder() {
 
   return (
     <div>
-      <PageHeader title="New Business Finder" subtitle="Real newly-registered business records from official state sources. Florida, Connecticut & New York are connected live; Georgia & Texas offer paid bulk data." />
+      <PageHeader title="New Business Finder" subtitle="Real newly-registered business records from official state sources. Florida, Connecticut & New York are connected live; Georgia & Texas offer paid bulk data." action={
+        <SaveSearchButton searchType="new_businesses" filters={filters} disabled={view !== "records" || rows.length === 0} />
+      } />
 
       <ComplianceBanner text={MARKETING_NOTICE} />
 

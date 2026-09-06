@@ -10,6 +10,7 @@ import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import BankruptcyLeadCard from "@/components/search/BankruptcyLeadCard";
+import SaveSearchButton from "@/components/search/SaveSearchButton";
 import { findDuplicateLead } from "@/lib/leadDedup";
 
 const ALL_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
@@ -169,7 +170,9 @@ export default function BankruptcyFinder() {
 
   return (
     <div>
-      <PageHeader title="Bankruptcy Prospects" subtitle="Find people or businesses associated with recent public bankruptcy filings — for credit-service outreach. All discovery is free; only optional contact enrichment costs 5 credits on verified success." />
+      <PageHeader title="Bankruptcy Prospects" subtitle="Find people or businesses associated with recent public bankruptcy filings — for credit-service outreach. All discovery is free; only optional contact enrichment costs 5 credits on verified success." action={
+        <SaveSearchButton searchType="bankruptcy" filters={filters} disabled={!searched || results.length === 0} />
+      } />
 
       <ComplianceBanner text="Bankruptcy filings are factual public records. This tool is for lawful marketing prospecting only — never for credit eligibility, loan/funding/insurance/employment/housing eligibility, underwriting, or risk scoring." />
 
