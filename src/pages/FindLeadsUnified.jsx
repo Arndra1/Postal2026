@@ -361,7 +361,7 @@ export default function FindLeadsUnified() {
       <div className="flex flex-wrap gap-1.5 mb-5">
         {TABS.map(t => (
           <button key={t.key} onClick={() => { setTab(t.key); setResults([]); setSearched(false); setError(""); }}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-white/30 border border-white/40 text-muted-foreground hover:text-foreground"}`}
             title={t.hint}>
             <t.icon className="w-4 h-4 inline mr-1.5" />{t.label}
           </button>
@@ -372,7 +372,7 @@ export default function FindLeadsUnified() {
         <div className="flex flex-wrap gap-1.5 mb-5">
           {PR_SUBS.map(s => (
             <button key={s.key} onClick={() => { setPrSub(s.key); setResults([]); setSearched(false); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${prSub === s.key ? "bg-secondary/20 text-secondary-foreground border border-secondary/40" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${prSub === s.key ? "bg-secondary/20 text-secondary-foreground border border-secondary/40" : "bg-white/30 border border-white/40 text-muted-foreground hover:text-foreground"}`}
               title={s.hint}>
               {s.label}
             </button>
@@ -380,7 +380,7 @@ export default function FindLeadsUnified() {
         </div>
       )}
 
-      <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
+      <form onSubmit={runSearch} className="glass-panel p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {isNonprofit ? (
             <>

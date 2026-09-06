@@ -21,7 +21,7 @@ export default function StateFilingRow({ r, k, busy, savedLead, onSave, onEnrich
   const dup = r.possible_duplicate;
 
   return (
-    <tr className="border-t border-border hover:bg-muted/30">
+    <tr className="border-t border-white/30 hover:bg-white/40">
       <td className="px-4 py-3">
         <div className="font-medium break-words">{r.business_name || "—"}</div>
         <div className="text-xs text-muted-foreground">{[r.address, r.city, r.state, r.zip].filter(Boolean).join(", ")}</div>

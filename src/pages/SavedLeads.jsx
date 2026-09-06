@@ -108,7 +108,7 @@ export default function SavedLeads() {
 
       <ComplianceBanner text={MARKETING_NOTICE + " " + ACCURACY_NOTICE} />
 
-      <div className="bg-card rounded-2xl border border-border lady-shadow p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="glass-panel p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search saved leads..." className="pl-9 h-10" />
@@ -121,10 +121,10 @@ export default function SavedLeads() {
         </select>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
+      <div className="glass-panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
+            <thead className="bg-white/30 text-muted-foreground">
               <tr>
                 <th className="text-left font-medium px-5 py-3">Name</th>
                 <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Company</th>
@@ -143,7 +143,7 @@ export default function SavedLeads() {
               {loading && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
               {!loading && filtered.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
               {filtered.map((l) => (
-                <tr key={l.id} className="border-t border-border hover:bg-muted/30">
+                <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
                   <td className="px-5 py-3 font-medium">{l.person_name || "—"}</td>
                   <td className="px-5 py-3 hidden md:table-cell">{l.business_name || "—"}</td>
                   <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.email || "—"}</td>

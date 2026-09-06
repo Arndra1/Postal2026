@@ -4,14 +4,16 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SUPPORT_EMAIL } from "@/lib/compliance";
 import Logo from "@/components/Logo";
+import GradientBackground from "@/components/GradientBackground";
 
 // Public post-checkout page. Payment confirmation is asynchronous (the Wix
 // webhook is the source of truth), so we never claim membership here — the
 // webhook activates it and grants the 100 monthly credits.
 export default function ThankYou() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-card rounded-2xl border border-border lady-shadow-lg p-8 text-center">
+    <div className="min-h-screen flex items-center justify-center p-6 relative">
+      <GradientBackground />
+      <div className="max-w-md w-full glass-panel p-8 text-center relative z-10">
         <div className="flex justify-center mb-5">
           <Logo variant="header" />
         </div>

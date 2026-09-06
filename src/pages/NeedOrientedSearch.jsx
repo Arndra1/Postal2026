@@ -230,7 +230,7 @@ export default function NeedOrientedSearch() {
 
       <ComplianceBanner text="RingBellz surfaces public records for lawful marketing prospecting only. Bankruptcy and court filings are factual events — never characterize prospects as 'high risk,' 'credit denied,' or 'financially distressed.' Not a consumer reporting agency." />
 
-      <div className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
+      <div className="glass-panel p-5 mb-6">
         <div className="flex items-center gap-2.5">
           <Sparkles className="w-4 h-4 text-primary" />
           <p className="text-sm text-muted-foreground">
@@ -243,7 +243,7 @@ export default function NeedOrientedSearch() {
 
       <div className="grid sm:grid-cols-2 gap-4">
         {paths.map((p) => (
-          <div key={p.key} className="bg-card rounded-2xl border border-border lady-shadow p-5 flex flex-col">
+          <div key={p.key} className="glass-card p-5 flex flex-col">
             <div className="flex items-center gap-1.5 mb-2">
               <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-secondary/30 text-secondary-foreground">{p.badge}</span>
             </div>

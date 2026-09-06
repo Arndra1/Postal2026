@@ -49,14 +49,14 @@ export default function Dashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
+        <div className="lg:col-span-2 glass-panel overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-heading text-lg font-semibold">Recent Leads</h2>
             <Link to="/saved-leads" className="text-sm text-primary font-medium flex items-center hover:underline">View all <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
+              <thead className="bg-white/30 text-muted-foreground">
                 <tr>
                   <th className="text-left font-medium px-5 py-3">Name</th>
                   <th className="text-left font-medium px-5 py-3">Company</th>
@@ -71,7 +71,7 @@ export default function Dashboard() {
                   <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No leads yet. <Link to="/find-leads" className="text-primary font-medium">Find your first lead</Link>.</td></tr>
                 )}
                 {data.recentLeads.map((l) => (
-                  <tr key={l.id} className="border-t border-border hover:bg-muted/30">
+                  <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
                     <td className="px-5 py-3 font-medium">{l.person_name || "—"}</td>
                     <td className="px-5 py-3">{l.business_name || "—"}</td>
                     <td className="px-5 py-3 hidden md:table-cell">{l.city || "—"}</td>
@@ -85,7 +85,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-card rounded-2xl border border-border lady-shadow p-5">
+        <div className="glass-panel p-5">
           <h2 className="font-heading text-lg font-semibold mb-4">Recent Activity</h2>
           <div className="space-y-3">
             {data.recentActivity.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}

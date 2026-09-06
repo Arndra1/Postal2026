@@ -44,7 +44,7 @@ export default function CreditPackGrid({ isMember }) {
         {PACKS.map((p) => {
           const perCredit = (p.price / p.credits).toFixed(2);
           return (
-            <div key={p.id} className={`relative bg-card rounded-2xl border lady-shadow p-6 flex flex-col items-center text-center ${p.bestValue ? "border-primary/40 lady-shadow-lg" : "border-border"}`}>
+            <div key={p.id} className={`relative bg-white/50 backdrop-blur-xl rounded-2xl border lady-shadow p-6 flex flex-col items-center text-center ${p.bestValue ? "border-primary/40 lady-shadow-lg" : "border-white/40"}`}>
               {p.bestValue && (
                 <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-wide px-2.5 py-0.5 rounded-full">
                   Best Value

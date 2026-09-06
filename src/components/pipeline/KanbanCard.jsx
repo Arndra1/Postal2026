@@ -7,7 +7,7 @@ export default function KanbanCard({ lead, dragHandleProps, onOpen }) {
     <div
       {...dragHandleProps}
       onClick={onOpen}
-      className="bg-card border border-border rounded-xl p-3 cursor-pointer hover:border-primary/30 hover:lady-shadow transition select-none"
+      className="bg-white/50 backdrop-blur-xl border border-white/40 rounded-xl p-3 cursor-pointer hover:border-primary/30 transition select-none"
     >
       <div className="flex items-start gap-1.5">
         <GripVertical className="w-3.5 h-3.5 text-muted-foreground/50 mt-0.5 shrink-0" />

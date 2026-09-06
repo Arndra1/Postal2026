@@ -49,11 +49,11 @@ export default function Credits() {
         </div>
       )}
 
-      <div className="bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
+      <div className="glass-panel overflow-hidden">
         <div className="p-5 border-b border-border"><h2 className="font-heading text-lg font-semibold">Credit Ledger</h2></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
+            <thead className="bg-white/30 text-muted-foreground">
               <tr>
                 <th className="text-left font-medium px-5 py-3">Action</th>
                 <th className="text-left font-medium px-5 py-3">Description</th>
@@ -66,7 +66,7 @@ export default function Credits() {
             <tbody>
               {ledger.length === 0 && <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No credit transactions yet.</td></tr>}
               {ledger.map((l) => (
-                <tr key={l.id} className="border-t border-border hover:bg-muted/30">
+                <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
                   <td className="px-5 py-3 capitalize font-medium">{l.action}</td>
                   <td className="px-5 py-3 text-muted-foreground">{l.description || "—"}</td>
                   <td className={`px-5 py-3 text-right font-medium ${l.amount >= 0 ? "text-accent" : "text-destructive"}`}>{l.amount >= 0 ? "+" : ""}{l.amount}</td>

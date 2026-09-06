@@ -45,7 +45,7 @@ export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData,
   const hasVerifiedContact = saved && (enrichedEmail || enrichedPhone);
 
   return (
-    <div className="bg-card rounded-2xl border border-border lady-shadow p-5">
+    <div className="glass-card p-5">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-1.5">

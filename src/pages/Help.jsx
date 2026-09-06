@@ -60,7 +60,7 @@ export default function Help() {
       {/* Help articles */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {visibleArticles.map((a) => (
-          <div key={a.title} className="bg-card rounded-2xl border border-border lady-shadow p-5">
+          <div key={a.title} className="glass-card p-5">
             <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center mb-3"><a.icon className="w-5 h-5 text-primary" /></div>
             <h3 className="font-semibold mb-1.5 text-sm">{a.title}</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">{a.body}</p>
@@ -70,25 +70,25 @@ export default function Help() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-card rounded-2xl border border-border lady-shadow p-6 mb-6">
+      <div className="glass-panel p-6 mb-6">
         <h2 className="font-heading text-lg font-semibold mb-4 flex items-center gap-2"><HelpCircle className="w-5 h-5 text-primary" /> Frequently Asked Questions</h2>
         {visibleFaqs.length > 0 ? <FaqList faqs={visibleFaqs} /> : <p className="text-sm text-muted-foreground">No FAQs matched your search. Try a different term or contact support below.</p>}
       </div>
 
       {/* Contact Support */}
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border lady-shadow p-6">
+        <div className="lg:col-span-2 glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-1.5 flex items-center gap-2"><Headset className="w-5 h-5 text-primary" /> Contact Support</h2>
           <p className="text-sm text-muted-foreground mb-5">Tell us what you need — account help, a billing question, a data issue, a privacy request, or anything else. We respond by email.</p>
           <SupportForm />
         </div>
         <div className="space-y-4">
-          <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+          <div className="glass-panel p-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> Email Support</h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-2">RingBellz provides email-based support only — we do not offer phone support.</p>
             <a href={`mailto:${SUPPORT_EMAIL}`} className="text-sm font-medium text-primary underline underline-offset-4 break-all">{SUPPORT_EMAIL}</a>
           </div>
-          <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+          <div className="glass-panel p-6">
             <h3 className="font-semibold mb-2">Before you submit</h3>
             <ul className="space-y-1.5 text-xs text-muted-foreground leading-relaxed">
               <li>• Include your account email and any error messages.</li>
@@ -101,7 +101,7 @@ export default function Help() {
       </div>
 
       {/* Compliance */}
-      <div className="bg-card rounded-2xl border border-border lady-shadow p-6 mb-6">
+      <div className="glass-panel p-6 mb-6">
         <h2 className="font-heading text-lg font-semibold mb-3 flex items-center gap-2"><Scale className="w-5 h-5 text-primary" /> Compliance &amp; Permitted Use</h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">{COMPLIANCE_NOTICE}</p>
         <div className="grid sm:grid-cols-2 gap-4 mb-4">

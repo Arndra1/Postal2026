@@ -146,7 +146,7 @@ export default function FindLeads() {
           <button
             key={t.key}
             onClick={() => { setTab(t.key); setResults([]); setSearched(false); setError(""); }}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-white/30 border border-white/40 text-muted-foreground hover:text-foreground"}`}
             title={t.hint}
           >
             {t.label}
@@ -154,7 +154,7 @@ export default function FindLeads() {
         ))}
       </div>
 
-      <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
+      <form onSubmit={runSearch} className="glass-panel p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {isNB ? (
             <div className="space-y-1.5">
@@ -193,7 +193,7 @@ export default function FindLeads() {
       </form>
 
       {searched && (
-        <div className="bg-card rounded-2xl border border-border lady-shadow overflow-hidden">
+        <div className="glass-panel overflow-hidden">
           {error && (
             <div className="flex items-center gap-2 p-4 text-sm text-destructive">
               <AlertCircle className="w-4 h-4" /> {error}
@@ -202,7 +202,7 @@ export default function FindLeads() {
           {!error && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-muted/50 text-muted-foreground">
+                <thead className="bg-white/30 text-muted-foreground">
                   <tr>
                     <th className="text-left font-medium px-5 py-3">Record</th>
                     <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Industry</th>

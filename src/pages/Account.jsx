@@ -47,7 +47,7 @@ export default function Account() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {stats && (
-          <div className="lg:col-span-2 bg-card rounded-2xl border border-border lady-shadow p-6">
+          <div className="lg:col-span-2 glass-panel p-6">
             <div className="flex items-center gap-2 mb-4">
               <Coins className="w-5 h-5 text-primary" />
               <h2 className="font-heading text-lg font-semibold">Credit Balance</h2>
@@ -56,7 +56,7 @@ export default function Account() {
           </div>
         )}
 
-        <form onSubmit={save} className="bg-card rounded-2xl border border-border lady-shadow p-6">
+        <form onSubmit={save} className="glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Profile</h2>
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -87,18 +87,18 @@ export default function Account() {
           </div>
         </form>
 
-        <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+        <div className="glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Security</h2>
           <div className="space-y-4 text-sm">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
               <Lock className="w-4 h-4 text-primary" />
               <div><div className="font-medium">Password</div><div className="text-muted-foreground">Use the forgot-password flow to reset your password.</div></div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
               <Check className="w-4 h-4 text-accent" />
               <div><div className="font-medium">Secure sessions</div><div className="text-muted-foreground">Sessions are managed securely by the platform.</div></div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
               <Check className="w-4 h-4 text-accent" />
               <div><div className="font-medium">Role</div><div className="text-muted-foreground capitalize">{user.role}</div></div>
             </div>

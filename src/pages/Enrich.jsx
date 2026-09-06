@@ -53,7 +53,7 @@ export default function Enrich() {
       <PageHeader title="Enrich" subtitle="Turn a name and company into verified contact intelligence." />
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <form onSubmit={run} className="bg-card rounded-2xl border border-border lady-shadow p-6">
+        <form onSubmit={run} className="glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Enrichment Inputs</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {f("person_name", "Person Name", "Jordan Avery", <Sparkles className="w-4 h-4" />)}
@@ -66,7 +66,7 @@ export default function Enrich() {
             {f("phone", "Phone (if known)", "+1 ...", <Phone className="w-4 h-4" />)}
           </div>
           {stats && !stats.exempt && (
-            <div className="mb-4 p-3 rounded-xl bg-muted/50 border border-border">
+            <div className="mb-4 p-3 rounded-xl bg-white/30 border border-white/40">
               <p className="text-xs text-muted-foreground mb-1.5 font-medium">Your Credit Balance</p>
               <CreditBalanceDisplay wallet={stats.wallet} subscription={stats.subscription} exempt={stats.exempt} compact />
             </div>
@@ -83,7 +83,7 @@ export default function Enrich() {
           )}
         </form>
 
-        <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+        <div className="glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Enrichment Result</h2>
           {!result && !loading && <div className="text-center py-12 text-muted-foreground text-sm">Enter lead details and run an enrichment to see verified contact data.</div>}
           {loading && <div className="flex flex-col items-center justify-center py-16"><Loader2 className="w-8 h-8 text-primary animate-spin mb-3" /><p className="text-sm text-muted-foreground">Contacting provider...</p></div>}
@@ -113,7 +113,7 @@ export default function Enrich() {
                   { icon: Briefcase, label: "Job Title", value: result.results.job_title },
                   { icon: Building2, label: "Company", value: result.results.company },
                 ].map((row) => (
-                  <div key={row.label} className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border">
+                  <div key={row.label} className="flex items-start gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
                     <row.icon className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-muted-foreground">{row.label}</div>

@@ -185,7 +185,7 @@ export default function BankruptcyFinder() {
         </div>
       ) : null}
 
-      <form onSubmit={runSearch} className="bg-card rounded-2xl border border-border lady-shadow p-5 mb-6">
+      <form onSubmit={runSearch} className="glass-panel p-5 mb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">State (optional)</Label>

@@ -19,7 +19,7 @@ export default function MembershipStatusCard({ data, purchases, purchasedCredits
   const periodEndText = sub.period_end ? new Date(sub.period_end).toLocaleDateString() : "—";
 
   return (
-    <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+    <div className="glass-panel p-6">
       <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>
       <div className="text-sm">
         <Row label="Plan"><span>RingBellz — $59/month</span></Row>

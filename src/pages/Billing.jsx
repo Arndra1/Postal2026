@@ -99,7 +99,7 @@ export default function Billing() {
       )}
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-card rounded-2xl border-2 border-primary/20 lady-shadow-lg p-8">
+        <div className="glass-panel border-2 border-primary/15 p-8">
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-heading text-xl font-semibold">RingBellz Membership</h2>
             {!exempt && <StatusBadge status={status} />}
@@ -161,7 +161,7 @@ export default function Billing() {
         {!exempt ? (
           <MembershipStatusCard data={data} purchases={purchases} />
         ) : (
-          <div className="bg-card rounded-2xl border border-border lady-shadow p-6">
+          <div className="glass-panel p-6">
             <h2 className="font-heading text-lg font-semibold mb-4">Membership Status</h2>
             <p className="text-sm text-muted-foreground">Owner/admin accounts have permanent access with no billing requirements and are not part of the recurring-billing flow.</p>
           </div>

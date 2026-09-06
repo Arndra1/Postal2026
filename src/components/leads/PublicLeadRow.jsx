@@ -21,7 +21,7 @@ export default function PublicLeadRow({ r, k, busy, savedLead, onSave, onEnrich,
   const dup = r.possible_duplicate;
 
   return (
-    <tr className="border-t border-border hover:bg-muted/30">
+    <tr className="border-t border-white/30 hover:bg-white/40">
       <td className="px-5 py-3">
         <div className="font-medium break-words">{r.business_name || r.agency || "—"}</div>
         {(r.person_name || r.city || r.state) && (

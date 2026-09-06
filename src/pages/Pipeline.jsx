@@ -66,7 +66,7 @@ export default function Pipeline() {
       {loading ? (
         <div className="py-20 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
       ) : leads.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border lady-shadow p-16 text-center">
+        <div className="glass-panel p-16 text-center">
           <FolderHeart className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
           <h3 className="font-heading text-lg font-semibold mb-1">No saved leads yet</h3>
           <p className="text-sm text-muted-foreground mb-5">Save leads first, then track them through your pipeline here.</p>
@@ -87,7 +87,7 @@ export default function Pipeline() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={"rounded-2xl border p-2.5 min-h-[200px] transition " + (snapshot.isDraggingOver ? "bg-secondary/15 border-primary/40" : "bg-muted/40 border-border")}
+                      className={"rounded-2xl border p-2.5 min-h-[200px] transition " + (snapshot.isDraggingOver ? "bg-secondary/15 border-primary/40" : "bg-white/20 border-white/30")}
                     >
                       {byStage[stage.key].map((l, i) => (
                         <Draggable key={l.id} draggableId={l.id} index={i}>
