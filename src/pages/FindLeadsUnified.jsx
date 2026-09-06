@@ -312,6 +312,10 @@ export default function FindLeadsUnified() {
     try { await base44.auth.updateMe({ customer_type: val }); } catch (_e) {}
   };
 
+  const isNonprofit = tab === "nonprofits";
+  const isStateFiling = tab === "new_businesses" || tab === "by_location";
+  const showCounty = isStateFiling && COUNTY_STATES.includes(filters.state);
+
   // Client-side post-filters (entity type, city, ZIP, county) — state filings only
   const filtered = isNonprofit ? results : results.filter(r => {
     const et = (r.extra?.entity_type || r.industry || "").toLowerCase();
@@ -327,9 +331,6 @@ export default function FindLeadsUnified() {
 
   const showCustomerPrompt = !customerType && !typeDismissed;
   const suggestions = SUGGESTED_SEARCHES[customerType] || [];
-  const isStateFiling = tab === "new_businesses" || tab === "by_location";
-  const isNonprofit = tab === "nonprofits";
-  const showCounty = isStateFiling && COUNTY_STATES.includes(filters.state);
 
   const applySuggestion = (s) => {
     setTab(s.tab);
