@@ -1,6 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthContext";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
 import {
@@ -15,6 +16,15 @@ import FinalCtaSection from "@/components/landing/FinalCtaSection";
 import LandingFooter from "@/components/landing/LandingFooter";
 
 export default function Landing() {
+  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoadingAuth) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoadingAuth, navigate]);
+
   return (
     <div className="min-h-screen text-foreground relative">
       <GradientBackground />
