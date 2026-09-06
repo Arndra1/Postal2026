@@ -76,6 +76,7 @@ export default async function(req) {
           try {
             await db.integrations.Core.SendEmail({
               to: email,
+              from_name: "RingBellz",
               subject: `🔔 ${newLeads.length} new lead${newLeads.length !== 1 ? "s" : ""} match your saved search "${search.name}"`,
               body: html,
             });

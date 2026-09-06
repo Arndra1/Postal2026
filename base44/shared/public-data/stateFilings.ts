@@ -53,7 +53,11 @@ const FL_FILING_TYPE = {
 // Fixed-width 1440-char records; field 17 (pos 473, len 8) = File Date (formation).
 export async function searchFlorida(inputs) {
   const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
-  const auth = "Basic " + btoa("Public:PubAccess1845!");
+  // FL DOS publishes public-access SFTP credentials; stored as a secret env var
+  // (FL_DOS_SFTP_AUTH = "user:password") to keep credentials out of source code.
+  const flCreds = Deno.env.get("FL_DOS_SFTP_AUTH") || "";
+  if (!flCreds) return { status: "failed", error: "fl_credentials_not_configured", results: [] };
+  const auth = "Basic " + btoa(flCreds);
   // Collect the most recent business days (cap at 7 to keep the request light).
   // FL daily files only exist on work days; weekends/holidays are skipped.
   const days = [];
