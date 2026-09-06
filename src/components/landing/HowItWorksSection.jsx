@@ -8,21 +8,21 @@ const steps = [
 
 export default function HowItWorksSection() {
   return (
-    <section id="how" className="bg-[#0D0E13] border-y border-cyan-500/10">
+    <section id="how" className="border-y border-white/30">
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white">From Search to Prospect in Three Simple Steps</h2>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground">From Search to Prospect in Three Simple Steps</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-8 md:gap-10 max-w-4xl mx-auto">
           {steps.map((s) => (
-            <div key={s.n} className="relative">
-              <div className="font-mono text-4xl font-semibold text-cyan-400 mb-3">{s.n}</div>
-              <h3 className="font-heading font-semibold mb-1.5 text-white">{s.title}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">{s.desc}</p>
+            <div key={s.n} className="glass-card p-6 text-center">
+              <div className="font-heading text-4xl font-semibold text-primary mb-3">{s.n}</div>
+              <h3 className="font-heading font-semibold mb-1.5 text-foreground">{s.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-slate-500 mt-12 max-w-xl mx-auto">
+        <p className="text-center text-xs text-muted-foreground mt-12 max-w-xl mx-auto">
           Returned information depends on what is available in public and permitted third-party sources — searches may not always return an email, phone number, professional profile, or other specific data.
         </p>
       </div>

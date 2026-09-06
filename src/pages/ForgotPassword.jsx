@@ -31,13 +31,13 @@ export default function ForgotPassword() {
       title="Reset password"
       subtitle="We'll send you a link to reset it"
       footer={
-        <Link to="/login" className="text-cyan-400 font-medium hover:text-cyan-300 transition">
+        <Link to="/login" className="text-primary font-medium hover:text-primary/80 transition">
           <ArrowLeft className="w-3 h-3 inline mr-1" />Back to log in
         </Link>
       }
     >
       {sent ? (
-        <p className="text-sm text-slate-200 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           If an account exists with that email, you'll receive a password reset link shortly.
         </p>
       ) : (
@@ -59,7 +59,7 @@ export default function ForgotPassword() {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full h-12 font-medium bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)]" disabled={loading}>
+          <Button type="submit" className="w-full h-12 font-medium lady-gradient text-white hover:opacity-90 shadow-lg" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

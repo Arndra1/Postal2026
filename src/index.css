@@ -118,4 +118,78 @@
     border-color: rgba(0, 240, 255, 0.3) !important;
     transform: translateY(-2px);
   }
+
+  /* ===== Glassmorphism ===== */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(91, 42, 110, 0.08);
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.50);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(91, 42, 110, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .glass-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(91, 42, 110, 0.2);
+    box-shadow: 0 16px 40px rgba(91, 42, 110, 0.12);
+  }
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.65);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .glass-sidebar {
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.45);
+  }
+  .glass-input {
+    background: rgba(255, 255, 255, 0.50);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(201, 167, 199, 0.35);
+    border-radius: 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .glass-input:focus {
+    border-color: rgba(91, 42, 110, 0.4);
+    box-shadow: 0 0 0 3px rgba(91, 42, 110, 0.08);
+    outline: none;
+  }
+
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .glass-panel, .glass-card, .glass-nav, .glass-sidebar, .glass-input {
+      background: rgba(255, 255, 255, 0.92);
+    }
+  }
+
+  /* ===== Animated gradient blobs ===== */
+  @keyframes blob-float-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.05); }
+    66% { transform: translate(-20px, 30px) scale(0.95); }
+  }
+  @keyframes blob-float-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 25px) scale(1.08); }
+    66% { transform: translate(25px, -30px) scale(0.92); }
+  }
+  @keyframes blob-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, 40px) scale(1.1); }
+  }
+  .animate-blob-1 { animation: blob-float-1 20s ease-in-out infinite; }
+  .animate-blob-2 { animation: blob-float-2 24s ease-in-out infinite; }
+  .animate-blob-3 { animation: blob-float-3 28s ease-in-out infinite; }
 }

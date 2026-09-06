@@ -7,6 +7,7 @@ import {
   ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb
 } from "lucide-react";
 import Logo from "@/components/Logo";
+import GradientBackground from "@/components/GradientBackground";
 import TermsGate from "@/components/TermsGate";
 
 const userNav = [
@@ -116,14 +117,15 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative">
+      <GradientBackground />
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col bg-sidebar border-r border-sidebar-border p-4">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col glass-sidebar p-4">
         <SidebarContent />
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-40 glass-nav px-4 h-14 flex items-center justify-between">
         <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center">
           <Logo variant="header" />
         </Link>
@@ -134,7 +136,7 @@ export default function AppLayout() {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-72 bg-sidebar border-r border-sidebar-border p-4">
+          <div className="relative w-72 glass-sidebar p-4">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></Button>
             <SidebarContent />
           </div>

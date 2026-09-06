@@ -46,7 +46,7 @@ export default function Login() {
           Don't have an account?{" "}
           <Link
             to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-cyan-400 font-medium hover:text-cyan-300 transition"
+            className="text-primary font-medium hover:text-primary/80 transition"
           >
             Create one
           </Link>
@@ -55,7 +55,7 @@ export default function Login() {
     >
       <Button
         variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6 border-cyan-500/20 text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-300 hover:border-cyan-500/40"
+        className="w-full h-12 text-sm font-medium mb-6 border-primary/20 text-foreground hover:bg-primary/5 hover:text-primary/80 hover:border-primary/40"
         onClick={handleGoogle}
       >
         <GoogleIcon className="w-5 h-5 mr-2" />
@@ -67,7 +67,7 @@ export default function Login() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[#12131A] px-3 text-slate-500">or</span>
+          <span className="bg-white/60 px-3 text-muted-foreground">or</span>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export default function Login() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-cyan-400 hover:text-cyan-300 transition">
+            <Link to="/forgot-password" className="text-xs text-primary hover:text-primary/80 transition">
               Forgot password?
             </Link>
           </div>
@@ -116,7 +116,7 @@ export default function Login() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)]" disabled={loading}>
+        <Button type="submit" className="w-full h-12 font-medium lady-gradient text-white hover:opacity-90 shadow-lg" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
