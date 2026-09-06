@@ -5,9 +5,11 @@ import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star, Zap, X } from "lucide-react";
+import { Search, Trash2, Download, Eye, Sparkles, Loader2, Check, Star, Zap, X, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import FreshnessBadge from "@/components/leads/FreshnessBadge";
+import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
 import { useToast } from "@/components/ui/use-toast";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
@@ -98,6 +100,14 @@ export default function SavedLeads() {
     load();
     setBulkProgress(null);
     setSelected(new Set());
+    base44.entities.Notification.create({
+      user_id: user.id,
+      type: "bulk_enrichment_complete",
+      title: "Bulk enrichment complete",
+      body: `${successCount} of ${toEnrich.length} leads enriched successfully. ${successCount * 5} credits charged.`,
+      action_url: "/saved-leads",
+      read: false,
+    }).catch(() => {});
     toast({
       title: "Bulk enrichment complete",
       description: `${successCount} of ${toEnrich.length} leads enriched successfully. ${successCount * 5} credits charged.`,
@@ -149,7 +159,12 @@ export default function SavedLeads() {
 
   return (
     <div>
-      <PageHeader title="Saved Leads" subtitle="Organize, search, and export your saved leads." action={<Button onClick={exportCsv} variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>} />
+      <PageHeader title="Saved Leads" subtitle="Organize, search, and export your saved leads." action={
+        <div className="flex gap-2">
+          <Button asChild variant="outline"><Link to="/add-lead"><UserPlus className="w-4 h-4 mr-2" /> Add Lead</Link></Button>
+          <Button onClick={exportCsv} variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>
+        </div>
+      } />
 
       <ComplianceBanner text={MARKETING_NOTICE + " " + ACCURACY_NOTICE} />
 
@@ -202,13 +217,14 @@ export default function SavedLeads() {
                 <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Industry</th>
                 <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Saved</th>
                 <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Freshness</th>
+                <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Score</th>
                 <th className="text-left font-medium px-5 py-3">Status</th>
                 <th className="text-right font-medium px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={12} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
-              {!loading && filtered.length === 0 && <tr><td colSpan={12} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
+              {loading && <tr><td colSpan={13} className="px-5 py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan={13} className="px-5 py-12 text-center text-muted-foreground">No saved leads yet. <span className="text-primary">Find and save leads</span> to see them here.</td></tr>}
               {filtered.map((l) => (
                 <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
                   <td className="px-3 py-3"><input type="checkbox" checked={selected.has(l.id)} onChange={() => toggleSelect(l.id)} className="w-4 h-4 rounded accent-primary cursor-pointer" /></td>
@@ -221,6 +237,7 @@ export default function SavedLeads() {
                   <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.industry || "—"}</td>
                   <td className="px-5 py-3 hidden md:table-cell text-muted-foreground">{l.created_date ? new Date(l.created_date).toLocaleDateString() : "—"}</td>
                   <td className="px-5 py-3 hidden lg:table-cell"><FreshnessBadge created_date={l.created_date} retrieval_timestamp={l.retrieval_timestamp} /></td>
+                  <td className="px-5 py-3 hidden md:table-cell"><LeadScoreBadge lead={l} /></td>
                   <td className="px-5 py-3"><StatusBadge status={l.enrichment_status} /></td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1">

@@ -4,11 +4,12 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
 import TermsGate from "@/components/TermsGate";
+import NotificationBell from "@/components/NotificationBell";
 
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -19,11 +20,13 @@ const userNav = [
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },
+  { to: "/add-lead", label: "Add Lead", icon: UserPlus },
   { to: "/outreach", label: "Outreach Templates", icon: Mail },
   { to: "/pipeline", label: "Pipeline", icon: Columns3 },
   { to: "/credits", label: "Credits", icon: Coins },
   { to: "/billing", label: "Billing", icon: CreditCard },
   { to: "/account", label: "Account", icon: UserCircle },
+  { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/help", label: "Help", icon: HelpCircle },
 ];
 
@@ -57,9 +60,12 @@ export default function AppLayout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center px-2 py-1">
-        <Logo variant="sidebar" />
-      </Link>
+      <div className="flex items-center justify-between px-2 py-1">
+        <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center">
+          <Logo variant="sidebar" />
+        </Link>
+        <NotificationBell />
+      </div>
 
       <nav className="mt-8 flex-1 space-y-1">
         {userNav.map((item) => {
@@ -130,7 +136,10 @@ export default function AppLayout() {
         <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center">
           <Logo variant="header" />
         </Link>
-        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></Button>
+        </div>
       </div>
 
       {/* Mobile drawer */}

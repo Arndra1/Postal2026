@@ -30,6 +30,8 @@ import Billing from '@/pages/Billing';
 import Account from '@/pages/Account';
 import Help from '@/pages/Help';
 import OutreachTemplates from '@/pages/OutreachTemplates';
+import AddLead from '@/pages/AddLead';
+import Notifications from '@/pages/Notifications';
 import ThankYou from '@/pages/ThankYou';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminUsers from '@/pages/admin/AdminUsers';
@@ -93,6 +95,8 @@ const AuthenticatedApp = () => {
           <Route path="/account" element={<Account />} />
           <Route path="/help" element={<Help />} />
           <Route path="/outreach" element={<OutreachTemplates />} />
+          <Route path="/add-lead" element={<AddLead />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin/overview" element={<AdminGuard><AdminOverview /></AdminGuard>} />
           <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
           <Route path="/admin/subscriptions" element={<AdminGuard><AdminSubscriptions /></AdminGuard>} />

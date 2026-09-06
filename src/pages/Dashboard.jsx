@@ -9,6 +9,7 @@ import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown, Zap } from "
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 import PastDueBanner from "@/components/PastDueBanner";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -73,12 +74,13 @@ export default function Dashboard() {
                   <th className="text-left font-medium px-5 py-3 hidden md:table-cell">City</th>
                   <th className="text-left font-medium px-5 py-3 hidden md:table-cell">Email</th>
                   <th className="text-left font-medium px-5 py-3">Status</th>
+                  <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Score</th>
                   <th className="text-left font-medium px-5 py-3 hidden lg:table-cell">Added</th>
                 </tr>
               </thead>
               <tbody>
                 {data.recentLeads.length === 0 && (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No leads yet. <Link to="/find-leads" className="text-primary font-medium">Find your first lead</Link>.</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No leads yet. <Link to="/find-leads" className="text-primary font-medium">Find your first lead</Link>.</td></tr>
                 )}
                 {data.recentLeads.map((l) => (
                   <tr key={l.id} className="border-t border-white/30 hover:bg-white/40">
@@ -87,6 +89,7 @@ export default function Dashboard() {
                     <td className="px-5 py-3 hidden md:table-cell">{l.city || "—"}</td>
                     <td className="px-5 py-3 hidden md:table-cell text-muted-foreground">{l.email || "—"}</td>
                     <td className="px-5 py-3"><StatusBadge status={l.contact_status} /></td>
+                    <td className="px-5 py-3 hidden lg:table-cell"><LeadScoreBadge lead={l} /></td>
                     <td className="px-5 py-3 hidden lg:table-cell text-muted-foreground">{l.created_date ? new Date(l.created_date).toLocaleDateString() : "—"}</td>
                   </tr>
                 ))}

@@ -1,0 +1,117 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "credit_low",
+        "subscription_renewing",
+        "subscription_canceled",
+        "subscription_ended",
+        "enrichment_complete",
+        "bulk_enrichment_complete",
+        "new_data_source",
+        "compliance_notice",
+        "general"
+      ],
+      "default": "general"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string",
+      "default": ""
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    },
+    "action_url": {
+      "type": "string",
+      "default": ""
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
