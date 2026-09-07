@@ -17,6 +17,7 @@ import { isVerified, populatedFields, RESULT_FIELDS } from "./providers/types.ts
 import { validatePhone as numverifyValidate, isConfigured as numverifyConfigured } from "./providers/numverify.ts";
 import { normalizeAddress as geoapifyNormalize, isConfigured as geoapifyConfigured } from "./providers/geoapify.ts";
 import { PDL, isConfigured as pdlConfigured, enrich as pdlEnrich } from "./providers/pdl.ts";
+import { ENRICH_SO, isConfigured as enrichSoConfigured, enrich as enrichSoEnrich } from "./providers/enrichSo.ts";
 import { TRACERFY, isConfigured as tracerfyConfigured, hasRequiredInputs as tracerfyHasInputs, enrich as tracerfyEnrich } from "./providers/tracerfy.ts";
 
 const DEDUP_WINDOW_MINUTES = 5;
@@ -236,6 +237,20 @@ export async function runEnrichment(base44, inputs) {
     }
   } else {
     recordSkip(PDL, pdlConfigured() ? "disabled" : "not_configured");
+  }
+
+  // ── Step 3.5: Enrich.so email finder (fallback) ────────────────────
+  // Called ONLY when PDL didn't return a verified email. Enrich.so takes
+  // a first name, last name, and domain to find a professional email —
+  // filling the gap PDL leaves for many records.
+  if (enrichSoConfigured() && isEnabled("enrich_so")) {
+    if (!merged.verified_email) {
+      await callProvider(ENRICH_SO, enrichSoEnrich, enrichedInputs);
+    } else {
+      recordSkip(ENRICH_SO, "skipped, email already filled by earlier provider");
+    }
+  } else {
+    recordSkip(ENRICH_SO, enrichSoConfigured() ? "disabled" : "not_configured");
   }
 
   // ── Step 4: NumVerify phone validation ─────────────────────────────
