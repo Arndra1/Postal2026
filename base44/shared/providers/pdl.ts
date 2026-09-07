@@ -53,11 +53,19 @@ export async function enrich(inputs) {
   }
 
   const d = res.json.data || {};
-  const emails = Array.isArray(d.emails) ? d.emails : [];
-  const verifiedEmail = emails.map((e) => (typeof e === "string" ? e : e.address)).find((a) => a && a.includes("@")) || "";
-  const phones = Array.isArray(d.phone_numbers) ? d.phone_numbers : [];
-  const phone = phones.find((p) => p) || "";
-  const website = d.website || (Array.isArray(d.job_company_website) ? d.job_company_website[0] : "") || (domain ? `https://${domain}` : "");
+  // PDL v5 field names: work_email (string), personal_emails (array of strings),
+  // recommended_personal_email (string), mobile_phone (string).
+  // Older "emails"/"phone_numbers" array fields do not exist in v5 responses.
+  const emailCandidates = [
+    d.work_email,
+    ...(Array.isArray(d.personal_emails) ? d.personal_emails : []),
+    d.recommended_personal_email,
+  ].filter((e) => e && String(e).includes("@"));
+  const verifiedEmail = emailCandidates[0] || "";
+  const phone = d.mobile_phone || "";
+  const website = d.website
+    || (Array.isArray(d.job_company_website) ? d.job_company_website[0] : (d.job_company_website || ""))
+    || (domain ? `https://${domain}` : "");
 
   const results = {
     verified_email: verifiedEmail,
