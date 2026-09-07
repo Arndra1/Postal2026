@@ -21,10 +21,9 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const db = base44.asServiceRole;
 
-    // Reject direct calls by ordinary app users (scheduled workflow has no user session).
-    let user = null;
-    try { user = await base44.auth.me(); } catch (_e) { user = null; }
-    if (user && user.role !== "admin" && user.role !== "owner") {
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "admin" && user.role !== "owner") {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 

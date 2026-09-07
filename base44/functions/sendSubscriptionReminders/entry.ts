@@ -21,13 +21,9 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Direct calls by ordinary app users are rejected. The scheduled workflow has no
-    // user session, so it proceeds — safe because every notice is recorded in
-    // SubscriptionNotice and keyed idempotently (one per user per period), so repeated
-    // or unsolicited runs can never spam members.
-    let user = null;
-    try { user = await base44.auth.me(); } catch (_e) { user = null; }
-    if (user && user.role !== "admin" && user.role !== "owner") {
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "admin" && user.role !== "owner") {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 

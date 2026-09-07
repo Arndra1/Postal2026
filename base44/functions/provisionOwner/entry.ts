@@ -11,10 +11,9 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Reject direct calls from non-admin authenticated users (workflow has no session).
-    let caller = null;
-    try { caller = await base44.auth.me(); } catch (_e) { caller = null; }
-    if (caller && caller.role !== "admin" && caller.role !== "owner") {
+    const caller = await base44.auth.me();
+    if (!caller) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (caller.role !== "admin" && caller.role !== "owner") {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 

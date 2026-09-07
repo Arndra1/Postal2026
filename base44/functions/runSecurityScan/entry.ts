@@ -11,10 +11,9 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Reject direct calls from non-admins
-    let user = null;
-    try { user = await base44.auth.me(); } catch (_e) { user = null; }
-    if (user && user.role !== "admin" && user.role !== "owner") {
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "admin" && user.role !== "owner") {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
