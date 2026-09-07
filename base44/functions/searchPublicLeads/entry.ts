@@ -77,7 +77,7 @@ export default async function(req) {
       if (adapter) {
         let pr;
         try {
-          pr = await adapter(inputs);
+          pr = await adapter(inputs, { db: base44.asServiceRole });
         } catch (_err) {
           return Response.json({ status: "failed", error: "Source temporarily unavailable.", results: [] }, { status: 502 });
         }

@@ -152,7 +152,7 @@ async function executeSearch(search) {
       if (!inputs.state) return [];
       const adapter = STATE_FILING_ADAPTERS[inputs.state.toUpperCase()];
       if (!adapter) return [];
-      const r = await adapter(inputs);
+      const r = await adapter(inputs, { db });
       return r.results || [];
     }
     default:

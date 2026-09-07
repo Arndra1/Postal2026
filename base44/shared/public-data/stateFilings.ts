@@ -51,13 +51,18 @@ const FL_FILING_TYPE = {
 
 // ---- Florida: free daily corporate filing files via public SFTP (HTTPS) ----
 // Fixed-width 1440-char records; field 17 (pos 473, len 8) = File Date (formation).
-export async function searchFlorida(inputs) {
+export async function searchFlorida(inputs, ctx) {
   const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
-  // FL DOS publishes public-access SFTP credentials; stored as a secret env var
-  // (FL_DOS_SFTP_AUTH = "user:password") to keep credentials out of source code.
-  const flCreds = Deno.env.get("FL_DOS_SFTP_AUTH") || "";
-  if (!flCreds) return { status: "failed", error: "fl_credentials_not_configured", results: [] };
-  const auth = "Basic " + btoa(flCreds);
+  // FL DOS public-access credentials are stored in the PublicDataSource entity (admin-only)
+  // to keep them out of source code without requiring a secret env var.
+  let auth = "";
+  if (ctx && ctx.db) {
+    try {
+      const rows = await ctx.db.entities.PublicDataSource.filter({ source_key: "fl_dos_sftp" });
+      if (rows && rows[0] && rows[0].api_endpoint) auth = rows[0].api_endpoint;
+    } catch (_e) { /* fall through */ }
+  }
+  if (!auth) return { status: "failed", error: "fl_credentials_not_configured", results: [] };
   // Collect the most recent business days (cap at 7 to keep the request light).
   // FL daily files only exist on work days; weekends/holidays are skipped.
   const days = [];
