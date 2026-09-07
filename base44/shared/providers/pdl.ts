@@ -5,17 +5,17 @@ import { splitName, domainFromWebsite, fetchJson, emptyResult, failedResult, pop
 export const PDL = {
   key: "people_data_labs",
   name: "People Data Labs",
-  secretNames: ["PEOPLE_DATA_LABS_API_KEY", "PDL_API_KEY"],
+  secretNames: ["PDL_API_KEY"],
   capabilities: ["person", "company", "email", "phone"],
   defaultPriority: 10,
 };
 
 export function isConfigured() {
-  return !!(process.env.PEOPLE_DATA_LABS_API_KEY || process.env.PDL_API_KEY);
+  return !!process.env.PDL_API_KEY;
 }
 
 export async function enrich(inputs) {
-  const key = process.env.PEOPLE_DATA_LABS_API_KEY || process.env.PDL_API_KEY;
+  const key = process.env.PDL_API_KEY;
   const start = Date.now();
   if (!key) return emptyResult(PDL.name, PDL.key, Date.now() - start, "missing_api_key");
 

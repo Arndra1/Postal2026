@@ -10,23 +10,23 @@
 //                  resp: { success, data: { found, displayName, headline,
 //                         companyName, location, profileUrl, ... } }
 //
-// Auth: Bearer ENRICH_SO_API_KEY (or legacy ENRICH_API_KEY)
+// Auth: Bearer ENRICH_SO_API_KEY
 import { splitName, domainFromWebsite, fetchJson, emptyResult, failedResult, populatedFields } from "./types.ts";
 
 export const ENRICH_SO = {
   key: "enrich_so",
   name: "Enrich.so",
-  secretNames: ["ENRICH_SO_API_KEY", "ENRICH_API_KEY"],
+  secretNames: ["ENRICH_SO_API_KEY"],
   capabilities: ["person", "company", "email"],
   defaultPriority: 20,
 };
 
 export function isConfigured() {
-  return !!(process.env.ENRICH_SO_API_KEY || process.env.ENRICH_API_KEY);
+  return !!process.env.ENRICH_SO_API_KEY;
 }
 
 export async function enrich(inputs) {
-  const key = process.env.ENRICH_SO_API_KEY || process.env.ENRICH_API_KEY;
+  const key = process.env.ENRICH_SO_API_KEY;
   const start = Date.now();
   if (!key) return emptyResult(ENRICH_SO.name, ENRICH_SO.key, Date.now() - start, "missing_api_key");
 
