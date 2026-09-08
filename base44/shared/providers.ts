@@ -175,8 +175,11 @@ export async function runEnrichment(base44, inputs) {
     const contributed = [];
     if (result.status === "success" && result.results) {
       for (const f of RESULT_FIELDS) {
-        if (!merged[f] && result.results[f] && String(result.results[f]).trim()) {
-          merged[f] = result.results[f];
+        const v = result.results[f];
+        const isString = typeof v === "string" && v.trim() !== "";
+        const isNumber = typeof v === "number" && Number.isFinite(v);
+        if (!merged[f] && (isString || isNumber)) {
+          merged[f] = v;
           contributed.push(f);
         }
       }
