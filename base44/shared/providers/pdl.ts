@@ -77,6 +77,17 @@ export async function enrich(inputs) {
     company: d.job_company_name || company,
   };
 
+  // Logging-only guard: if PDL returned a profile but none of the core
+  // contact fields (email/phone/website) are populated — common with
+  // plan-tier restrictions — label this "empty" so the provider_breakdown
+  // log reads accurately. Downstream behavior is identical: callProvider's
+  // field-level merge contributes nothing either way (no populated fields
+  // to fill), and emptyResult carries the same data_sources entry, so the
+  // only visible difference is the status label in the breakdown.
+  if (!verifiedEmail && !phone && !website) {
+    return emptyResult(PDL.name, PDL.key, duration_ms);
+  }
+
   return {
     status: "success",
     results,
