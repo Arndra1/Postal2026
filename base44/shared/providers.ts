@@ -19,6 +19,7 @@ import { normalizeAddress as geoapifyNormalize, isConfigured as geoapifyConfigur
 import { PDL, isConfigured as pdlConfigured, enrich as pdlEnrich } from "./providers/pdl.ts";
 import { ENRICH_SO, isConfigured as enrichSoConfigured, enrich as enrichSoEnrich } from "./providers/enrichSo.ts";
 import { TRACERFY, isConfigured as tracerfyConfigured, hasRequiredInputs as tracerfyHasInputs, enrich as tracerfyEnrich } from "./providers/tracerfy.ts";
+import { resolveDomain } from "./providers/domainResolver.ts";
 
 const DEDUP_WINDOW_MINUTES = 5;
 
@@ -237,6 +238,47 @@ export async function runEnrichment(base44, inputs) {
     }
   } else {
     recordSkip(PDL, pdlConfigured() ? "disabled" : "not_configured");
+  }
+
+  // ── Step 3.4: Domain resolution (feeds Enrich.so) ──────────────────
+  // Public-record LLC leads often arrive with only a business name + city
+  // and no website. Enrich.so's email-finder needs a domain, so resolve one
+  // here (Clearbit Autocomplete → PDL Company Search, cached) BEFORE the
+  // Enrich.so step. Only runs when no website is present yet and a business
+  // name exists. Charges 0 credits; never overwrites a website already
+  // supplied by an earlier provider (Geoapify/Tracerfy/PDL).
+  const hasWebsite = !!(enrichedInputs.website && enrichedInputs.website.trim());
+  if (!hasWebsite && enrichedInputs.business_name) {
+    const resolved = await resolveDomain(
+      base44,
+      enrichedInputs.business_name,
+      enrichedInputs.city,
+      enrichedInputs.state
+    );
+    if (resolved.domain) {
+      enrichedInputs.website = `https://${resolved.domain}`;
+    }
+    provider_breakdown.push({
+      provider: "DomainResolver",
+      provider_key: "domain_resolver",
+      status: resolved.domain ? "success" : "empty",
+      fields: resolved.domain ? ["website"] : [],
+      duration_ms: resolved.duration_ms,
+      error: "",
+      method: resolved.method,
+    });
+    if (resolved.domain && !data_sources.includes("DomainResolver")) {
+      data_sources.push("DomainResolver");
+    }
+  } else {
+    provider_breakdown.push({
+      provider: "DomainResolver",
+      provider_key: "domain_resolver",
+      status: "skipped",
+      fields: [],
+      duration_ms: 0,
+      error: hasWebsite ? "skipped, website already present" : "skipped, no business name",
+    });
   }
 
   // ── Step 3.5: Enrich.so email finder (fallback) ────────────────────

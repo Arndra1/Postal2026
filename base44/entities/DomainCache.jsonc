@@ -1,0 +1,96 @@
+{
+  "name": "DomainCache",
+  "type": "object",
+  "properties": {
+    "cache_key": {
+      "type": "string",
+      "description": "Normalized lowercase/trimmed/punctuation-stripped 'businessname+city' \u2014 logical unique lookup key."
+    },
+    "business_name": {
+      "type": "string",
+      "default": ""
+    },
+    "city": {
+      "type": "string",
+      "default": ""
+    },
+    "domain": {
+      "type": "string",
+      "default": ""
+    },
+    "found": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when a domain was successfully resolved."
+    },
+    "resolved_via": {
+      "type": "string",
+      "enum": [
+        "clearbit",
+        "pdl_company"
+      ],
+      "default": "clearbit"
+    }
+  },
+  "required": [
+    "cache_key"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
