@@ -86,23 +86,25 @@ async function pdlCompanyLookup(businessName, city, state) {
   const key = process.env.PDL_API_KEY;
   if (!key) return null;
 
-  const query = { name: { term: businessName } };
-  const location = [city, state].filter(Boolean).join(", ");
-  if (location) query.location = location;
-
+  // Company Enrich returns a single best-guess match for a name (no
+  // location scoping). The nameMatches guard below prevents accepting a
+  // domain for the WRONG company when the business name is generic.
+  const url = `https://api.peopledatalabs.com/v5/company/enrich?name=${encodeURIComponent(businessName)}`;
   let res;
   try {
-    res = await fetchJson("https://api.peopledatalabs.com/v5/company/search", {
-      method: "POST",
+    res = await fetchJson(url, {
+      method: "GET",
       headers: { "X-Api-Key": key, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ query, size: 1, titlecase: true }),
     });
   } catch (_err) {
     return null;
   }
-  if (!res.ok || !res.json || !Array.isArray(res.json.data) || res.json.data.length === 0) return null;
-  const co = res.json.data[0] || {};
-  return stripProtocol(co.website || "") || null;
+  if (!res.ok || !res.json || !res.json.name) return null;
+  // Guard: only accept the domain if PDL's returned company name is a
+  // loose match for the input business name (same logic as clearbitLookup).
+  const bizNorm = normalizeName(businessName);
+  if (!nameMatches(bizNorm, normalizeName(res.json.name))) return null;
+  return stripProtocol(res.json.website || "") || null;
 }
 
 // ---- cache read/write ----
