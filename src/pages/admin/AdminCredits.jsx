@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import AdminTable from "@/components/AdminTable";
+import GiftCreditsSection from "@/components/admin/GiftCreditsSection";
 
 export default function AdminCredits() {
   const [wallets, setWallets] = useState([]);
   const [ledger, setLedger] = useState([]);
-  useEffect(() => {
+
+  const loadData = useCallback(() => {
     base44.entities.CreditWallet.list().then(setWallets);
     base44.entities.CreditLedger.list().then((l) => setLedger(l.slice().sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0))));
   }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const walletCols = [
     { key: "user_id", label: "User ID", hidden: "hidden lg:table-cell", render: (r) => <span className="font-mono text-xs">{r.user_id?.slice(0, 8)}…</span> },
@@ -29,6 +33,7 @@ export default function AdminCredits() {
   return (
     <div>
       <PageHeader title="Credits" subtitle="Credit wallets and ledger across all users." />
+      <GiftCreditsSection onGranted={loadData} />
       <h2 className="font-heading text-lg font-semibold mb-3">Wallets</h2>
       <AdminTable columns={walletCols} rows={wallets} empty="No wallets." />
       <h2 className="font-heading text-lg font-semibold mt-8 mb-3">Ledger</h2>
