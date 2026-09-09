@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset, Award, Receipt
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
@@ -19,6 +19,8 @@ const userNav = [
   { to: "/find-leads", label: "Find Leads (Legacy)", icon: Search },
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/federal-grants", label: "Federal Grants", icon: Landmark },
+  { to: "/grants-gov", label: "Grants.gov Opportunities", icon: Award },
+  { to: "/tax-delinquent", label: "Tax-Delinquent Taxpayers", icon: Receipt },
   { to: "/enrich", label: "Enrich", icon: Sparkles },
   { to: "/saved-leads", label: "Saved Leads", icon: FolderHeart },
   { to: "/add-lead", label: "Add Lead", icon: UserPlus },
