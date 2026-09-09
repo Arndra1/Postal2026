@@ -193,7 +193,7 @@ export default function FederalGrants() {
                 busy={{}}
                 savedLead={savedIds.has((r.official_record_id || "").toLowerCase()) ? { id: r.official_record_id } : null}
                 onSave={saveLead}
-                onEnrich={() => {}}
+                hideEnrich={true}
                 onStar={() => {}}
                 onPipeline={() => {}}
                 onTagsChange={() => {}}

@@ -214,7 +214,7 @@ export default function TaxDelinquent() {
                 busy={busySaving}
                 savedLead={savedIds.has((r.official_record_id || "").toLowerCase()) ? { id: r.official_record_id } : null}
                 onSave={saveLead}
-                onEnrich={() => {}}
+                hideEnrich={true}
                 onStar={() => {}}
                 onPipeline={() => {}}
                 onTagsChange={() => {}}

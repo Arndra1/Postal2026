@@ -25,7 +25,7 @@ function Field({ label, value }) {
 // Unified lead card for ALL source types (state filings + public records).
 // Public data = "PUBLIC RECORD" badge. Enriched contacts = "VERIFIED CONTACT" section.
 // Never fabricates missing fields — they are simply not shown.
-export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData, onSave, onEnrich, onStar, onPipeline, onTagsChange, lists, onCreateList, onListIdsChange }) {
+export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData, onSave, onEnrich, onStar, onPipeline, onTagsChange, lists, onCreateList, onListIdsChange, hideEnrich = false }) {
   const [expanded, setExpanded] = useState(null);
   const saving = busy[k] === "saving";
   const saved = !!savedLead;
@@ -106,10 +106,12 @@ export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData,
             <List className="w-4 h-4" />
           </Button>
         )}
-        <Button variant="outline" size="sm" onClick={() => onEnrich(r)} disabled={enriching} title="Enrich contact (5 credits on success only)">
-          {enriching ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : enriched ? <Check className="w-4 h-4 mr-1 text-accent" /> : enrichFailed ? <X className="w-4 h-4 mr-1 text-destructive" /> : <Sparkles className="w-4 h-4 mr-1" />}
-          Enrich
-        </Button>
+        {!hideEnrich && (
+          <Button variant="outline" size="sm" onClick={() => onEnrich(r)} disabled={enriching} title="Enrich contact (5 credits on success only)">
+            {enriching ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : enriched ? <Check className="w-4 h-4 mr-1 text-accent" /> : enrichFailed ? <X className="w-4 h-4 mr-1 text-destructive" /> : <Sparkles className="w-4 h-4 mr-1" />}
+            Enrich
+          </Button>
+        )}
         <Button variant="ghost" size="sm" onClick={() => onSave(r)} disabled={saving || saved} title="Save lead (0 credits)">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4 text-accent" /> : <Save className="w-4 h-4" />}
           {!saved && "Save"}
