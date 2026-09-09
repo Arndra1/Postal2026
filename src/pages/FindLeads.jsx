@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Search, Loader2, AlertCircle } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
+import { useToast } from "@/components/ui/use-toast";
 import PublicLeadRow from "@/components/leads/PublicLeadRow";
 
 const TABS = [
@@ -24,6 +25,7 @@ const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","
 
 export default function FindLeads() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [tab, setTab] = useState("government_open_data");
   const [query, setQuery] = useState({ business_name: "", person_name: "", city: "", state: "", industry: "All" });
   const [results, setResults] = useState([]);
@@ -100,9 +102,37 @@ export default function FindLeads() {
         lead_id: leadId,
         inputs: { person_name: r.person_name, business_name: r.business_name, website: r.website, job_title: r.job_title, city: r.city, state: r.state },
       });
-      setBusy((b) => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
-    } catch (_e) {
+      const st = res.data.status;
+      const code = res.data.code || "";
+      if (st === "success") {
+        setBusy((b) => ({ ...b, [ke]: "enriched" }));
+      } else if (st === "empty") {
+        setBusy((b) => ({ ...b, [ke]: "empty" }));
+        toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });
+      } else if (st === "provider_error") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+      } else if (code === "no_membership") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Subscription required", description: res.data.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Insufficient credits", description: res.data.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Enrichment failed", description: res.data.error || "Please try again.", variant: "destructive" });
+      }
+    } catch (e) {
+      const err = e?.response?.data || {};
+      const code = err.code || "";
       setBusy((b) => ({ ...b, [ke]: "failed" }));
+      if (code === "no_membership") {
+        toast({ title: "Subscription required", description: err.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        toast({ title: "Insufficient credits", description: err.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        toast({ title: "Enrichment failed", description: err.error || e?.message || "A network error occurred. Please try again.", variant: "destructive" });
+      }
     }
   };
 

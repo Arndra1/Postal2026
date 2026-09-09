@@ -87,13 +87,16 @@ export default function SavedLeads() {
       setBusy(b => ({ ...b, [l.id]: "loading" }));
       try {
         const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
-        if (res.data.status === "success") {
+        const st = res.data.status;
+        if (st === "success") {
           successCount++;
           setBusy(b => ({ ...b, [l.id]: "enriched" }));
+        } else if (st === "empty") {
+          setBusy(b => ({ ...b, [l.id]: "empty" }));
         } else {
           setBusy(b => ({ ...b, [l.id]: "failed" }));
         }
-      } catch (_e) {
+      } catch (e) {
         setBusy(b => ({ ...b, [l.id]: "failed" }));
       }
       setBulkProgress({ done: i + 1, total: toEnrich.length });
@@ -119,14 +122,38 @@ export default function SavedLeads() {
     setBusy(b => ({ ...b, [l.id]: "loading" }));
     try {
       const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
-      if (res.data.status === "provider_error") {
+      const st = res.data.status;
+      const code = res.data.code || "";
+      if (st === "success") {
+        setBusy(b => ({ ...b, [l.id]: "enriched" }));
+        load();
+      } else if (st === "empty") {
+        setBusy(b => ({ ...b, [l.id]: "empty" }));
+        toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });
+      } else if (st === "provider_error") {
+        setBusy(b => ({ ...b, [l.id]: "failed" }));
         toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+      } else if (code === "no_membership") {
+        setBusy(b => ({ ...b, [l.id]: "failed" }));
+        toast({ title: "Subscription required", description: res.data.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        setBusy(b => ({ ...b, [l.id]: "failed" }));
+        toast({ title: "Insufficient credits", description: res.data.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        setBusy(b => ({ ...b, [l.id]: "failed" }));
+        toast({ title: "Enrichment failed", description: res.data.error || "Please try again.", variant: "destructive" });
       }
-      setBusy(b => ({ ...b, [l.id]: res.data.status === "success" ? "enriched" : "failed" }));
-      if (res.data.status === "success") load();
-    } catch (_e) {
-      toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+    } catch (e) {
+      const err = e?.response?.data || {};
+      const code = err.code || "";
       setBusy(b => ({ ...b, [l.id]: "failed" }));
+      if (code === "no_membership") {
+        toast({ title: "Subscription required", description: err.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        toast({ title: "Insufficient credits", description: err.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        toast({ title: "Enrichment failed", description: err.error || e?.message || "A network error occurred. Please try again.", variant: "destructive" });
+      }
     }
   };
 

@@ -119,11 +119,38 @@ export default function NewBusinessFinder() {
         leadId = lead.id; setSavedLeads((s) => ({ ...s, [k]: lead }));
       }
       const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs: { business_name: r.business_name, state: r.state, city: r.city } });
-      setBusy((b) => ({ ...b, [ke]: res.data.status === "success" ? "enriched" : "failed" }));
-      if (res.data.status === "provider_error") {
+      const st = res.data.status;
+      const code = res.data.code || "";
+      if (st === "success") {
+        setBusy((b) => ({ ...b, [ke]: "enriched" }));
+      } else if (st === "empty") {
+        setBusy((b) => ({ ...b, [ke]: "empty" }));
+        toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });
+      } else if (st === "provider_error") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
         toast({ title: "Provider temporarily unavailable", description: "A data provider is temporarily unavailable. Please try again shortly.", variant: "destructive" });
+      } else if (code === "no_membership") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Subscription required", description: res.data.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Insufficient credits", description: res.data.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        setBusy((b) => ({ ...b, [ke]: "failed" }));
+        toast({ title: "Enrichment failed", description: res.data.error || "Please try again.", variant: "destructive" });
       }
-    } catch (_e) { setBusy((b) => ({ ...b, [ke]: "failed" })); }
+    } catch (e) {
+      const err = e?.response?.data || {};
+      const code = err.code || "";
+      setBusy((b) => ({ ...b, [ke]: "failed" }));
+      if (code === "no_membership") {
+        toast({ title: "Subscription required", description: err.error || "Subscribe to enrich leads.", variant: "destructive" });
+      } else if (code === "insufficient_credits") {
+        toast({ title: "Insufficient credits", description: err.error || "Purchase a credit pack to continue.", variant: "destructive" });
+      } else {
+        toast({ title: "Enrichment failed", description: err.error || e?.message || "A network error occurred. Please try again.", variant: "destructive" });
+      }
+    }
   };
 
   const onStar = async (leadId, starred) => {
