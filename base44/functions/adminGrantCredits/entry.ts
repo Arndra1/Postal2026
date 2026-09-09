@@ -9,7 +9,15 @@ import { logActivity, logCompliance } from "../../shared/logging.ts";
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    // Auth boundary: auth.me() throws on missing/invalid tokens — without
+    // this guard an unauthenticated request falls through to the outer
+    // catch and returns a misleading 500 instead of a clean 401.
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (_authErr) {
+      return unauthorized();
+    }
     if (!user) return unauthorized();
     if (!isAdmin(user.role)) return forbidden();
 
