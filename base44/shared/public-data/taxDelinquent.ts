@@ -133,7 +133,12 @@ function parseNY(html, listType) {
 
 function buildNYProspect(name, taxType, county, warrants, listType) {
   const isBusiness = looksLikeBusiness(name);
-  const totalBalance = warrants.reduce((sum, w) => sum + parseAmount(w.totalBalance || w.filedAmount), 0);
+  // The "Total filed balance amount" column appears only in the first row of each
+  // ranked debtor and already represents the grand total across all warrants.
+  // Summing it with individual warrant amounts would double-count. Use it when
+  // available; fall back to summing filed amounts only if it's missing.
+  const firstTotal = parseAmount(warrants[0]?.totalBalance);
+  const totalBalance = firstTotal > 0 ? firstTotal : warrants.reduce((sum, w) => sum + parseAmount(w.filedAmount), 0);
   const firstWarrantId = warrants[0]?.warrantId || "";
   const latestDate = warrants.map(w => w.filedDate).filter(Boolean).sort().reverse()[0] || "";
   const sourceUrl = listType === "businesses" ? NY_URLS.businesses : NY_URLS.individuals;
