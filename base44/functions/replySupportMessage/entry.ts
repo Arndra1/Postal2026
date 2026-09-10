@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
 import { isStaff, unauthorized, badRequest, forbidden } from "../../shared/roles.ts";
 import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
+import { logActivity } from "../../shared/logging.ts";
 
 // Posts a reply to an existing support request thread.
 // - Authenticated users (the ticket owner) and staff/admin/owner can reply.
@@ -73,7 +74,12 @@ export default async function(req) {
             "You can also view and reply to this conversation in the Help section of your RingBellz account.\n\n" +
             "— RingBellz Support"
         });
-      } catch (_e) { /* best-effort */ }
+      } catch (e) {
+        console.error("[replySupportMessage] Staff reply email failed for:", ticket.account_email, e?.message || e);
+        await logActivity(base44, user, "email_delivery_failed",
+          "Failed to send staff reply to " + ticket.account_email + ": " + (e?.message || String(e)),
+          { support_request_id: supportRequestId, recipient: ticket.account_email, context: "replySupportMessage_staff" });
+      }
     } else {
       // Notify the customer-service inboxes that the user replied.
       const internalBody =
@@ -89,7 +95,12 @@ export default async function(req) {
             subject: "[RingBellz Support] Reply: " + ticket.subject,
             body: internalBody
           });
-        } catch (_e) { /* best-effort */ }
+        } catch (e) {
+          console.error("[replySupportMessage] SendEmail failed for recipient:", to, e?.message || e);
+          await logActivity(base44, user, "email_delivery_failed",
+            "Failed to send reply notification to " + to + ": " + (e?.message || String(e)),
+            { support_request_id: supportRequestId, recipient: to, context: "replySupportMessage_user" });
+        }
       }
     }
 

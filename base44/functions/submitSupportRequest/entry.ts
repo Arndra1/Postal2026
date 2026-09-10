@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
+import { logActivity } from "../../shared/logging.ts";
 
 // RingBellz support: email-based customer support only — no phone support.
 // Stores the request, notifies the customer-service inboxes, and sends the
@@ -65,7 +66,12 @@ export default async function(req) {
           subject: "[RingBellz Support] " + category + ": " + subject,
           body: internalBody
         });
-      } catch (_e) { /* email delivery is best-effort; the request is stored */ }
+      } catch (e) {
+        console.error("[submitSupportRequest] SendEmail failed for recipient:", to, e?.message || e);
+        await logActivity(base44, user, "email_delivery_failed",
+          "Failed to send support notification to " + to + ": " + (e?.message || String(e)),
+          { support_request_id: record.id, recipient: to, context: "submitSupportRequest" });
+      }
     }
 
     // Confirmation email to the requester.
@@ -82,7 +88,12 @@ export default async function(req) {
           "The RingBellz Support Team will respond by email. Please do not submit duplicate requests for the same issue.\n\n" +
           "— RingBellz Support"
       });
-    } catch (_e) { /* best-effort */ }
+    } catch (e) {
+      console.error("[submitSupportRequest] Confirmation email failed for:", accountEmail, e?.message || e);
+      await logActivity(base44, user, "email_delivery_failed",
+        "Failed to send confirmation email to " + accountEmail + ": " + (e?.message || String(e)),
+        { support_request_id: record.id, recipient: accountEmail, context: "submitSupportRequest_confirmation" });
+    }
 
     return Response.json({
       ok: true,
