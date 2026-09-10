@@ -8,7 +8,8 @@ import { isAdmin, isOwner, unauthorized, forbidden } from "../../shared/roles.ts
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    let user;
+    try { user = await base44.auth.me(); } catch (_authErr) { return unauthorized(); }
     if (!user) return unauthorized();
     if (!isAdmin(user.role) && !isOwner(user.role)) return forbidden();
 
