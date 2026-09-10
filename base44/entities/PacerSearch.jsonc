@@ -1,0 +1,103 @@
+{
+  "name": "PacerSearch",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Search inputs: first_name, last_name."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "no_results",
+        "failed",
+        "unauthorized"
+      ],
+      "default": "failed"
+    },
+    "results": {
+      "type": "object",
+      "description": "Raw PACER PCL party-search response payload."
+    },
+    "credits_charged": {
+      "type": "number",
+      "default": 0
+    },
+    "cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Real per-search PACER cost in USD cents (informational)."
+    },
+    "error": {
+      "type": "string",
+      "default": ""
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}

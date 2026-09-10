@@ -37,6 +37,7 @@ import Notifications from '@/pages/Notifications';
 import FederalGrants from '@/pages/FederalGrants';
 import GrantsGov from '@/pages/GrantsGov';
 import TaxDelinquent from '@/pages/TaxDelinquent';
+import PacerSearch from '@/pages/PacerSearch';
 import SavedSearches from '@/pages/SavedSearches';
 import ThankYou from '@/pages/ThankYou';
 import AdminOverview from '@/pages/admin/AdminOverview';
@@ -124,6 +125,7 @@ const AuthenticatedApp = () => {
           <Route path="/federal-grants" element={<FederalGrants />} />
           <Route path="/grants-gov" element={<GrantsGov />} />
           <Route path="/tax-delinquent" element={<TaxDelinquent />} />
+          <Route path="/pacer-search" element={<PacerSearch />} />
           <Route path="/saved-searches" element={<SavedSearches />} />
           <Route path="/admin/overview" element={<AdminGuard><AdminOverview /></AdminGuard>} />
           <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
