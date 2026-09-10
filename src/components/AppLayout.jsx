@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset, Award, Receipt
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset, Award, Receipt, Heart
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
@@ -18,6 +18,7 @@ const userNav = [
   { to: "/bankruptcy", label: "Bankruptcy Prospects", icon: Gavel },
   { to: "/find-leads", label: "Find Leads (Legacy)", icon: Search },
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
+  { to: "/find-leads-unified", label: "Nonprofits", icon: Heart, state: { tab: "nonprofits" } },
   { to: "/federal-grants", label: "Federal Grants", icon: Landmark },
   { to: "/grants-gov", label: "Grants.gov Opportunities", icon: Award },
   { to: "/tax-delinquent", label: "Tax-Delinquent Taxpayers", icon: Receipt },
@@ -79,6 +80,7 @@ export default function AppLayout() {
             <Link
               key={item.to}
               to={item.to}
+              state={item.state}
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                 active ? "bg-primary text-primary-foreground lady-shadow" : "text-muted-foreground hover:bg-secondary/15 hover:text-foreground"
