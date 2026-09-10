@@ -60,11 +60,10 @@ export default function Landing() {
               <Sparkles className="w-3.5 h-3.5" /> Public-Data Lead Intelligence &amp; Prospecting
             </div>
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight text-foreground">
-              Find Better Leads.<br />Get Better Data.<br />
-              <span className="text-primary">Close More Business.</span>
+              Find the right people.<br />Get their <span className="text-primary">real contact info.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              RingBellz helps businesses discover prospects using public data and enrich lead records through permitted third-party data providers — built for lawful marketing, prospecting, and business development.
+              RingBellz is a prospecting app — it helps small businesses find people and companies worth reaching out to, then digs up their real contact info so you can actually get in touch.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link to="/register">
