@@ -6,7 +6,6 @@ export const TERMS_VERSION = "1.0";
 // RingBellz offers email-based customer support only — no phone support.
 // PRIMARY PUBLIC customer-service address — shown to customers on the website,
 // footer, Help/Contact pages, billing pages, and terms/privacy contact points.
-// Secondary public address: customerservice1@abundance-consultants.com.
 // IMPORTANT: support@abundance-consultants.com is the PRIVATE owner/admin
 // account address — it must NEVER be displayed publicly or shown to customers.
 // The owner receives internal copies of customer-service communications.

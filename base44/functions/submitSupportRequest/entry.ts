@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
+import { CUSTOMER_SERVICE_EMAIL, OWNER_EMAIL } from "../../shared/emails.ts";
 import { logActivity } from "../../shared/logging.ts";
 
 // RingBellz support: email-based customer support only — no phone support.
@@ -59,7 +59,7 @@ export default async function(req) {
       "Company: " + (company || "—") + "\n" +
       "Submitted: " + submittedAt + "\n\n" +
       "Message:\n" + message;
-    for (const to of [CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL]) {
+    for (const to of [CUSTOMER_SERVICE_EMAIL, OWNER_EMAIL]) {
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: to,

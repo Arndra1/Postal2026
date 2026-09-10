@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
 import { isStaff, unauthorized, badRequest, forbidden } from "../../shared/roles.ts";
-import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from "../../shared/emails.ts";
+import { CUSTOMER_SERVICE_EMAIL, OWNER_EMAIL } from "../../shared/emails.ts";
 import { logActivity } from "../../shared/logging.ts";
 
 // Posts a reply to an existing support request thread.
@@ -88,7 +88,7 @@ export default async function(req) {
         "Category: " + ticket.category + "\n" +
         "From: " + (ticket.name || "—") + " <" + ticket.account_email + ">\n\n" +
         "Reply:\n" + messageText;
-      for (const to of [CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL]) {
+      for (const to of [CUSTOMER_SERVICE_EMAIL, OWNER_EMAIL]) {
         try {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: to,

@@ -8,5 +8,4 @@ export const OWNER_EMAIL = "support@abundance-consultants.com";
 
 // Public customer-service addresses (shown to customers).
 export const CUSTOMER_SERVICE_EMAIL = "customerservice@abundance-consultants.com";
-export const CUSTOMER_SERVICE_EMAIL_2 = "customerservice1@abundance-consultants.com";
-export const CUSTOMER_SERVICE_EMAILS = [CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2];
+export const CUSTOMER_SERVICE_EMAILS = [CUSTOMER_SERVICE_EMAIL];
