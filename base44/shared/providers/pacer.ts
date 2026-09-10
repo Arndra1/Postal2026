@@ -39,12 +39,17 @@ export async function authenticate() {
     if (!resp.ok) {
       return { ok: false, token: "", error: `PACER auth HTTP ${resp.status}` };
     }
-    const data = await resp.json().catch(() => ({}));
-    if (data.loginResult !== "0") {
-      const msg = data.errorDescription || `PACER auth failed (loginResult: ${data.loginResult})`;
+    // PACER CSO auth returns application/xml: <CsoAuth><nextGenCSO>..</nextGenCSO>
+    //   <loginResult>0|1</loginResult><errorDescription>..</errorDescription></CsoAuth>
+    // loginResult "0" = success, "1" = failure.
+    const xml = await resp.text();
+    const loginResult = extractXmlTag(xml, "loginResult");
+    const errorDescription = extractXmlTag(xml, "errorDescription");
+    if (loginResult !== "0") {
+      const msg = errorDescription || `PACER auth failed (loginResult: ${loginResult || "empty"})`;
       return { ok: false, token: "", error: msg };
     }
-    const token = data.nextGenCSO || "";
+    const token = extractXmlTag(xml, "nextGenCSO") || "";
     if (!token) {
       return { ok: false, token: "", error: "PACER auth returned no nextGenCSO token" };
     }
@@ -84,6 +89,13 @@ export async function searchParty(token, firstName, lastName) {
   } catch (e) {
     return { ok: false, found: false, results: {}, error: `PCL search failed: ${e.message || String(e)}` };
   }
+}
+
+// Extracts the text content of <tagName>..</tagName> from an XML string.
+// Returns "" if the tag is absent or empty.
+function extractXmlTag(xml, tagName) {
+  const m = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`).exec(xml || "");
+  return m ? m[1].trim() : "";
 }
 
 function fetchWithTimeout(url, options, timeoutMs = REQUEST_TIMEOUT_MS) {
