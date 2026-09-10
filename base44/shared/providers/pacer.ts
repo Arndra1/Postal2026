@@ -22,6 +22,7 @@ export function isConfigured() {
 export async function authenticate() {
   const username = secrets.get("PACER_USERNAME");
   const password = secrets.get("PACER_PASSWORD");
+  const clientCode = secrets.get("PACER_CLIENT_CODE") || "";
   if (!username || !password) {
     return { ok: false, token: "", error: "PACER credentials not configured" };
   }
@@ -32,7 +33,7 @@ export async function authenticate() {
       body: JSON.stringify({
         loginId: username,
         password,
-        clientCode: "",
+        clientCode,
         redactFlag: "1"
       })
     });
