@@ -9,7 +9,8 @@ import { CUSTOMER_SERVICE_EMAIL, CUSTOMER_SERVICE_EMAIL_2, OWNER_EMAIL } from ".
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    let user;
+    try { user = await base44.auth.me(); } catch (_authErr) { return unauthorized(); }
     if (!user) return unauthorized();
 
     let body = {};
