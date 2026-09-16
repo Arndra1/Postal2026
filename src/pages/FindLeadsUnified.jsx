@@ -15,6 +15,7 @@ import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
 import NonprofitLeadCard from "@/components/search/NonprofitLeadCard";
 import CustomerTypePrompt, { SUGGESTED_SEARCHES } from "@/components/search/CustomerTypePrompt";
 import SaveSearchButton from "@/components/search/SaveSearchButton";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const NTEE_GROUPS = [
   { id: "", label: "All categories" },
@@ -389,7 +390,7 @@ export default function FindLeadsUnified() {
       <div className="flex flex-wrap gap-1.5 mb-5">
         {TABS.map(t => (
           <button key={t.key} onClick={() => { setTab(t.key); setResults([]); setSearched(false); setError(""); }}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-white/30 border border-white/40 text-muted-foreground hover:text-foreground"}`}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? "bg-primary text-primary-foreground" : "bg-white/30 dark:bg-white/5 border border-white/40 dark:border-white/10 text-muted-foreground hover:text-foreground"}`}
             title={t.hint}>
             <t.icon className="w-4 h-4 inline mr-1.5" />{t.label}
           </button>
@@ -400,7 +401,7 @@ export default function FindLeadsUnified() {
         <div className="flex flex-wrap gap-1.5 mb-5">
           {PR_SUBS.map(s => (
             <button key={s.key} onClick={() => { setPrSub(s.key); setResults([]); setSearched(false); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${prSub === s.key ? "bg-secondary/20 text-secondary-foreground border border-secondary/40" : "bg-white/30 border border-white/40 text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${prSub === s.key ? "bg-secondary/20 text-secondary-foreground border border-secondary/40" : "bg-white/30 dark:bg-white/5 border border-white/40 dark:border-white/10 text-muted-foreground hover:text-foreground"}`}
               title={s.hint}>
               {s.label}
             </button>
@@ -418,32 +419,47 @@ export default function FindLeadsUnified() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">State (optional)</Label>
-                <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  <option value="">All states</option>
-                  {ALL_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={filters.state}
+                  onChange={(v) => setFilters({ ...filters, state: v })}
+                  aria-label="State"
+                  options={[{ value: "", label: "All states" }, ...ALL_STATES.map((s) => ({ value: s, label: s }))]}
+                  className="h-10"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Category (NTEE)</Label>
-                <select value={filters.ntee} onChange={e => setFilters({ ...filters, ntee: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  {NTEE_GROUPS.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={filters.ntee}
+                  onChange={(v) => setFilters({ ...filters, ntee: v })}
+                  aria-label="Category (NTEE)"
+                  options={NTEE_GROUPS.map((g) => ({ value: String(g.id), label: g.label }))}
+                  className="h-10"
+                />
               </div>
             </>
           ) : isStateFiling ? (
             <>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">State</Label>
-                <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  <option value="">Select a state</option>
-                  {LIVE_STATES.map(s => <option key={s.code} value={s.code}>{s.code} — {s.name} · LIVE</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={filters.state}
+                  onChange={(v) => setFilters({ ...filters, state: v })}
+                  aria-label="State"
+                  options={[{ value: "", label: "Select a state" }, ...LIVE_STATES.map((s) => ({ value: s.code, label: `${s.code} — ${s.name} · LIVE` }))]}
+                  className="h-10"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Formation Date</Label>
-                <select value={filters.dateRange} onChange={e => setFilters({ ...filters, dateRange: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" disabled={!filters.state}>
-                  {supportedRanges.map(d => <option key={d} value={d}>{d === "CUSTOM RANGE" ? "CUSTOM" : d}</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={filters.dateRange}
+                  onChange={(v) => setFilters({ ...filters, dateRange: v })}
+                  aria-label="Formation Date"
+                  options={supportedRanges.map((d) => ({ value: d, label: d === "CUSTOM RANGE" ? "CUSTOM" : d }))}
+                  className="h-10"
+                  disabled={!filters.state}
+                />
                 {filters.state === "FL" && <p className="text-[10px] text-amber-600">FL supports Today & Last 7 Days (daily filing files).</p>}
               </div>
               {filters.dateRange === "CUSTOM RANGE" && (
@@ -464,11 +480,17 @@ export default function FindLeadsUnified() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{prSub === "geographic" ? "State (optional)" : "Name / Party"}</Label>
                 {prSub === "geographic" ? (
-                  <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                    <option value="">All states</option>
-                    {LIVE_STATES.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
-                    {["AL","AK","AZ","AR","CA","DE","DC","GA","HI","ID","IL","IN","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NC","ND","OH","OK","RI","SC","SD","TN","UT","VT","VA","WA","WV","WI","WY"].map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <ResponsiveSelect
+                    value={filters.state}
+                    onChange={(v) => setFilters({ ...filters, state: v })}
+                    aria-label="State"
+                    options={[
+                      { value: "", label: "All states" },
+                      ...LIVE_STATES.map((s) => ({ value: s.code, label: s.code })),
+                      ...["AL","AK","AZ","AR","CA","DE","DC","GA","HI","ID","IL","IN","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NC","ND","OH","OK","RI","SC","SD","TN","UT","VT","VA","WA","WV","WI","WY"].map((s) => ({ value: s, label: s })),
+                    ]}
+                    className="h-10"
+                  />
                 ) : (
                   <Input value={filters.nameQuery} onChange={e => setFilters({ ...filters, nameQuery: e.target.value })} placeholder="Search name..." className="h-10" />
                 )}
@@ -476,10 +498,13 @@ export default function FindLeadsUnified() {
               {prSub !== "geographic" && (
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">State (optional)</Label>
-                  <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                    <option value="">All</option>
-                    {LIVE_STATES.map(s => <option key={s.code} value={s.code}>{s.code}</option>)}
-                  </select>
+                  <ResponsiveSelect
+                    value={filters.state}
+                    onChange={(v) => setFilters({ ...filters, state: v })}
+                    aria-label="State"
+                    options={[{ value: "", label: "All" }, ...LIVE_STATES.map((s) => ({ value: s.code, label: s.code }))]}
+                    className="h-10"
+                  />
                 </div>
               )}
             </>

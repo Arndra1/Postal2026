@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle } from "lucide-react";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const PIPELINE_OPTIONS = [
   { value: "new", label: "New" },
@@ -41,13 +42,13 @@ export default function StateFilingRow({ r, k, busy, savedLead, onSave, onEnrich
       <td className="px-4 py-3 hidden xl:table-cell text-xs text-muted-foreground">{r.agency}</td>
       <td className="px-4 py-3">
         {saved ? (
-          <select
+          <ResponsiveSelect
             value={savedLead.pipeline_status || "new"}
-            onChange={(e) => onPipeline(savedLead.id, e.target.value)}
-            className="h-8 rounded-md border border-input bg-background px-2 text-xs"
-          >
-            {PIPELINE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+            onChange={(v) => onPipeline(savedLead.id, v)}
+            aria-label="Pipeline stage"
+            options={PIPELINE_OPTIONS}
+            className="h-8 w-auto"
+          />
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
       <td className="px-4 py-3">

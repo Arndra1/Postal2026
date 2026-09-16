@@ -9,6 +9,7 @@ import { SUPPORT_EMAIL } from "@/lib/compliance";
 import { CUSTOMER_TYPES } from "@/components/search/CustomerTypePrompt";
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 import DeleteAccountSection from "@/components/account/DeleteAccountSection";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -69,10 +70,13 @@ export default function Account() {
             </div>
             <div className="space-y-1.5">
               <Label>Business Type</Label>
-              <select value={customerType} onChange={(e) => setCustomerType(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                <option value="">Select your business type</option>
-                {CUSTOMER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
+              <ResponsiveSelect
+                value={customerType}
+                onChange={(v) => setCustomerType(v)}
+                aria-label="Business Type"
+                options={[{ value: "", label: "Select your business type" }, ...CUSTOMER_TYPES.map((t) => ({ value: t.value, label: t.label }))]}
+                className="h-10"
+              />
               <p className="text-xs text-muted-foreground">Personalizes suggested searches. Does not affect pricing or data access.</p>
             </div>
             <div className="space-y-1.5">
@@ -90,15 +94,15 @@ export default function Account() {
         <div className="glass-panel p-6">
           <h2 className="font-heading text-lg font-semibold mb-4">Security</h2>
           <div className="space-y-4 text-sm">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10">
               <Lock className="w-4 h-4 text-primary" />
               <div><div className="font-medium">Password</div><div className="text-muted-foreground">Use the forgot-password flow to reset your password.</div></div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10">
               <Check className="w-4 h-4 text-accent" />
               <div><div className="font-medium">Secure sessions</div><div className="text-muted-foreground">Sessions are managed securely by the platform.</div></div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-white/40">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10">
               <Check className="w-4 h-4 text-accent" />
               <div><div className="font-medium">Role</div><div className="text-muted-foreground capitalize">{user.role}</div></div>
             </div>

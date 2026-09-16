@@ -8,6 +8,7 @@ import TagsEditor from "@/components/leads/TagsEditor";
 import ListsEditor from "@/components/leads/ListsEditor";
 import NotesTimeline from "@/components/leads/NotesTimeline";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const PIPELINE_STAGES = [
   { key: "new", label: "New" },
@@ -20,6 +21,8 @@ export const PIPELINE_STAGES = [
 export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
   const { user } = useAuth();
   const [lists, setLists] = useState([]);
+  const [closing, setClosing] = useState(false);
+  const handleClose = () => setClosing(true);
 
   useEffect(() => {
     if (!user) return;
@@ -39,8 +42,17 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white/60 backdrop-blur-xl h-full border-l border-white/40 overflow-y-auto overscroll-contain safe-pt">
+      <AnimatePresence onExitComplete={() => { if (closing) onClose(); }}>
+        {!closing && (
+          <>
+            <motion.div className="absolute inset-0 bg-black/30" onClick={handleClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+            <motion.div
+              className="relative w-full max-w-md bg-white/60 backdrop-blur-xl h-full border-l border-white/40 overflow-y-auto overscroll-contain safe-pt"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            >
         <div className="sticky top-0 bg-white/70 backdrop-blur-xl border-b border-white/40 px-6 py-4 flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-xl font-semibold">{lead.person_name || "Lead"}</h3>
@@ -50,7 +62,7 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
             <Button variant="ghost" size="icon" onClick={() => persist({ starred: !lead.starred })} title={lead.starred ? "Unstar" : "Star"}>
               <Star className={"w-5 h-5 " + (lead.starred ? "fill-accent text-accent" : "")} />
             </Button>
-            <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5" /></Button>
+            <Button variant="ghost" size="icon" onClick={handleClose}><X className="w-5 h-5" /></Button>
           </div>
         </div>
 
@@ -98,7 +110,10 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
           </div>
         </div>
         <div className="h-4 safe-pb" />
-      </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

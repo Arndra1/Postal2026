@@ -9,6 +9,7 @@ import { Search, Loader2, Landmark, AlertCircle, ExternalLink, Calendar, Buildin
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const STATUS_OPTIONS = [
   { value: "posted|forecasted", label: "Open & Forecasted" },
@@ -102,9 +103,13 @@ export default function GrantsGov() {
           </div>
           <div>
             <Label htmlFor="status">Opportunity status</Label>
-            <select id="status" value={oppStatuses} onChange={(e) => setOppStatuses(e.target.value)} className="mt-1.5 w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
-              {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={oppStatuses}
+              onChange={(v) => setOppStatuses(v)}
+              aria-label="Opportunity status"
+              options={STATUS_OPTIONS.map((s) => ({ value: s.value, label: s.label }))}
+              className="mt-1.5 w-full h-9"
+            />
           </div>
         </div>
         <Button onClick={search} disabled={loading} className="mt-4">
