@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
 import SwipeableSavedLeadRow from "@/components/leads/SwipeableSavedLeadRow";
+import { useUrlDetailParam } from "@/hooks/useUrlDetailParam";
 
 export default function SavedLeads() {
   const { user } = useAuth();
@@ -27,6 +28,19 @@ export default function SavedLeads() {
   const [selected, setSelected] = useState(new Set());
   const [bulkProgress, setBulkProgress] = useState(null);
   const { toast } = useToast();
+  const { id: urlLeadId, open: openUrlLead, close: closeUrlLead } = useUrlDetailParam("leadId");
+
+  // Sync the detail modal with the ?leadId URL param so the iOS back gesture
+  // closes the panel instead of leaving the page.
+  useEffect(() => {
+    if (!urlLeadId) { setDetail(null); return; }
+    if (detail && detail.id === urlLeadId) return;
+    const found = leads.find((l) => l.id === urlLeadId);
+    if (found) setDetail(found);
+  }, [urlLeadId, leads]);
+
+  const openDetail = (l) => { setDetail(l); openUrlLead(l.id); };
+  const closeDetail = () => { setDetail(null); closeUrlLead(); };
 
   const load = () => {
     setLoading(true);
@@ -239,7 +253,7 @@ export default function SavedLeads() {
               onStar={() => updateLead(l.id, { starred: !l.starred })}
               onEnrich={() => enrich(l)}
               onDelete={() => remove(l.id)}
-              onOpen={() => setDetail(l)}
+              onOpen={() => openDetail(l)}
             />
           ))}
         </div>
@@ -289,7 +303,7 @@ export default function SavedLeads() {
                       <Button variant="ghost" size="sm" onClick={() => updateLead(l.id, { starred: !l.starred })} title={l.starred ? "Unstar" : "Star"}>
                         <Star className={"w-4 h-4 " + (l.starred ? "fill-accent text-accent" : "")} />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setDetail(l)} title="View"><Eye className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => openDetail(l)} title="View"><Eye className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="sm" onClick={() => enrich(l)} disabled={busy[l.id] === "loading"} title="Enrich">
                         {busy[l.id] === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : busy[l.id] === "enriched" ? <Check className="w-4 h-4 text-accent" /> : <Sparkles className="w-4 h-4" />}
                       </Button>
@@ -306,7 +320,7 @@ export default function SavedLeads() {
       {detail && (
         <LeadDetailPanel
           lead={detail}
-          onClose={() => setDetail(null)}
+          onClose={closeDetail}
           onLeadUpdated={(u) => {
             setDetail(u);
             setLeads(prev => prev.map(l => (l.id === u.id ? u : l)));

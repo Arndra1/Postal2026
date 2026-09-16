@@ -9,6 +9,7 @@ import LeadDetailPanel, { PIPELINE_STAGES } from "@/components/leads/LeadDetailP
 import { Loader2, FolderHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useUrlDetailParam } from "@/hooks/useUrlDetailParam";
 
 const STAGE_DOT = {
   new: "bg-secondary",
@@ -23,6 +24,18 @@ export default function Pipeline() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
+  const { id: urlLeadId, open: openUrlLead, close: closeUrlLead } = useUrlDetailParam("leadId");
+
+  // Sync the detail modal with ?leadId so the iOS back gesture closes it.
+  useEffect(() => {
+    if (!urlLeadId) { setDetail(null); return; }
+    if (detail && detail.id === urlLeadId) return;
+    const found = leads.find((l) => l.id === urlLeadId);
+    if (found) setDetail(found);
+  }, [urlLeadId, leads]);
+
+  const openDetail = (l) => { setDetail(l); openUrlLead(l.id); };
+  const closeDetail = () => { setDetail(null); closeUrlLead(); };
 
   useEffect(() => {
     if (!user) return;
@@ -84,7 +97,7 @@ export default function Pipeline() {
       ) : (
         <>
           {/* Mobile: stacked stage view with tap-to-move */}
-          <MobilePipeline byStage={byStage} onMove={onMoveMobile} onOpen={(l) => setDetail(l)} />
+          <MobilePipeline byStage={byStage} onMove={onMoveMobile} onOpen={openDetail} />
           {/* Desktop: drag-and-drop Kanban */}
           <div className="hidden lg:block">
             <DragDropContext onDragEnd={onDragEnd}>
@@ -107,7 +120,7 @@ export default function Pipeline() {
                             <Draggable key={l.id} draggableId={l.id} index={i}>
                               {(provided) => (
                                 <div ref={provided.innerRef} {...provided.draggableProps} className="mb-2.5">
-                                  <KanbanCard lead={l} dragHandleProps={provided.dragHandleProps} onOpen={() => setDetail(l)} />
+                                  <KanbanCard lead={l} dragHandleProps={provided.dragHandleProps} onOpen={openDetail} />
                                 </div>
                               )}
                             </Draggable>
@@ -128,7 +141,7 @@ export default function Pipeline() {
       )}
 
       {detail && (
-        <LeadDetailPanel lead={detail} onClose={() => setDetail(null)} onLeadUpdated={applyUpdate} />
+        <LeadDetailPanel lead={detail} onClose={closeDetail} onLeadUpdated={applyUpdate} />
       )}
     </div>
   );

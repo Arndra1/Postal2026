@@ -192,4 +192,52 @@
   .animate-blob-1 { animation: blob-float-1 20s ease-in-out infinite; }
   .animate-blob-2 { animation: blob-float-2 24s ease-in-out infinite; }
   .animate-blob-3 { animation: blob-float-3 28s ease-in-out infinite; }
+
+  /* ===== iOS safe-area insets ===== */
+  .safe-pt { padding-top: env(safe-area-inset-top); }
+  .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-pl { padding-left: env(safe-area-inset-left); }
+  .safe-pr { padding-right: env(safe-area-inset-right); }
+
+  /* ===== Tap-highlight & text-selection suppression =====
+     Applied to interactive surfaces so multi-taps on iOS don't flash the
+     grey highlight or visually select label text. Inputs and contenteditable
+     remain selectable. */
+  button,
+  a[role="button"],
+  [data-tap="none"],
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a[role="button"],
+  [data-tap="none"],
+  .no-select,
+  nav a,
+  [role="tablist"] [role="tab"],
+  .stat-card,
+  .mobile-tab-item {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  /* ===== Overscroll containment =====
+     Prevents parent-viewport rubber-banding on iOS when inner containers
+     reach their scroll boundary. */
+  .overscroll-contain {
+    overscroll-behavior: none;
+  }
+  .overscroll-y-contain {
+    overscroll-behavior-y: none;
+  }
+
+  /* shadcn Dialog / Sheet / Drawer content: clear the iOS home indicator. */
+  [role="dialog"] > *:last-child,
+  [data-radix-dialog-content] > *:last-child,
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="drawer-content"] {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
 }

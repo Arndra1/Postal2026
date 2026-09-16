@@ -2,7 +2,7 @@ import React from "react";
 
 export default function StatCard({ icon: Icon, label, value, sub, accent }) {
   return (
-    <div className="glass-card p-5">
+    <div className="stat-card glass-card p-5">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-muted-foreground font-medium">{label}</span>
         {Icon && (

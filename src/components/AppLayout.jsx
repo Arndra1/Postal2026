@@ -10,6 +10,37 @@ import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
 import TermsGate from "@/components/TermsGate";
 import NotificationBell from "@/components/NotificationBell";
+import MobileTabBar from "@/components/MobileTabBar";
+import MobileBackHeader from "@/components/MobileBackHeader";
+
+// Routes that show the fixed bottom tab bar.
+const TAB_ROUTES = new Set([
+  "/dashboard",
+  "/discover",
+  "/find-leads-unified",
+  "/pipeline",
+  "/account",
+]);
+
+// Title lookup for the mobile back header on nested (non-tab) routes.
+const NESTED_TITLES = {
+  "/add-lead": "Add Lead",
+  "/notifications": "Notifications",
+  "/enrich": "Enrich",
+  "/credits": "Credits",
+  "/billing": "Billing",
+  "/help": "Help & Support",
+  "/saved-leads": "Saved Leads",
+  "/bankruptcy": "Bankruptcy Prospects",
+  "/find-leads": "Find Leads",
+  "/new-businesses": "New Businesses",
+  "/federal-grants": "Federal Grants",
+  "/grants-gov": "Grants.gov",
+  "/tax-delinquent": "Tax-Delinquent",
+  "/pacer-search": "PACER Search",
+  "/saved-searches": "Saved Searches",
+  "/outreach": "Outreach Templates",
+};
 
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -57,6 +88,9 @@ export default function AppLayout() {
 
   const isAdmin = user && (user.role === "admin" || user.role === "owner");
   const isOwner = user && user.role === "owner";
+
+  const isTabRoute = TAB_ROUTES.has(location.pathname);
+  const backTitle = NESTED_TITLES[location.pathname] || "";
 
   const handleLogout = () => {
     logout(false);
@@ -140,7 +174,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden sticky top-0 z-40 glass-nav px-4 h-14 flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-40 glass-nav safe-pt px-4 min-h-14 flex items-center justify-between">
         <Link to="/dashboard" aria-label="RingBellz dashboard" className="flex items-center">
           <Logo variant="header" />
         </Link>
@@ -152,9 +186,9 @@ export default function AppLayout() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex safe-pt">
           <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-72 glass-sidebar p-4">
+          <div className="relative w-72 glass-sidebar p-4 safe-pt overflow-y-auto overscroll-contain">
             <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></Button>
             <SidebarContent />
           </div>
@@ -163,12 +197,16 @@ export default function AppLayout() {
 
       {/* Main content */}
       <main className="lg:pl-64">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
+        <div className={"max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 overscroll-contain " + (isTabRoute ? "pb-28 lg:pb-8" : "pb-8")}>
+          {!isTabRoute && backTitle && <MobileBackHeader title={backTitle} />}
           <TermsGate>
               <Outlet />
           </TermsGate>
         </div>
       </main>
+
+      {/* Mobile bottom tab bar — five core routes only */}
+      {isTabRoute && <MobileTabBar />}
     </div>
   );
 }

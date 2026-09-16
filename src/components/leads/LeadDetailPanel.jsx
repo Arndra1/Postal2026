@@ -39,7 +39,7 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white/60 backdrop-blur-xl h-full border-l border-white/40 overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white/60 backdrop-blur-xl h-full border-l border-white/40 overflow-y-auto overscroll-contain safe-pt">
         <div className="sticky top-0 bg-white/70 backdrop-blur-xl border-b border-white/40 px-6 py-4 flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-xl font-semibold">{lead.person_name || "Lead"}</h3>
@@ -96,6 +96,7 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
             <NotesTimeline lead={lead} />
           </div>
         </div>
+        <div className="h-4 safe-pb" />
       </div>
     </div>
   );
