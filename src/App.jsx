@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, RotateCw } from 'lucide-react';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useSystemDarkMode } from "@/hooks/useSystemDarkMode";
 import AppLayout from '@/components/AppLayout';
 import AdminGuard from '@/components/AdminGuard';
 import Landing from '@/pages/Landing';
@@ -146,6 +147,7 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  useSystemDarkMode();
 
   return (
     <AuthProvider>

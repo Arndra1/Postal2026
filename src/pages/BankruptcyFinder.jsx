@@ -12,6 +12,8 @@ import { useToast } from "@/components/ui/use-toast";
 import BankruptcyLeadCard from "@/components/search/BankruptcyLeadCard";
 import SaveSearchButton from "@/components/search/SaveSearchButton";
 import { findDuplicateLead } from "@/lib/leadDedup";
+import PullToRefresh from "@/components/PullToRefresh";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const ALL_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 const CHAPTERS = ["", "7", "11", "13"];
@@ -194,7 +196,20 @@ export default function BankruptcyFinder() {
     try { await base44.entities.Lead.update(leadId, { list_ids }); setSavedLeads(s => { const n = { ...s }; for (const k in n) if (n[k].id === leadId) n[k] = { ...n[k], list_ids }; return n; }); } catch (_e) {}
   };
 
+  // Re-validate the current query (or meta data) on pull-to-refresh.
+  const refreshData = async () => {
+    if (searched) {
+      await runSearch();
+    } else if (user) {
+      await Promise.all([
+        base44.entities.LeadList.filter({ user_id: user.id }).then(setLists).catch(() => {}),
+        base44.auth.me().then((u) => setCustomerType(u.customer_type || "")).catch(() => {}),
+      ]);
+    }
+  };
+
   return (
+    <PullToRefresh onRefresh={refreshData}>
     <div>
       <PageHeader title="Bankruptcy Prospects" subtitle="Find people or businesses associated with recent public bankruptcy filings — for credit-service outreach. All discovery is free; only optional contact enrichment costs 5 credits on verified success." action={
         <SaveSearchButton searchType="bankruptcy" filters={filters} disabled={!searched || results.length === 0} />
@@ -218,16 +233,23 @@ export default function BankruptcyFinder() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">State (optional)</Label>
-            <select value={filters.state} onChange={e => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="">All states</option>
-              {ALL_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.state}
+              onChange={(v) => setFilters({ ...filters, state: v })}
+              aria-label="State"
+              options={[{ value: "", label: "All states" }, ...ALL_STATES.map((s) => ({ value: s, label: s }))]}
+              className="h-10"
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Chapter (optional)</Label>
-            <select value={filters.chapter} onChange={e => setFilters({ ...filters, chapter: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-              {CHAPTERS.map(c => <option key={c} value={c}>{c === "" ? "All chapters" : `Chapter ${c}`}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.chapter}
+              onChange={(v) => setFilters({ ...filters, chapter: v })}
+              aria-label="Chapter"
+              options={CHAPTERS.map((c) => ({ value: c, label: c === "" ? "All chapters" : `Chapter ${c}` }))}
+              className="h-10"
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Filed after</Label>
@@ -273,5 +295,6 @@ export default function BankruptcyFinder() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

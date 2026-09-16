@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
@@ -11,6 +11,7 @@ import PastDueBanner from "@/components/PastDueBanner";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -18,8 +19,9 @@ export default function Dashboard() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    Promise.all([
+  const load = useCallback(() => {
+    setLoading(true);
+    return Promise.all([
       base44.functions.invoke("userStats", {}),
       base44.entities.Lead.filter({ user_id: user.id, saved: true }, "-created_date", 200),
     ]).then(([res, leadRes]) => {
@@ -27,7 +29,9 @@ export default function Dashboard() {
       setLeads(leadRes);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  }, [user.id]);
+
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
@@ -39,6 +43,7 @@ export default function Dashboard() {
   const monthly = data.exempt ? "Unlimited" : "100";
 
   return (
+    <PullToRefresh onRefresh={load}>
     <div>
       <PageHeader title="Dashboard" subtitle="Your lead intelligence at a glance." />
 
@@ -118,5 +123,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }

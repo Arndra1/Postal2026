@@ -15,6 +15,8 @@ import { MARKETING_NOTICE, ACCURACY_NOTICE } from "@/lib/compliance";
 import LeadDetailPanel from "@/components/leads/LeadDetailPanel";
 import SwipeableSavedLeadRow from "@/components/leads/SwipeableSavedLeadRow";
 import { useUrlDetailParam } from "@/hooks/useUrlDetailParam";
+import PullToRefresh from "@/components/PullToRefresh";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 export default function SavedLeads() {
   const { user } = useAuth();
@@ -200,6 +202,7 @@ export default function SavedLeads() {
   };
 
   return (
+    <PullToRefresh onRefresh={load}>
     <div>
       <PageHeader title="Saved Leads" subtitle="Organize, search, and export your saved leads." action={
         <div className="flex gap-2">
@@ -215,12 +218,29 @@ export default function SavedLeads() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search saved leads..." className="pl-9 h-10" />
         </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
-          <option>All</option><option value="none">Not enriched</option><option value="enriched">Enriched</option><option value="failed">Failed</option>
-        </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
-          <option value="created_date">Sort: Newest</option><option value="name">Sort: Name</option><option value="company">Sort: Company</option>
-        </select>
+        <ResponsiveSelect
+          value={statusFilter}
+          onChange={(v) => setStatusFilter(v)}
+          aria-label="Filter by status"
+          options={[
+            { value: "All", label: "All" },
+            { value: "none", label: "Not enriched" },
+            { value: "enriched", label: "Enriched" },
+            { value: "failed", label: "Failed" },
+          ]}
+          className="sm:w-auto"
+        />
+        <ResponsiveSelect
+          value={sort}
+          onChange={(v) => setSort(v)}
+          aria-label="Sort order"
+          options={[
+            { value: "created_date", label: "Sort: Newest" },
+            { value: "name", label: "Sort: Name" },
+            { value: "company", label: "Sort: Company" },
+          ]}
+          className="sm:w-auto"
+        />
       </div>
 
       {selected.size > 0 && (
@@ -328,5 +348,6 @@ export default function SavedLeads() {
         />
       )}
     </div>
+    </PullToRefresh>
   );
 }

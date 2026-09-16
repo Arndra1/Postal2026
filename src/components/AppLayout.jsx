@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import AnimatedOutlet from "@/components/AnimatedOutlet";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -200,7 +201,7 @@ export default function AppLayout() {
         <div className={"max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 overscroll-contain " + (isTabRoute ? "pb-28 lg:pb-8" : "pb-8")}>
           {!isTabRoute && backTitle && <MobileBackHeader title={backTitle} />}
           <TermsGate>
-              <Outlet />
+              <AnimatedOutlet />
           </TermsGate>
         </div>
       </main>
