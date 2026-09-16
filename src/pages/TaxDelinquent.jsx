@@ -11,6 +11,7 @@ import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import { findDuplicateLead } from "@/lib/leadDedup";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 import SaveSearchButton from "@/components/search/SaveSearchButton";
 
 const STATES = [
@@ -133,29 +134,23 @@ export default function TaxDelinquent() {
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="state">State</Label>
-            <select
-              id="state"
+            <ResponsiveSelect
               value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="mt-1.5 w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {STATES.map((s) => (
-                <option key={s.code} value={s.code}>{s.label}</option>
-              ))}
-            </select>
+              onChange={(v) => setState(v)}
+              aria-label="State"
+              options={STATES.map((s) => ({ value: s.code, label: s.label }))}
+              className="mt-1.5 w-full h-9"
+            />
           </div>
           <div>
             <Label htmlFor="listType">List type</Label>
-            <select
-              id="listType"
+            <ResponsiveSelect
               value={listType}
-              onChange={(e) => setListType(e.target.value)}
-              className="mt-1.5 w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {LIST_TYPES.map((l) => (
-                <option key={l.value} value={l.value}>{l.label}</option>
-              ))}
-            </select>
+              onChange={(v) => setListType(v)}
+              aria-label="List type"
+              options={LIST_TYPES.map((l) => ({ value: l.value, label: l.label }))}
+              className="mt-1.5 w-full h-9"
+            />
           </div>
           <div>
             <Label htmlFor="keyword">Filter by name (optional)</Label>

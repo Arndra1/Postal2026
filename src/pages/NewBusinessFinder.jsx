@@ -12,6 +12,9 @@ import { useToast } from "@/components/ui/use-toast";
 import StateFilingRow from "@/components/leads/StateFilingRow";
 import SaveSearchButton from "@/components/search/SaveSearchButton";
 import { findDuplicateLead } from "@/lib/leadDedup";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
+import PublicRecordCard from "@/components/search/PublicRecordCard";
+import StateRegistryCard from "@/components/search/StateRegistryCard";
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
@@ -177,16 +180,24 @@ export default function NewBusinessFinder() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">State</Label>
-            <select value={filters.state} onChange={(e) => setFilters({ ...filters, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="">All states (registry)</option>
-              {US_STATES.map((s) => <option key={s} value={s}>{s}{LIVE_STATES.includes(s) ? " · LIVE" : ""}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.state}
+              onChange={(v) => setFilters({ ...filters, state: v })}
+              aria-label="State"
+              options={[{ value: "", label: "All states (registry)" }, ...US_STATES.map((s) => ({ value: s, label: `${s}${LIVE_STATES.includes(s) ? " · LIVE" : ""}` }))]}
+              className="h-10"
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Formation Date</Label>
-            <select value={filters.dateRange} onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" disabled={!isLive}>
-              {DATE_RANGES.map((d) => <option key={d}>{d}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.dateRange}
+              onChange={(v) => setFilters({ ...filters, dateRange: v })}
+              aria-label="Formation Date"
+              options={DATE_RANGES.map((d) => ({ value: d, label: d }))}
+              className="h-10"
+              disabled={!isLive}
+            />
           </div>
           {filters.dateRange === "CUSTOM RANGE" && (
             <>
@@ -202,15 +213,25 @@ export default function NewBusinessFinder() {
           )}
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Entity Type</Label>
-            <select value={filters.entityType} onChange={(e) => setFilters({ ...filters, entityType: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" disabled={!isLive}>
-              {ENTITY_TYPES.map((t) => <option key={t}>{t}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.entityType}
+              onChange={(v) => setFilters({ ...filters, entityType: v })}
+              aria-label="Entity Type"
+              options={ENTITY_TYPES.map((t) => ({ value: t, label: t }))}
+              className="h-10"
+              disabled={!isLive}
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Business Status</Label>
-            <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" disabled={!isLive}>
-              {STATUSES.map((s) => <option key={s}>{s}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={filters.status}
+              onChange={(v) => setFilters({ ...filters, status: v })}
+              aria-label="Business Status"
+              options={STATUSES.map((s) => ({ value: s, label: s }))}
+              className="h-10"
+              disabled={!isLive}
+            />
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between gap-3">
@@ -231,7 +252,15 @@ export default function NewBusinessFinder() {
 
       {view === "records" ? (
         <div className="glass-panel overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="md:hidden grid gap-3 p-4">
+            {loading && <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-muted-foreground" /></div>}
+            {!loading && rows.length === 0 && <div className="py-10 text-center text-muted-foreground text-sm">No new businesses found in this date range.</div>}
+            {!loading && rows.map((r, i) => {
+              const k = keyOf(r, i);
+              return <PublicRecordCard key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} onSave={onSave} onEnrich={onEnrich} onStar={onStar} onPipeline={onPipeline} />;
+            })}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-white/30 text-muted-foreground">
                 <tr>
@@ -258,7 +287,11 @@ export default function NewBusinessFinder() {
         </div>
       ) : (
         <div className="glass-panel overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="md:hidden grid gap-3 p-4">
+            {loading && <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-muted-foreground" /></div>}
+            {!loading && rows.map((r) => <StateRegistryCard key={r.state} r={r} statusBadge={statusBadge} />)}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-white/30 text-muted-foreground">
                 <tr>

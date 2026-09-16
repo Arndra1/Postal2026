@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Lightbulb, Search, Columns3, UserCircle } from "lucide-react";
 
 const TABS = [
@@ -12,6 +12,7 @@ const TABS = [
 
 export default function MobileTabBar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   return (
     <nav
       aria-label="Primary"
@@ -25,6 +26,13 @@ export default function MobileTabBar() {
             <Link
               key={t.to}
               to={t.to}
+              onClick={(e) => {
+                if (pathname === t.to) {
+                  e.preventDefault();
+                  navigate(t.to, { replace: true });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               className={
                 "mobile-tab-item no-tap-highlight flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium transition " +
                 (active ? "text-primary" : "text-muted-foreground hover:text-foreground")

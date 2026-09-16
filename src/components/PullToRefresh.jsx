@@ -24,6 +24,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   const onRefreshRef = useRef(onRefresh);
   const startY = useRef(null);
   const eligible = useRef(false);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     onRefreshRef.current = onRefresh;
@@ -36,6 +37,13 @@ export default function PullToRefresh({ onRefresh, children }) {
     if (!supported) return;
 
     const onStart = (e) => {
+      // Skip when the wrapper is hidden (keep-alive inactive tab) so only the
+      // visible tab's pull-to-refresh can fire.
+      if (!wrapperRef.current || wrapperRef.current.offsetParent === null) {
+        startY.current = null;
+        eligible.current = false;
+        return;
+      }
       if (e.target?.closest?.(OVERLAY_SELECTOR)) {
         startY.current = null;
         eligible.current = false;
@@ -118,7 +126,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   const progress = Math.min(pullDistance / THRESHOLD, 1);
 
   return (
-    <div className="relative">
+    <div ref={wrapperRef} className="relative">
       {supported && (pullDistance > 0 || refreshing) && (
         <div
           className="absolute left-1/2 top-0 z-30 flex items-center justify-center pointer-events-none"

@@ -7,6 +7,7 @@ import { X, Star } from "lucide-react";
 import TagsEditor from "@/components/leads/TagsEditor";
 import ListsEditor from "@/components/leads/ListsEditor";
 import NotesTimeline from "@/components/leads/NotesTimeline";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 export const PIPELINE_STAGES = [
   { key: "new", label: "New" },
@@ -56,13 +57,13 @@ export default function LeadDetailPanel({ lead, onClose, onLeadUpdated }) {
         <div className="px-6 py-5 space-y-6">
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pipeline Stage</label>
-            <select
+            <ResponsiveSelect
               value={lead.pipeline_status || "new"}
-              onChange={(e) => persist({ pipeline_status: e.target.value })}
-              className="mt-1.5 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {PIPELINE_STAGES.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
-            </select>
+              onChange={(v) => persist({ pipeline_status: v })}
+              aria-label="Pipeline Stage"
+              options={PIPELINE_STAGES.map((s) => ({ value: s.key, label: s.label }))}
+              className="mt-1.5 w-full h-9"
+            />
           </div>
 
           <div>

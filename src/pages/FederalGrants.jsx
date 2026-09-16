@@ -11,6 +11,7 @@ import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import { findDuplicateLead } from "@/lib/leadDedup";
 import UnifiedLeadCard from "@/components/search/UnifiedLeadCard";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 import SaveSearchButton from "@/components/search/SaveSearchButton";
 
 const USA_BASE = "https://api.usaspending.gov/api/v2/search/spending_by_award/";
@@ -159,9 +160,13 @@ export default function FederalGrants() {
           </div>
           <div>
             <Label htmlFor="state">State (optional)</Label>
-            <select id="state" value={stateCode} onChange={(e) => setStateCode(e.target.value)} className="mt-1.5 w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
-              {ALL_STATES.map((s) => <option key={s} value={s}>{s || "All states"}</option>)}
-            </select>
+            <ResponsiveSelect
+              value={stateCode}
+              onChange={(v) => setStateCode(v)}
+              aria-label="State"
+              options={ALL_STATES.map((s) => ({ value: s, label: s || "All states" }))}
+              className="mt-1.5 w-full h-9"
+            />
           </div>
         </div>
         <Button onClick={search} disabled={loading} className="mt-4">

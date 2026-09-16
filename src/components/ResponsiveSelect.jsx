@@ -20,6 +20,7 @@ export default function ResponsiveSelect({
   onChange,
   options,
   className,
+  disabled,
   "aria-label": ariaLabel,
 }) {
   const isMobile = useIsMobile();
@@ -33,6 +34,7 @@ export default function ResponsiveSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={ariaLabel}
+        disabled={disabled}
         className={cn(
           "flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm",
           className
@@ -55,6 +57,7 @@ export default function ResponsiveSelect({
           variant="outline"
           role="combobox"
           aria-label={ariaLabel}
+          disabled={disabled}
           className={cn("flex h-10 w-full justify-between font-normal", className)}
         >
           <span className="truncate text-left">{label}</span>

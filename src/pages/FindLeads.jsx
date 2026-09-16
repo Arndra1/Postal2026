@@ -10,6 +10,8 @@ import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import PublicLeadRow from "@/components/leads/PublicLeadRow";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
+import PublicRecordCard from "@/components/search/PublicRecordCard";
 
 const TABS = [
   { key: "government_open_data", label: "Government Open Data", hint: "FEC registered entities (Data.gov)" },
@@ -189,10 +191,13 @@ export default function FindLeads() {
           {isNB ? (
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">State</Label>
-              <select value={query.state} onChange={(e) => setQuery({ ...query, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                <option value="">All states</option>
-                {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <ResponsiveSelect
+                value={query.state}
+                onChange={(v) => setQuery({ ...query, state: v })}
+                aria-label="State"
+                options={[{ value: "", label: "All states" }, ...US_STATES.map((s) => ({ value: s, label: s }))]}
+                className="h-10"
+              />
             </div>
           ) : (
             <>
@@ -200,16 +205,23 @@ export default function FindLeads() {
               {field("person_name", "Person Name", "Jane Doe")}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">State</Label>
-                <select value={query.state} onChange={(e) => setQuery({ ...query, state: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  <option value="">All</option>
-                  {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={query.state}
+                  onChange={(v) => setQuery({ ...query, state: v })}
+                  aria-label="State"
+                  options={[{ value: "", label: "All" }, ...US_STATES.map((s) => ({ value: s, label: s }))]}
+                  className="h-10"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Industry (Census)</Label>
-                <select value={query.industry} onChange={(e) => setQuery({ ...query, industry: e.target.value })} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                  {INDUSTRIES.map((i) => <option key={i}>{i}</option>)}
-                </select>
+                <ResponsiveSelect
+                  value={query.industry}
+                  onChange={(v) => setQuery({ ...query, industry: v })}
+                  aria-label="Industry"
+                  options={INDUSTRIES.map((i) => ({ value: i, label: i }))}
+                  className="h-10"
+                />
               </div>
             </>
           )}
@@ -230,7 +242,19 @@ export default function FindLeads() {
             </div>
           )}
           {!error && (
-            <div className="overflow-x-auto">
+            <>
+            <div className="md:hidden grid gap-3 mb-4">
+              {results.length === 0 && !loading && (
+                <div className="text-center py-10 text-muted-foreground text-sm">No records returned. Try broadening your search.</div>
+              )}
+              {results.map((r, i) => {
+                const k = keyOf(r, i);
+                return (
+                  <PublicRecordCard key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} onSave={onSave} onEnrich={onEnrich} onStar={onStar} onPipeline={onPipeline} />
+                );
+              })}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-white/30 text-muted-foreground">
                   <tr>
@@ -264,6 +288,7 @@ export default function FindLeads() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
           <div className="px-5 py-2.5 border-t border-border text-xs text-muted-foreground">
             Public-data search, viewing, saving, tagging, lists, notes & pipeline = 0 credits · Successful enrichment = 5 credits
