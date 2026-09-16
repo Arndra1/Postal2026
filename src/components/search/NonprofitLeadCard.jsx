@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle, Tag, List } from "lucide-react";
 import TagsEditor from "@/components/leads/TagsEditor";
 import ListsEditor from "@/components/leads/ListsEditor";
+import EnrichedDot from "@/components/leads/EnrichedDot";
 
 const PIPELINE_OPTIONS = [
   { value: "new", label: "New" },
@@ -39,9 +40,11 @@ export default function NonprofitLeadCard({ r, k, busy, savedLead, enrichmentDat
   const enrichedEmail = enrichmentData?.verified_email || enrichmentData?.email || savedLead?.email || "";
   const enrichedPhone = enrichmentData?.verified_phone || enrichmentData?.phone || savedLead?.phone || "";
   const hasVerifiedContact = saved && (enrichedEmail || enrichedPhone);
+  const isEnriched = savedLead?.enrichment_status === "enriched" || hasVerifiedContact;
 
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card p-5 relative">
+      <EnrichedDot enriched={isEnriched} />
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-1.5">

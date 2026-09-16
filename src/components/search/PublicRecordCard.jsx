@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
+import EnrichedDot from "@/components/leads/EnrichedDot";
 import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle } from "lucide-react";
 
 const PIPELINE_OPTIONS = [
@@ -31,9 +32,11 @@ export default function PublicRecordCard({ r, k, busy, savedLead, onSave, onEnri
   const enrichFailed = busy[k + "e"] === "failed";
   const dup = r.possible_duplicate;
   const sub = [r.person_name, r.address, r.city, r.state, r.zip].filter(Boolean).join(", ");
+  const isEnriched = savedLead?.enrichment_status === "enriched" || !!savedLead?.email || !!savedLead?.phone;
 
   return (
-    <div className="glass-card p-4">
+    <div className="glass-card p-4 relative">
+      <EnrichedDot enriched={isEnriched} />
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
