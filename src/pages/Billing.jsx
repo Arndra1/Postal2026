@@ -137,8 +137,8 @@ export default function Billing() {
                 </div>
               ) : !isSubscribed ? (
                 <div className="space-y-2">
-                  <Button className="w-full h-11" onClick={subscribe} disabled={action === "sub" || !consent}>
-                    {action === "sub" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />} Subscribe — $59/month
+                  <Button className="w-full h-14 text-base font-semibold lady-gradient lady-shadow-lg" onClick={subscribe} disabled={action === "sub" || !consent}>
+                    {action === "sub" ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CreditCard className="w-5 h-5 mr-2" />} Ring the Bellz — $59/month
                   </Button>
                   {!consent && <p className="text-xs text-muted-foreground text-center">Accept the automatic-renewal terms above to continue.</p>}
                 </div>
