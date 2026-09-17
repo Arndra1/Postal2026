@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Check, Crown, CreditCard, Loader2, XCircle, Gift } from "lucide-react";
+import { Check, Crown, CreditCard, Loader2, XCircle, Gift, Zap } from "lucide-react";
 import CreditPackGrid from "@/components/billing/CreditPackGrid";
 import RenewalDisclosures from "@/components/billing/RenewalDisclosures";
 import MembershipStatusCard from "@/components/billing/MembershipStatusCard";
@@ -137,20 +137,36 @@ export default function Billing() {
                 </div>
               ) : !isSubscribed ? (
                 <div className="space-y-2">
-                  <Button className="w-full h-14 text-base font-semibold lady-gradient lady-shadow-lg" onClick={subscribe} disabled={action === "sub" || !consent}>
-                    {action === "sub" ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CreditCard className="w-5 h-5 mr-2" />} Ring the Bellz — $59/month
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button className="flex-1 h-14 lady-gradient lady-shadow-lg" onClick={subscribe} disabled={action === "sub" || !consent}>
+                      {action === "sub" ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CreditCard className="w-5 h-5 mr-2" />}
+                      <span className="flex flex-col items-center leading-tight">
+                        <span className="text-base font-semibold">RingBellz</span>
+                        <span className="text-xs font-normal opacity-90">Pay Now · $59/mo</span>
+                      </span>
+                    </Button>
+                    <Button variant="outline" className="flex-1 h-14 border-primary/30 hover:bg-primary/5" onClick={() => document.getElementById("credit-packs")?.scrollIntoView({ behavior: "smooth" })}>
+                      <Zap className="w-5 h-5 mr-2 text-accent" />
+                      <span className="flex flex-col items-center leading-tight">
+                        <span className="text-base font-semibold">Buy Credits</span>
+                        <span className="text-xs font-normal opacity-70">One-time · never expire</span>
+                      </span>
+                    </Button>
+                  </div>
                   {!consent && <p className="text-xs text-muted-foreground text-center">Accept the automatic-renewal terms above to continue.</p>}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   {status === "active" || status === "trialing" ? (
-                    <Button variant="outline" className="w-full h-11" onClick={() => setConfirmingCancel(true)} disabled={action === "cancel"}>
+                    <Button variant="outline" className="flex-1 h-11" onClick={() => setConfirmingCancel(true)} disabled={action === "cancel"}>
                       <XCircle className="w-4 h-4 mr-2" /> Cancel Subscription
                     </Button>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Auto-renewal is off. Your membership stays active until {periodEndText}. Subscribe again afterward to restart.</p>
+                    <p className="text-sm text-muted-foreground flex-1 self-center">Auto-renewal is off. Active until {periodEndText}.</p>
                   )}
+                  <Button variant="outline" className="flex-1 h-11 border-accent/40 text-accent hover:bg-accent/10" onClick={() => document.getElementById("credit-packs")?.scrollIntoView({ behavior: "smooth" })}>
+                    <Zap className="w-4 h-4 mr-2" /> Buy Credits
+                  </Button>
                 </div>
               )}
               {notice && <p className="text-xs text-muted-foreground text-center pt-3">{notice}</p>}

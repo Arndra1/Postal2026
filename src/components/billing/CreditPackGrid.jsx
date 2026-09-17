@@ -32,7 +32,7 @@ export default function CreditPackGrid({ isMember }) {
   };
 
   return (
-    <div className="mt-8">
+    <div id="credit-packs" className="mt-8 scroll-mt-8">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
         <div>
           <h2 className="font-heading text-xl font-semibold">Buy Additional Credits</h2>
