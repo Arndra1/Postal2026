@@ -126,16 +126,18 @@ export default async function(req) {
         if (!w.user_id) continue;
         const total = (w.balance || 0) + (w.pack_balance || 0);
         if (total >= LOW_CREDIT_THRESHOLD) continue;
-        // Only notify once per day per user.
+        // Skip exempt admin/owner accounts — credits are never deducted.
+        const userRows = await db.entities.User.filter({ id: w.user_id });
+        const role = userRows?.[0]?.role;
+        if (role === "admin" || role === "owner") continue;
+        // Only notify ONCE per low-credit episode: if any existing credit_low
+        // notification is present (read or unread), skip until the balance
+        // recovers above the threshold. This prevents daily duplicate alerts.
         const existing = await db.entities.Notification.filter({
           user_id: w.user_id,
           type: "credit_low",
         });
-        const recent = (existing || []).find((n) => {
-          if (!n.created_date) return false;
-          return (now.getTime() - new Date(n.created_date).getTime()) < 86400000;
-        });
-        if (recent) continue;
+        if ((existing || []).length > 0) continue;
 
         await db.entities.Notification.create({
           user_id: w.user_id,
