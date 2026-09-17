@@ -113,8 +113,7 @@ export default function Billing() {
             {includes.map((p) => <li key={p} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-accent flex-shrink-0" /> {p}</li>)}
           </ul>
 
-          {!exempt && (
-            <div className="border-t border-border pt-6">
+          <div className="border-t border-border pt-6">
               <h3 className="font-heading text-lg font-semibold mb-4">Manage Subscription</h3>
               <RenewalDisclosures consent={consent} onConsentChange={setConsent} showCheckbox={!isSubscribed} />
 
@@ -171,7 +170,6 @@ export default function Billing() {
               )}
               {notice && <p className="text-xs text-muted-foreground text-center pt-3">{notice}</p>}
             </div>
-          )}
         </div>
 
         {!exempt ? (
