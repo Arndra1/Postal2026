@@ -5,25 +5,34 @@ import StatCard from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Crown, Zap, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import GiftCreditsSection from "@/components/admin/GiftCreditsSection";
 
 export default function Credits() {
   const [data, setData] = useState(null);
   const [ledger, setLedger] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     base44.functions.invoke("userStats", {}).then(async (res) => {
       setData(res.data);
       const me = res.data.user;
       const led = await base44.entities.CreditLedger.filter({ user_id: me.id });
       setLedger(led.slice().sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0)));
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   if (!data) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <PageHeader title="Credits" subtitle="Track your credit balance and every movement." />
+
+      {data.exempt && (
+        <div className="mb-6">
+          <GiftCreditsSection onGranted={loadData} />
+        </div>
+      )}
 
       {data.exempt && (
         <div className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/20">
