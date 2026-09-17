@@ -8,11 +8,14 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { Search, Loader2, AlertCircle, Info, Coins, ScrollText } from "lucide-react";
+import { Search, Loader2, AlertCircle, Info, Coins, ScrollText, Clock } from "lucide-react";
 import ComplianceBanner from "@/components/ComplianceBanner";
 import { MARKETING_NOTICE } from "@/lib/compliance";
 import { useToast } from "@/components/ui/use-toast";
 import PacerResultCard from "@/components/pacer/PacerResultCard";
+
+// PACER credentials are temporarily pending verification — feature is dormant.
+const PACER_COMING_SOON = true;
 
 export default function PacerSearch() {
   const [firstName, setFirstName] = useState("");
@@ -70,6 +73,18 @@ export default function PacerSearch() {
 
       <ComplianceBanner text={MARKETING_NOTICE} />
 
+      {PACER_COMING_SOON && (
+        <div className="glass-panel p-5 mb-6 border-l-4 border-gold flex items-start gap-3">
+          <Clock className="w-6 h-6 text-gold shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-heading text-lg font-semibold mb-1">Coming Soon</p>
+            <p className="text-muted-foreground">
+              PACER Party Search is temporarily unavailable while we finalize our federal court data access. Please check back soon — no credits will be charged in the meantime.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="glass-panel p-4 mb-6 border-l-4 border-primary flex items-start gap-3">
         <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
         <div className="text-sm text-muted-foreground">
@@ -78,7 +93,7 @@ export default function PacerSearch() {
         </div>
       </div>
 
-      <div className="glass-panel p-5 mb-6">
+      <div className="glass-panel p-5 mb-6 opacity-60 pointer-events-none">
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="firstName">First name</Label>
@@ -99,9 +114,9 @@ export default function PacerSearch() {
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="mt-4" disabled={loading || !firstName.trim() || !lastName.trim()}>
-              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
-              {loading ? "Searching..." : "Search PACER"}
+            <Button className="mt-4" disabled>
+              <Search className="w-4 h-4 mr-2" />
+              Search PACER
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
