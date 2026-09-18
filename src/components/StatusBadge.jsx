@@ -32,11 +32,11 @@ const labels = {
   unknown: "Unknown",
 };
 
-export default function StatusBadge({ status }) {
+export default function StatusBadge({ status, label }) {
   const cls = styles[status] || styles.unknown;
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
-      {labels[status] || String(status || "unknown").replace(/_/g, " ")}
+      {label || labels[status] || String(status || "unknown").replace(/_/g, " ")}
     </span>
   );
 }

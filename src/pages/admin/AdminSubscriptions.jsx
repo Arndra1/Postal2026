@@ -1,25 +1,61 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
-import AdminTable from "@/components/AdminTable";
-import StatusBadge from "@/components/StatusBadge";
+import SubscriptionSummary from "@/components/admin/SubscriptionSummary";
+import SubscriptionToolbar from "@/components/admin/SubscriptionToolbar";
+import SubscriberTable from "@/components/admin/SubscriberTable";
 
 export default function AdminSubscriptions() {
-  const [rows, setRows] = useState([]);
-  useEffect(() => { base44.entities.Subscription.list().then(setRows); }, []);
-  const columns = [
-    { key: "user_id", label: "User ID", hidden: "hidden lg:table-cell", render: (r) => <span className="font-mono text-xs">{r.user_id?.slice(0, 8)}…</span> },
-    { key: "plan", label: "Plan" },
-    { key: "status", label: "Status", badge: true },
-    { key: "billing_provider", label: "Provider", hidden: "hidden md:table-cell" },
-    { key: "period_start", label: "Period Start", hidden: "hidden lg:table-cell", render: (r) => r.period_start ? new Date(r.period_start).toLocaleDateString() : "—" },
-    { key: "period_end", label: "Period End", hidden: "hidden lg:table-cell", render: (r) => r.period_end ? new Date(r.period_end).toLocaleDateString() : "—" },
-    { key: "cancelled_at", label: "Cancelled", hidden: "hidden xl:table-cell", render: (r) => r.cancelled_at ? new Date(r.cancelled_at).toLocaleDateString() : "—" },
-  ];
+  const [data, setData] = useState(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const load = useCallback(() => {
+    base44.functions
+      .invoke("adminSubscriptions", {})
+      .then((res) => setData(res.data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    load();
+    // Live: re-pull the figures whenever a subscription starts, renews, cancels or goes past due.
+    const unsubscribe = base44.entities.Subscription.subscribe(() => load());
+    return unsubscribe;
+  }, [load]);
+
+  const rows = data?.rows || [];
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (filter === "active" && !(r.status === "active" || r.status === "trialing")) return false;
+      if (filter === "past_due" && r.status !== "past_due") return false;
+      if (filter === "canceled" && r.status !== "cancelled") return false;
+      if (!q) return true;
+      return (r.name || "").toLowerCase().includes(q) || (r.email || "").toLowerCase().includes(q);
+    });
+  }, [rows, search, filter]);
+
   return (
     <div>
-      <PageHeader title="Subscriptions" subtitle="All membership subscriptions." />
-      <AdminTable columns={columns} rows={rows} empty="No subscriptions." />
+      <PageHeader title="Subscriptions" subtitle="Subscriber activity and recurring revenue." />
+      {!data ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          <SubscriptionSummary metrics={data.metrics} />
+          <SubscriptionToolbar
+            search={search}
+            onSearch={setSearch}
+            filter={filter}
+            onFilter={setFilter}
+          />
+          <SubscriberTable rows={visible} />
+        </>
+      )}
     </div>
   );
 }
