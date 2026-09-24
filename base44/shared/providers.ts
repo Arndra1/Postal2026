@@ -1,16 +1,23 @@
 // Enrichment orchestrator — server-side waterfall over configured providers.
 //
 // Waterfall:
-//   1. Geoapify  — normalize/clean the address first (before Tracerfy).
-//   2. Tracerfy  — cheapest contact provider; runs first when an address is
-//                  available. Returns owner phone/email.
-//   3. PDL       — called only if Tracerfy didn't fill both email AND phone.
-//   4. NumVerify — validates any candidate phone before it counts as verified.
+//   1. Geoapify  — normalize/clean the address first (PINNED FIRST).
+//   2. Reorderable steps, in admin priority order (lowest number first):
+//        - Domain lookup — resolves a company domain from the business name
+//        - Tracerfy      — address-based owner phone/email
+//        - Enrich.so     — email finder (name + domain)
+//        - PDL           — person/company enrichment (needs a full name)
+//   3. NumVerify — validates any candidate phone (PINNED LAST).
 //
-// Stops calling paid providers as soon as a verified email or candidate phone
-// is obtained. Fail-closed (0 credits) when no provider key is configured or
-// no qualifying contact is returned. All keys stay server-side; none are
-// exposed to the frontend, logs, or responses.
+// Geoapify and NumVerify are pinned because the address-based lookup depends
+// on a clean address, and validation must see every candidate phone. The
+// remaining steps are reordered from each provider's priority number.
+//
+// Stops calling the remaining paid contact providers as soon as BOTH a
+// verified email and a verified phone have been found. Fail-closed (0 credits)
+// when no provider key is configured or no qualifying contact is returned.
+// All keys stay server-side; none are exposed to the frontend, logs, or
+// responses.
 
 import { allProviderMeta } from "./providers/registry.ts";
 import { isVerified, populatedFields, RESULT_FIELDS } from "./providers/types.ts";
@@ -22,6 +29,29 @@ import { TRACERFY, isConfigured as tracerfyConfigured, hasRequiredInputs as trac
 import { resolveDomain } from "./providers/domainResolver.ts";
 
 const DEDUP_WINDOW_MINUTES = 5;
+
+// ---- Provider order (admin-driven priority) -------------------------------
+
+// Shipped default priorities for the reorderable steps — used when a provider
+// has no settings row, or a row whose priority is missing/invalid. Lower runs
+// earlier. Geoapify (pinned first) and NumVerify (pinned last) are absent here
+// on purpose: their position never changes.
+const DEFAULT_PRIORITY = {
+  domain_resolver: 15,
+  tracerfy: 20,
+  enrich_so: 30,
+  people_data_labs: 40,
+};
+
+// Resolve a step's priority from its settings row, falling back to the shipped
+// default when the row or its number is missing/invalid.
+function resolvePriority(settings, key) {
+  const row = settings[key];
+  const saved = row ? Number(row.priority) : NaN;
+  if (Number.isFinite(saved)) return saved;
+  const fallback = DEFAULT_PRIORITY[key];
+  return Number.isFinite(fallback) ? fallback : 999;
+}
 
 // ---- Provider settings (admin toggles + status) ---------------------------
 
@@ -100,33 +130,28 @@ export { hashInputs };
 // ── Field-level enrichment waterfall ───────────────────────────────────
 //
 // SEQUENCE (per enrichment attempt):
-//   1. Geoapify  — normalize/clean address FIRST (before Tracerfy).
-//   2. Tracerfy  — cheapest contact provider; runs first when an address
-//                  is available. Returns owner phone/email.
-//   3. PDL       — called ONLY if Tracerfy didn't fill both email AND phone
-//                  (i.e., email OR phone OR job_title OR linkedin still empty).
-//                  Skipped entirely when Tracerfy returned both email+phone
-//                  to avoid a duplicate paid lookup.
-//   4. NumVerify — validate any phone from Tracerfy or PDL before marking
-//                  it "verified".
+//   1. Geoapify  — normalize/clean the address FIRST (pinned first).
+//   2. The reorderable steps run in the order set by their priority numbers
+//      in the admin Providers screen (lowest first):
+//        domain_resolver  — resolve a company domain (free, cached)
+//        tracerfy         — address-based owner phone/email
+//        enrich_so        — email finder (name + domain)
+//        people_data_labs — person/company enrichment (needs a full name)
+//   3. NumVerify — validate any candidate phone (pinned last).
+//
+// EARLY STOP:
+//   Once BOTH a verified email and a verified phone are present — whichever
+//   provider produced them — the remaining contact providers are skipped, so
+//   no further paid calls are made.
 //
 // FIELD-LEVEL DEDUP:
-//   A field filled by an earlier provider is never overwritten by a later
-//   one. PDL can still contribute linkedin/job_title even when Tracerfy
-//   already returned email+phone (but in that case PDL is skipped per the
-//   rule above — it only runs when at least one of email/phone is missing).
+//   A field filled by an earlier provider is never overwritten by a later one.
 //
 // CREDIT LOGIC (charged in enrichLead/entry.ts — NO CHANGE):
-//   A single flat 5-credit charge is applied per enrichment attempt when
-//   the final merged result contains a NEW verified_email or verified_phone.
-//   This charge is NOT per-provider-call:
-//   - If Tracerfy returns both email and phone → PDL is skipped → 5 credits.
-//   - If Tracerfy returns only phone → PDL runs and returns email → 5 credits
-//     (covers both providers — no additional charge for the PDL call).
-//   - If PDL runs after Tracerfy to fill linkedin/job_title and does NOT
-//     return a new email or phone → still 5 credits (the charge is for the
-//     enrichment attempt, not per field).
-//   - If neither provider returns a verified email or phone → 0 credits.
+//   A single flat 5-credit charge is applied per enrichment attempt when the
+//   final merged result contains a NEW verified_email or verified_phone. The
+//   charge is per attempt, not per provider call. If no provider returns a
+//   verified email or phone → 0 credits.
 export async function runEnrichment(base44, inputs) {
   const start = Date.now();
   const settings = await loadSettings(base44);
@@ -134,6 +159,35 @@ export async function runEnrichment(base44, inputs) {
   const data_sources = [];
   const provider_breakdown = [];
   const merged = {}; // accumulated results across providers (field-level merge)
+  let enrichedInputs = { ...inputs }; // inputs enriched as the waterfall progresses
+
+  // Contact providers, keyed by provider_key. `canRun` gates a provider on the
+  // inputs it actually needs, so paid calls that cannot possibly match are
+  // skipped rather than charged for.
+  const CONTACT_STEPS = {
+    tracerfy: {
+      meta: TRACERFY,
+      enrich: tracerfyEnrich,
+      configured: tracerfyConfigured,
+      canRun: () => tracerfyHasInputs(enrichedInputs),
+      skipReason: "skipped, no address available",
+    },
+    enrich_so: {
+      meta: ENRICH_SO,
+      enrich: enrichSoEnrich,
+      configured: enrichSoConfigured,
+      canRun: () => !merged.verified_email,
+      skipReason: "skipped, email already filled by earlier provider",
+    },
+    people_data_labs: {
+      meta: PDL,
+      enrich: pdlEnrich,
+      configured: pdlConfigured,
+      canRun: () =>
+        String(enrichedInputs.person_name || "").trim().split(/\s+/).filter(Boolean).length >= 2,
+      skipReason: "skipped, no person name",
+    },
+  };
 
   function isEnabled(key) {
     const s = settings[key];
@@ -202,9 +256,8 @@ export async function runEnrichment(base44, inputs) {
     return result;
   }
 
-  // ── Step 1: Geoapify address normalization ──────────────────────────
-  // Runs BEFORE Tracerfy so the address is clean/normalized.
-  let enrichedInputs = { ...inputs };
+  // ── Step 1: Geoapify address normalization (pinned first) ───────────
+  // Always runs before the address-based lookup so it sees a clean address.
   if (geoapifyConfigured()) {
     const geo = await geoapifyNormalize(inputs);
     if (geo && geo.address) {
@@ -215,91 +268,62 @@ export async function runEnrichment(base44, inputs) {
     }
   }
 
-  // ── Step 2: Tracerfy (cheapest contact provider, runs first) ────────
-  // Address-based skip-tracing for owner phone/email.
-  if (tracerfyConfigured() && isEnabled("tracerfy")) {
-    if (tracerfyHasInputs(enrichedInputs)) {
-      await callProvider(TRACERFY, tracerfyEnrich, enrichedInputs);
-    } else {
-      recordSkip(TRACERFY, "skipped, no address available");
+  // ── Step 2: reorderable steps — domain lookup + contact providers ───
+  // Order comes from each step's priority number (lowest first). Geoapify and
+  // NumVerify are pinned and are not part of this list.
+  const contactFilled = () => !!(merged.verified_email && merged.verified_phone);
+  const orderedKeys = Object.keys(DEFAULT_PRIORITY).sort(
+    (a, b) => resolvePriority(settings, a) - resolvePriority(settings, b)
+  );
+
+  for (const key of orderedKeys) {
+    // Domain lookup — free and cached; gives the contact providers that follow
+    // a website/domain to work with. Never overwrites a website already present.
+    if (key === "domain_resolver") {
+      if (!isEnabled("domain_resolver")) {
+        provider_breakdown.push({
+          provider: "DomainResolver", provider_key: "domain_resolver",
+          status: "skipped", fields: [], duration_ms: 0, error: "disabled",
+        });
+        continue;
+      }
+      const hasWebsite = !!(enrichedInputs.website && enrichedInputs.website.trim());
+      if (hasWebsite || !enrichedInputs.business_name) {
+        provider_breakdown.push({
+          provider: "DomainResolver", provider_key: "domain_resolver",
+          status: "skipped", fields: [], duration_ms: 0,
+          error: hasWebsite ? "skipped, website already present" : "skipped, no business name",
+        });
+        continue;
+      }
+      const resolved = await resolveDomain(
+        base44, enrichedInputs.business_name, enrichedInputs.city, enrichedInputs.state
+      );
+      if (resolved.domain) enrichedInputs.website = `https://${resolved.domain}`;
+      provider_breakdown.push({
+        provider: "DomainResolver", provider_key: "domain_resolver",
+        status: resolved.domain ? "success" : "empty",
+        fields: resolved.domain ? ["website"] : [],
+        duration_ms: resolved.duration_ms, error: "", method: resolved.method,
+      });
+      if (resolved.domain && !data_sources.includes("DomainResolver")) {
+        data_sources.push("DomainResolver");
+      }
+      continue;
     }
-  } else {
-    recordSkip(TRACERFY, tracerfyConfigured() ? "disabled" : "not_configured");
+
+    const step = CONTACT_STEPS[key];
+    if (!step) continue;
+    // Stop paying for contact lookups once a verified email AND phone exist.
+    if (contactFilled()) { recordSkip(step.meta, "skipped, email and phone already filled"); continue; }
+    if (!step.configured()) { recordSkip(step.meta, "not_configured"); continue; }
+    if (!isEnabled(key)) { recordSkip(step.meta, "disabled"); continue; }
+    if (step.canRun && !step.canRun()) { recordSkip(step.meta, step.skipReason); continue; }
+    await callProvider(step.meta, step.enrich, enrichedInputs);
   }
 
-  // ── Step 3: PDL (fill remaining gaps) ──────────────────────────────
-  // PDL is called if, after Tracerfy, the lead is still missing email OR
-  // phone OR job_title OR linkedin. If Tracerfy already returned BOTH
-  // email and phone, PDL is skipped to avoid paying for a duplicate lookup
-  // on fields already filled.
-  const tracerfyFilledBoth = !!(merged.verified_email && merged.verified_phone);
-  if (pdlConfigured() && isEnabled("people_data_labs")) {
-    if (!tracerfyFilledBoth) {
-      await callProvider(PDL, pdlEnrich, enrichedInputs);
-    } else {
-      recordSkip(PDL, "skipped, email and phone already filled by Tracerfy");
-    }
-  } else {
-    recordSkip(PDL, pdlConfigured() ? "disabled" : "not_configured");
-  }
-
-  // ── Step 3.4: Domain resolution (feeds Enrich.so) ──────────────────
-  // Public-record LLC leads often arrive with only a business name + city
-  // and no website. Enrich.so's email-finder needs a domain, so resolve one
-  // here (Clearbit Autocomplete → PDL Company Search, cached) BEFORE the
-  // Enrich.so step. Only runs when no website is present yet and a business
-  // name exists. Charges 0 credits; never overwrites a website already
-  // supplied by an earlier provider (Geoapify/Tracerfy/PDL).
-  const hasWebsite = !!(enrichedInputs.website && enrichedInputs.website.trim());
-  if (!hasWebsite && enrichedInputs.business_name) {
-    const resolved = await resolveDomain(
-      base44,
-      enrichedInputs.business_name,
-      enrichedInputs.city,
-      enrichedInputs.state
-    );
-    if (resolved.domain) {
-      enrichedInputs.website = `https://${resolved.domain}`;
-    }
-    provider_breakdown.push({
-      provider: "DomainResolver",
-      provider_key: "domain_resolver",
-      status: resolved.domain ? "success" : "empty",
-      fields: resolved.domain ? ["website"] : [],
-      duration_ms: resolved.duration_ms,
-      error: "",
-      method: resolved.method,
-    });
-    if (resolved.domain && !data_sources.includes("DomainResolver")) {
-      data_sources.push("DomainResolver");
-    }
-  } else {
-    provider_breakdown.push({
-      provider: "DomainResolver",
-      provider_key: "domain_resolver",
-      status: "skipped",
-      fields: [],
-      duration_ms: 0,
-      error: hasWebsite ? "skipped, website already present" : "skipped, no business name",
-    });
-  }
-
-  // ── Step 3.5: Enrich.so email finder (fallback) ────────────────────
-  // Called ONLY when PDL didn't return a verified email. Enrich.so takes
-  // a first name, last name, and domain to find a professional email —
-  // filling the gap PDL leaves for many records.
-  if (enrichSoConfigured() && isEnabled("enrich_so")) {
-    if (!merged.verified_email) {
-      await callProvider(ENRICH_SO, enrichSoEnrich, enrichedInputs);
-    } else {
-      recordSkip(ENRICH_SO, "skipped, email already filled by earlier provider");
-    }
-  } else {
-    recordSkip(ENRICH_SO, enrichSoConfigured() ? "disabled" : "not_configured");
-  }
-
-  // ── Step 4: NumVerify phone validation ─────────────────────────────
-  // Validates any candidate phone from Tracerfy or PDL before marking it
+  // ── Step 3: NumVerify phone validation (pinned last) ───────────────
+  // Validates any candidate phone from any contact provider before marking it
   // as "verified". Drops phones that fail validation. If NumVerify is not
   // configured, the phone is kept as-is from the provider.
   if (merged.verified_phone && numverifyConfigured()) {

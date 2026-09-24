@@ -7,7 +7,7 @@ export const PDL = {
   name: "People Data Labs",
   secretNames: ["PDL_API_KEY"],
   capabilities: ["person", "company", "email", "phone"],
-  defaultPriority: 10,
+  defaultPriority: 40,
 };
 
 export function isConfigured() {

@@ -18,7 +18,7 @@ export const ENRICH_SO = {
   name: "Enrich.so",
   secretNames: ["ENRICH_SO_API_KEY"],
   capabilities: ["person", "company", "email"],
-  defaultPriority: 20,
+  defaultPriority: 30,
 };
 
 export function isConfigured() {

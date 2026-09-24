@@ -8,7 +8,7 @@ export const TRACERFY = {
   name: "Tracerfy",
   secretNames: ["TRACERFY_API_KEY"],
   capabilities: ["property_owner", "phone", "email"],
-  defaultPriority: 30,
+  defaultPriority: 20,
 };
 
 export function isConfigured() {
