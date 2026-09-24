@@ -74,11 +74,13 @@ export default function PacerSearch() {
       <ComplianceBanner text={MARKETING_NOTICE} />
 
       {PACER_COMING_SOON && (
-        <div className="glass-panel p-5 mb-6 border-l-4 border-gold flex items-start gap-3">
-          <Clock className="w-6 h-6 text-gold shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-heading text-lg font-semibold mb-1">Coming Soon</p>
-            <p className="text-muted-foreground">
+        <div className="mb-6 rounded-xl border-4 border-destructive bg-destructive/10 p-6 sm:p-8">
+          <div className="flex flex-col items-center text-center gap-3">
+            <Clock className="w-12 h-12 sm:w-14 sm:h-14 text-destructive" strokeWidth={2.5} />
+            <p className="font-heading text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-destructive">
+              Coming Soon
+            </p>
+            <p className="max-w-2xl text-sm sm:text-base text-destructive font-medium">
               PACER Party Search is temporarily unavailable while we finalize our federal court data access. Please check back soon — no credits will be charged in the meantime.
             </p>
           </div>
