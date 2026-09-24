@@ -19,6 +19,18 @@ export default async function(req) {
     const savedLeads = leads.filter(l => l.saved).length;
     const enrichments = await base44.entities.Enrichment.filter({ user_id: user.id });
     const successful = enrichments.filter(e => e.status === "success").length;
+
+    // Partnership and inquiry counts cover the work this app is built for:
+    // partner organizations sourced from IRS filings, and people who reached
+    // out themselves and consented to be contacted. Admins and staff see the
+    // whole book, matching the Inquiries and Partnership pages.
+    const seesAll = ["admin", "owner", "staff"].includes(user.role);
+    const partnerOrgs = seesAll
+      ? await base44.entities.PartnerOrganization.list("-created_date", 500)
+      : await base44.entities.PartnerOrganization.filter({ user_id: user.id });
+    const inquiries = seesAll
+      ? await base44.entities.Inquiry.list("-created_date", 500)
+      : await base44.entities.Inquiry.filter({ user_id: user.id });
     const activity = await base44.asServiceRole.entities.ActivityLog.filter({ user_id: user.id });
 
     const recentActivity = activity
@@ -57,6 +69,9 @@ export default async function(req) {
       membershipActive: exempt || hasActiveMembership(sub),
       savedLeads,
       successfulEnrichments: successful,
+      partnerOrgs: partnerOrgs.length,
+      inquiries: inquiries.length,
+      newInquiries: inquiries.filter(i => i.status === "new").length,
       totalEnrichments: enrichments.length,
       recentActivity,
       recentLeads

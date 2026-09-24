@@ -5,13 +5,14 @@ import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
-import { Coins, FolderHeart, Sparkles, Activity, ArrowRight, Crown, Zap } from "lucide-react";
+import { Coins, Users, Inbox, ArrowRight, Crown, Zap } from "lucide-react";
 import CreditBalanceDisplay from "@/components/billing/CreditBalanceDisplay";
 import PastDueBanner from "@/components/PastDueBanner";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import LeadScoreBadge from "@/components/leads/LeadScoreBadge";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
 import PullToRefresh from "@/components/PullToRefresh";
+import useTabActive from "@/hooks/useTabActive";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -32,6 +33,8 @@ export default function Dashboard() {
   }, [user.id]);
 
   useEffect(() => { load(); }, [load]);
+  // Refresh when the user returns to this tab — it stays mounted while hidden.
+  useTabActive(load);
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
@@ -61,8 +64,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard icon={Coins} label="Monthly Credits" value={data.exempt ? "∞" : `${balance} / 100`} sub={data.exempt ? "Unlimited access" : "Resets each cycle"} />
         <StatCard icon={Zap} label="Pack Credits" value={data.exempt ? "∞" : packBalance} sub={data.exempt ? "Unlimited access" : "Never expire"} accent />
-        <StatCard icon={FolderHeart} label="Saved Leads" value={data.savedLeads} />
-        <StatCard icon={Sparkles} label="Successful Enrichments" value={data.successfulEnrichments} />
+        <StatCard icon={Users} label="Partner Organizations" value={data.partnerOrgs || 0} sub="Churches, nonprofits & microbusinesses" />
+        <StatCard icon={Inbox} label="Inquiries" value={data.inquiries || 0} sub={data.newInquiries ? `${data.newInquiries} awaiting review` : "Consented requests"} />
       </div>
 
       <DashboardCharts leads={leads} />

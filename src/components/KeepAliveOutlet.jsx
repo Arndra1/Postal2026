@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { TabActiveContext } from "@/hooks/useTabActive";
 
 // Primary bottom-tab routes whose page state should be preserved (kept
 // mounted) when the user switches between them.
@@ -55,9 +56,11 @@ export default function KeepAliveOutlet() {
         if (!el) return null;
         const active = p === location.pathname;
         return (
-          <div key={p} aria-hidden={!active} style={{ display: active ? "block" : "none" }}>
-            {el}
-          </div>
+          <TabActiveContext.Provider key={p} value={active}>
+            <div aria-hidden={!active} style={{ display: active ? "block" : "none" }}>
+              {el}
+            </div>
+          </TabActiveContext.Provider>
         );
       })}
     </>
