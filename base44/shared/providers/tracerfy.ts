@@ -15,9 +15,11 @@ export function isConfigured() {
   return !!process.env.TRACERFY_API_KEY;
 }
 
-// Tracerfy only supports address-based lookups — skip without an address.
+// Tracerfy only supports address-based lookups. A city/state pair alone can never
+// match a property record, so require a real street address — that way the paid
+// call is skipped rather than spent on a lookup that cannot succeed.
 export function hasRequiredInputs(inputs) {
-  return !!(inputs.address || (inputs.city && inputs.state));
+  return !!(inputs.address && String(inputs.address).trim());
 }
 
 export async function enrich(inputs) {

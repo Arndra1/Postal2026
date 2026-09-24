@@ -53,10 +53,12 @@ const FL_FILING_TYPE = {
 // Fixed-width 1440-char records; field 17 (pos 473, len 8) = File Date (formation).
 export async function searchFlorida(inputs, ctx) {
   const { start, end } = rangeBounds(inputs.dateRange, inputs.startDate, inputs.endDate);
-  // FL DOS public-access credentials are stored in the PublicDataSource entity (admin-only)
-  // to keep them out of source code without requiring a secret env var.
-  let auth = "";
-  if (ctx && ctx.db) {
+  // FL DOS public-access credential = the Authorization header value. It lives in the
+  // app secret FL_DOS_API_KEY, so no credential material is stored in the codebase.
+  // Falls back to the admin-managed PublicDataSource row for installs that haven't
+  // set the secret yet.
+  let auth = (process.env.FL_DOS_API_KEY || "").trim();
+  if (!auth && ctx && ctx.db) {
     try {
       const rows = await ctx.db.entities.PublicDataSource.filter({ source_key: "fl_dos_sftp" });
       if (rows && rows[0] && rows[0].api_endpoint) auth = rows[0].api_endpoint;

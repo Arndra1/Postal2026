@@ -1,18 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { isExempt, ENRICHMENT_COST, chargeCredits, getOrCreateWallet, hasEnoughCredits, hasActiveMembership, getOrCreateSubscription } from "../../shared/credits.ts";
-import { runEnrichment, findRecentSuccess } from "../../shared/providers.ts";
+import { runEnrichment, findRecentSuccess, resolveLeadInputs } from "../../shared/providers.ts";
 import { logActivity, logCompliance } from "../../shared/logging.ts";
 import { unauthorized, badRequest } from "../../shared/roles.ts";
-
-// Public-record registered-agent / owner names arrive space-padded
-// (e.g. "DIACK               CHRISTIAN     A") — collapse to a clean name.
-function pickPersonName(candidates) {
-  for (const c of candidates) {
-    const v = String(c || "").replace(/\s+/g, " ").trim();
-    if (v) return v;
-  }
-  return "";
-}
 
 // Enrichment workflow.
 // 1. Check credits across both pools (or exempt role).
@@ -31,35 +21,11 @@ export default async function(req) {
 
     let body = {};
     try { body = await req.json(); } catch (_e) { body = {}; }
-    const inputs = body.inputs || {};
     const leadId = body.lead_id || "";
-
-    // New-business filings often carry no person name, but the official record
-    // does carry the registered agent / owner. Without a name the person
-    // providers have nothing to match, so derive one here when the caller didn't
-    // supply it. Address/ZIP normally come from the caller; fall back to the
-    // lead's own stored fields so every lead enriches the same way.
-    if (leadId) {
-      try {
-        const lead = await base44.entities.Lead.get(leadId);
-        if (lead) {
-          const pub = lead.original_public_fields || {};
-          const extra = pub.extra || {};
-          if (!inputs.person_name) {
-            inputs.person_name = pickPersonName([
-              lead.person_name,
-              extra.registered_agent,
-              extra.owner_name,
-              extra.officer_name,
-              extra.agent_name,
-              pub.registered_agent,
-            ]);
-          }
-          if (!inputs.address) inputs.address = lead.address || pub.address || "";
-          if (!inputs.zip) inputs.zip = lead.zip || pub.zip || "";
-        }
-      } catch (_e) { /* lead missing or not readable by caller — enrich with the supplied inputs only */ }
-    }
+    // Address, ZIP and the registered-agent name are resolved from the lead record
+    // in the shared enrichment module, so every caller enriches identically
+    // without relying on the frontend to send them.
+    const inputs = await resolveLeadInputs(base44, leadId, body.inputs || {});
 
     const exempt = isExempt(user.role);
 

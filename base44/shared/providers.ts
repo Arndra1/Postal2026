@@ -125,6 +125,96 @@ export async function findRecentSuccess(base44, userId, inputs) {
 
 export { hashInputs };
 
+// ---- Public-record name normalization --------------------------------------
+//
+// Registries publish person names in different conventions. Florida's Sunbiz
+// fixed-width filings publish the registered agent SURNAME FIRST, padded, with a
+// trailing middle initial ("DIACK               CHRISTIAN     A"); every other
+// connected source publishes given-name first. Person-matching providers expect
+// "Given Surname", so a surname-first value is reversed before it is handed over
+// — otherwise the providers receive a surname where they expect a first name and
+// the match fails.
+//
+// One shared helper, used wherever a public-record name is resolved, so every
+// source is normalized the same way.
+const SURNAME_FIRST_STATES = new Set(["FL"]);
+
+// A corporate registered agent ("REGISTERED AGENTS INC") is not a person — never
+// reorder it.
+const ORG_SUFFIX = /\b(INC|LLC|CORP|CORPORATION|COMPANY|CO|LTD|LP|LLP|PLLC|TRUST|BANK|SERVICES|AGENTS|SOLUTIONS|GROUP|HOLDINGS)\.?$/i;
+
+function titleCaseIfShouting(s) {
+  if (!s || s !== s.toUpperCase()) return s;
+  return s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+}
+
+// Collapse padding/whitespace and, when the source publishes surname-first,
+// return "Given Surname". Sources that already publish given-name-first are
+// returned cleaned but otherwise untouched.
+export function normalizePersonName(raw, options = {}) {
+  const cleaned = String(raw || "").replace(/\s+/g, " ").trim();
+  if (!cleaned) return "";
+  if (!options.surnameFirst) return cleaned;
+  if (ORG_SUFFIX.test(cleaned)) return cleaned;
+
+  let surname = "";
+  let given = "";
+  if (cleaned.includes(",")) {
+    const parts = cleaned.split(",");
+    surname = (parts[0] || "").trim();
+    given = parts.slice(1).join(" ").trim();
+  } else {
+    const parts = cleaned.split(" ").filter(Boolean);
+    if (parts.length < 2) return cleaned;
+    surname = parts[0];
+    given = parts.slice(1).join(" ");
+  }
+  if (!surname || !given) return cleaned;
+  return titleCaseIfShouting(`${given} ${surname}`);
+}
+
+// Resolve the inputs the waterfall needs from the lead record itself, so every
+// caller — search screen, bulk run, or saved search — enriches identically
+// without relying on the frontend to send the address, ZIP, or registered agent.
+export async function resolveLeadInputs(base44, leadId, inputs) {
+  const resolved = { ...(inputs || {}) };
+  if (!leadId) return resolved;
+
+  let lead = null;
+  try {
+    lead = await base44.entities.Lead.get(leadId);
+  } catch (_e) {
+    return resolved;
+  }
+  if (!lead) return resolved;
+
+  const pub = lead.original_public_fields || {};
+  const extra = pub.extra || {};
+  const state = String(resolved.state || lead.state || pub.state || "").toUpperCase();
+
+  if (!resolved.business_name) resolved.business_name = lead.business_name || pub.business_name || "";
+  if (!resolved.city) resolved.city = lead.city || pub.city || "";
+  if (!resolved.state) resolved.state = state;
+  if (!resolved.address) resolved.address = lead.address || pub.address || "";
+  if (!resolved.zip) resolved.zip = lead.zip || pub.zip || "";
+  if (!resolved.website) resolved.website = lead.website || pub.website || "";
+
+  if (!resolved.person_name) {
+    const raw = [
+      lead.person_name,
+      extra.registered_agent,
+      extra.owner_name,
+      extra.officer_name,
+      extra.agent_name,
+      extra.associated_person,
+      pub.registered_agent,
+    ].map((c) => String(c || "").trim()).find(Boolean) || "";
+    resolved.person_name = normalizePersonName(raw, { surnameFirst: SURNAME_FIRST_STATES.has(state) });
+  }
+
+  return resolved;
+}
+
 // ---- Orchestration ---------------------------------------------------------
 
 // ── Field-level enrichment waterfall ───────────────────────────────────
