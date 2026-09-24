@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
+import useBellRing from "@/hooks/useBellRing";
 import {
   Sparkles, ArrowRight, BadgeCheck, Check
 } from "lucide-react";
@@ -18,6 +19,7 @@ import LandingFooter from "@/components/landing/LandingFooter";
 export default function Landing() {
   const { isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
+  const bellRinging = useBellRing();
 
   useEffect(() => {
     if (isAuthenticated && !isLoadingAuth) {
@@ -33,7 +35,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 glass-nav">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" aria-label="RingBellz home" className="flex items-center">
-            <Logo variant="header" />
+            <Logo variant="header" bellClassName={bellRinging ? "bell-swing" : ""} />
           </Link>
           <nav className="hidden lg:flex items-center gap-8 text-sm text-muted-foreground font-medium">
             <a href="#features" className="hover:text-primary transition">Features</a>

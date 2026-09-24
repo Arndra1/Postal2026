@@ -17,13 +17,13 @@ const VARIANTS = {
   icon: { icon: false, src: BRAND_ASSETS.icon, className: "w-8 h-8 rounded-lg" },
 };
 
-export default function Logo({ variant = "header", className = "", ...props }) {
+export default function Logo({ variant = "header", className = "", bellClassName = "", ...props }) {
   const v = VARIANTS[variant] || VARIANTS.header;
 
   if (v.icon) {
     return (
       <span className={`inline-flex items-center gap-2 ${className}`.trim()}>
-        <Image src={v.src} alt="RingBellz" fittingType="fit" className={v.className} />
+        <Image src={v.src} alt="RingBellz" fittingType="fit" className={`${v.className} ${bellClassName}`.trim()} />
         <span className={`font-heading font-semibold tracking-tight ${v.textClass}`}>
           <span className="text-foreground">Ring</span>
           <span className="text-gold">bellz</span>

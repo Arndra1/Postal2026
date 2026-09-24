@@ -232,6 +232,26 @@
   .animate-blob-2 { animation: blob-float-2 24s ease-in-out infinite; }
   .animate-blob-3 { animation: blob-float-3 28s ease-in-out infinite; }
 
+  /* ===== Brand bell swing (landing page) =====
+     One damped swing that settles back to rest, pivoting from the top of the
+     bell so it reads as a hanging bell being struck. */
+  @keyframes bell-swing {
+    0%   { transform: rotate(0deg); }
+    7%   { transform: rotate(15deg); }
+    19%  { transform: rotate(-12deg); }
+    31%  { transform: rotate(9deg); }
+    43%  { transform: rotate(-6deg); }
+    55%  { transform: rotate(3.5deg); }
+    67%  { transform: rotate(-2deg); }
+    79%  { transform: rotate(1deg); }
+    91%  { transform: rotate(-0.4deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .bell-swing {
+    transform-origin: 50% 10%;
+    animation: bell-swing 1.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
   /* ===== iOS safe-area insets ===== */
   .safe-pt { padding-top: env(safe-area-inset-top); }
   .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
