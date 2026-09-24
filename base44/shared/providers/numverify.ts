@@ -36,7 +36,9 @@ export async function validatePhone(phone) {
   try {
     const { ok, json } = await fetchJson(url, { headers });
     if (ok && json && json.valid) {
-      return { valid: true, intl: json.intl_format || phone };
+      // NumVerify's response field is `international_format`; there is no
+      // `intl_format` field, so reading it always fell back to the raw input.
+      return { valid: true, intl: json.international_format || json.intl_format || phone };
     }
     return { valid: false, intl: "" };
   } catch (_e) {
