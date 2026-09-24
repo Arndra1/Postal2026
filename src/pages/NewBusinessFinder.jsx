@@ -121,7 +121,7 @@ export default function NewBusinessFinder() {
         });
         leadId = lead.id; setSavedLeads((s) => ({ ...s, [k]: lead }));
       }
-      const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs: { business_name: r.business_name, state: r.state, city: r.city } });
+      const res = await base44.functions.invoke("enrichLead", { lead_id: leadId, inputs: { business_name: r.business_name, state: r.state, city: r.city, address: r.address, zip: r.zip } });
       const st = res.data.status;
       const code = res.data.code || "";
       if (st === "success") {

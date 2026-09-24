@@ -102,7 +102,7 @@ export default function SavedLeads() {
       const l = toEnrich[i];
       setBusy(b => ({ ...b, [l.id]: "loading" }));
       try {
-        const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, email: l.email, phone: l.phone } });
+        const res = await base44.functions.invoke("enrichLead", { lead_id: l.id, inputs: { person_name: l.person_name, business_name: l.business_name, website: l.website, city: l.city, state: l.state, address: l.address, zip: l.zip || l.original_public_fields?.zip, email: l.email, phone: l.phone } });
         const st = res.data.status;
         if (st === "success") {
           successCount++;
