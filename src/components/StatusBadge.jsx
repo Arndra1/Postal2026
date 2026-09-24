@@ -19,6 +19,7 @@ const styles = {
   past_due: "bg-destructive/10 text-destructive",
   validation_error: "bg-destructive/10 text-destructive",
   provider_error: "bg-amber-100 text-amber-800",
+  partial: "bg-amber-100 text-amber-800",
   empty: "bg-muted text-muted-foreground",
 };
 

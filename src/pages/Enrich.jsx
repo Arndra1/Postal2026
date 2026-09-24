@@ -47,6 +47,7 @@ export default function Enrich() {
   );
 
   const success = result?.status === "success";
+  const partial = result?.status === "partial";
 
   return (
     <div>
@@ -87,7 +88,7 @@ export default function Enrich() {
           <h2 className="font-heading text-lg font-semibold mb-4">Enrichment Result</h2>
           {!result && !loading && <div className="text-center py-12 text-muted-foreground text-sm">Enter lead details and run an enrichment to see verified contact data.</div>}
           {loading && <div className="flex flex-col items-center justify-center py-16"><Loader2 className="w-8 h-8 text-primary animate-spin mb-3" /><p className="text-sm text-muted-foreground">Contacting provider...</p></div>}
-          {result && !success && (
+          {result && !success && !partial && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${result.status === "provider_error" ? "bg-amber-100" : "bg-destructive/10"}`}>
                 <AlertCircle className={`w-6 h-6 ${result.status === "provider_error" ? "text-amber-600" : "text-destructive"}`} />
@@ -97,11 +98,15 @@ export default function Enrich() {
               <p className="text-xs text-accent mt-3 font-medium">0 credits charged</p>
             </div>
           )}
-          {result && success && (
+          {result && (success || partial) && (
             <div>
-              <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-accent/10">
-                <ShieldCheck className="w-5 h-5 text-accent" />
-                <span className="text-sm font-medium">Verified contact data · {result.credits_charged} credits charged</span>
+              <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${partial ? "bg-amber-50" : "bg-accent/10"}`}>
+                {partial ? <AlertCircle className="w-5 h-5 text-amber-600" /> : <ShieldCheck className="w-5 h-5 text-accent" />}
+                <span className="text-sm font-medium">
+                  {partial
+                    ? "Background details found · no verified email or phone · 0 credits charged"
+                    : `Verified contact data · ${result.credits_charged} credits charged`}
+                </span>
               </div>
               <div className="space-y-3">
                 {[
@@ -122,8 +127,13 @@ export default function Enrich() {
                   </div>
                 ))}
                 <div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
-                  <Check className="w-3.5 h-3.5 text-accent" /> Confidence: <span className="font-medium text-foreground capitalize">{result.results.confidence}</span>
-                  <span className="mx-1">·</span> Provider: <span className="font-medium text-foreground">{result.data_sources.join(", ")}</span>
+                  {success && (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-accent" /> Confidence: <span className="font-medium text-foreground capitalize">{result.results.confidence}</span>
+                      <span className="mx-1">·</span>
+                    </>
+                  )}
+                  Provider: <span className="font-medium text-foreground">{result.data_sources.join(", ")}</span>
                 </div>
               </div>
             </div>

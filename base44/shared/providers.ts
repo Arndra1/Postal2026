@@ -30,6 +30,11 @@ import { resolveDomain } from "./providers/domainResolver.ts";
 
 const DEDUP_WINDOW_MINUTES = 5;
 
+// Non-contact fields that still make an enrichment attempt worthwhile when no
+// verified email or phone is found. A result carrying any of these is reported
+// as "partial" (0 credits) rather than "empty".
+const BACKGROUND_FIELDS = ["website", "linkedin", "job_title", "company"];
+
 // ---- Provider order (admin-driven priority) -------------------------------
 
 // Shipped default priorities for the reorderable steps — used when a provider
@@ -453,6 +458,23 @@ export async function runEnrichment(base44, inputs) {
         provider_breakdown,
         duration_ms: Date.now() - start,
         error: "We're having trouble reaching one of our data providers right now. Your credits were not charged. Please try again shortly or contact support if this continues.",
+      };
+    }
+    // The waterfall may still have gathered background details (company, job
+    // title, LinkedIn, website) even when no verified email or phone came back.
+    // Returning them as a "partial" outcome instead of discarding them keeps the
+    // run from being a dead end. Partial runs still cost 0 credits.
+    const foundBackground = BACKGROUND_FIELDS.some(
+      (f) => merged[f] && String(merged[f]).trim() !== ""
+    );
+    if (foundBackground) {
+      return {
+        status: "partial",
+        results: merged,
+        data_sources,
+        provider_breakdown,
+        duration_ms: Date.now() - start,
+        error: "Background details were found, but no verified email or phone is available for this person.",
       };
     }
     return {

@@ -153,20 +153,39 @@ export default async function(req) {
         } catch (_e) { /* lead missing or not owned by caller — no update */ }
       }
     } else {
-      // Failed/empty/timeout — log it, charge 0.
+      // Failed/empty/partial/timeout — log it, charge 0.
+      const partial = providerResult.status === "partial";
       enrichmentRecord = await base44.asServiceRole.entities.Enrichment.create({
         user_id: user.id,
         lead_id: leadId,
         provider: (providerResult.data_sources[0]) || "",
         status: providerResult.status,
         inputs,
-        results: {},
+        results: partial ? (providerResult.results || {}) : {},
         credits_charged: 0,
         duration_ms: providerResult.duration_ms,
         data_sources: providerResult.data_sources,
         provider_breakdown: providerResult.provider_breakdown || [],
         error_message: providerResult.error || ""
       });
+
+      // A partial run found real background details but no verified contact.
+      // Write the fields the lead record can hold so the run leaves something
+      // behind — the contact fields stay empty (nothing was verified, 0 credits).
+      if (partial && leadId) {
+        try {
+          const lead = await base44.entities.Lead.get(leadId);
+          if (lead && (lead.user_id === user.id || exempt)) {
+            const found = providerResult.results || {};
+            const patch = {};
+            for (const field of ["website", "linkedin", "job_title", "address"]) {
+              if (found[field] && !lead[field]) patch[field] = found[field];
+            }
+            if (Object.keys(patch).length) await base44.entities.Lead.update(leadId, patch);
+          }
+        } catch (_e) { /* lead missing or not owned by caller — no update */ }
+      }
+
       if (!exempt) {
         const wallet = await getOrCreateWallet(base44, user.id);
         balanceAfter = wallet.balance;
