@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Search, Sparkles, FolderHeart, Columns3, Coins, CreditCard, UserCircle, HelpCircle,
-  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Gavel, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset, Award, Receipt, Heart, ArrowDownUp
+  ShieldCheck, Scale, LogOut, Menu, X, ChevronRight, Building2, Database, Lightbulb, Mail, Bell, UserPlus, Landmark, Bookmark, Headset, Award, Receipt, Heart, ArrowDownUp, Users, Inbox
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import GradientBackground from "@/components/GradientBackground";
@@ -32,7 +32,9 @@ const NESTED_TITLES = {
   "/billing": "Billing",
   "/help": "Help & Support",
   "/saved-leads": "Saved Leads",
-  "/bankruptcy": "Bankruptcy Prospects",
+  "/community": "Community & Small Business",
+  "/partnerships": "Partnership Pipeline",
+  "/inquiries": "Inquiries",
   "/find-leads": "Find Leads",
   "/new-businesses": "New Businesses",
   "/federal-grants": "Federal Grants",
@@ -46,7 +48,9 @@ const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/discover", label: "Discover Leads", icon: Lightbulb },
   { to: "/find-leads-unified", label: "Find Leads", icon: Search },
-  { to: "/bankruptcy", label: "Bankruptcy Prospects", icon: Gavel },
+  { to: "/community", label: "Community & Small Business", icon: Users },
+  { to: "/partnerships", label: "Partnership Pipeline", icon: Columns3 },
+  { to: "/inquiries", label: "Inquiries", icon: Inbox },
   { to: "/find-leads", label: "Find Leads (Legacy)", icon: Search },
   { to: "/new-businesses", label: "New Businesses", icon: Building2 },
   { to: "/find-leads-unified", label: "Nonprofits", icon: Heart, state: { tab: "nonprofits" } },

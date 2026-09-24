@@ -14,12 +14,12 @@ import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 const NEED_PATHS = {
   credit_repair: [
     {
-      key: "bankruptcy_recovery",
-      title: "People recovering from bankruptcy",
-      need: "Individuals and businesses with recent public bankruptcy filings who may benefit from credit-repair or financial-recovery services.",
-      source: "Public bankruptcy court records (CourtListener RECAP)",
-      route: "/bankruptcy",
-      cta: "Find bankruptcy prospects",
+      key: "community_partnerships",
+      title: "Churches, nonprofits & microbusinesses",
+      need: "Community organizations that serve people who need credit help. Partner with them to deliver education — their members then reach out to you themselves.",
+      source: "Official IRS Exempt Organizations filings",
+      route: "/community",
+      cta: "Find community partners",
       badge: "Public Record",
     },
     {
@@ -228,7 +228,7 @@ export default function NeedOrientedSearch() {
         subtitle="Start with your prospect's need — we'll guide you to the right public-data source. All discovery is free; only optional contact enrichment costs credits."
       />
 
-      <ComplianceBanner text="RingBellz surfaces public records for lawful marketing prospecting only. Bankruptcy and court filings are factual events — never characterize prospects as 'high risk,' 'credit denied,' or 'financially distressed.' Not a consumer reporting agency." />
+      <ComplianceBanner text="RingBellz surfaces public records for lawful marketing prospecting only. Filings are factual events — never characterize prospects as 'high risk,' 'credit denied,' or 'financially distressed.' Individuals are never targeted from a public record; they reach you by asking for help. Not a consumer reporting agency." />
 
       <div className="glass-panel p-5 mb-6">
         <div className="flex items-center gap-2.5">

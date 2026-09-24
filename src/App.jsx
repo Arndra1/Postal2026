@@ -24,7 +24,10 @@ import Dashboard from '@/pages/Dashboard';
 import FindLeads from '@/pages/FindLeads';
 import FindLeadsUnified from '@/pages/FindLeadsUnified';
 import NeedOrientedSearch from '@/pages/NeedOrientedSearch';
-import BankruptcyFinder from '@/pages/BankruptcyFinder';
+import CommunityOpportunities from '@/pages/CommunityOpportunities';
+import PartnershipPipeline from '@/pages/PartnershipPipeline';
+import Inquiries from '@/pages/Inquiries';
+import PublicInquiry from '@/pages/PublicInquiry';
 import Enrich from '@/pages/Enrich';
 import SavedLeads from '@/pages/SavedLeads';
 import Pipeline from '@/pages/Pipeline';
@@ -105,13 +108,16 @@ const AuthenticatedApp = () => {
       <Route path="/terms" element={<TermsOfUse />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/ThankYou" element={<ThankYou />} />
+      <Route path="/inquiry" element={<PublicInquiry />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/find-leads" element={<FindLeads />} />
           <Route path="/find-leads-unified" element={<FindLeadsUnified />} />
           <Route path="/discover" element={<NeedOrientedSearch />} />
-          <Route path="/bankruptcy" element={<BankruptcyFinder />} />
+          <Route path="/community" element={<CommunityOpportunities />} />
+          <Route path="/partnerships" element={<PartnershipPipeline />} />
+          <Route path="/inquiries" element={<Inquiries />} />
           <Route path="/new-businesses" element={<NewBusinessFinder />} />
           <Route path="/enrich" element={<Enrich />} />
           <Route path="/saved-leads" element={<SavedLeads />} />

@@ -10,7 +10,6 @@ import { useToast } from "@/components/ui/use-toast";
 
 const TYPE_LABELS = {
   new_businesses: "New Businesses",
-  bankruptcy: "Bankruptcy",
   nonprofits: "Nonprofits",
   public_records: "Public Records",
   government_open_data: "Government Data",
@@ -51,7 +50,7 @@ export default function SavedSearches() {
     const f = s.filters || {};
     const params = new URLSearchParams();
     Object.entries(f).forEach(([k, v]) => { if (v) params.set(k, v); });
-    const route = s.search_type === "federal_grants" ? "/federal-grants" : s.search_type === "bankruptcy" ? "/bankruptcy" : "/find-leads-unified";
+    const route = s.search_type === "federal_grants" ? "/federal-grants" : "/find-leads-unified";
     window.location.href = `${route}?${params.toString()}`;
   };
 

@@ -1,0 +1,158 @@
+{
+  "name": "Inquiry",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "App user who receives and works this inquiry."
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "default": ""
+    },
+    "phone": {
+      "type": "string",
+      "default": ""
+    },
+    "city": {
+      "type": "string",
+      "default": ""
+    },
+    "state": {
+      "type": "string",
+      "default": ""
+    },
+    "need_type": {
+      "type": "string",
+      "enum": [
+        "personal_credit",
+        "debt_help",
+        "business_credit",
+        "financial_education",
+        "other"
+      ],
+      "default": "other",
+      "description": "The need the person stated themselves."
+    },
+    "message": {
+      "type": "string",
+      "default": ""
+    },
+    "consent_text": {
+      "type": "string",
+      "default": "",
+      "description": "Exact disclosure text shown to the person when they submitted."
+    },
+    "consent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "default": "public_inquiry_page"
+    },
+    "referred_by": {
+      "type": "string",
+      "default": "",
+      "description": "Organization or person who referred this individual, when stated."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "converted",
+        "closed"
+      ],
+      "default": "new"
+    },
+    "converted_lead_id": {
+      "type": "string",
+      "default": ""
+    },
+    "notes": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "consent_at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        }
+      ]
+    }
+  }
+}
