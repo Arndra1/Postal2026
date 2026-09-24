@@ -98,6 +98,7 @@ export default function SavedLeads() {
     if (toEnrich.length === 0) return;
     setBulkProgress({ done: 0, total: toEnrich.length });
     let successCount = 0;
+    let detailsCount = 0;
     for (let i = 0; i < toEnrich.length; i++) {
       const l = toEnrich[i];
       setBusy(b => ({ ...b, [l.id]: "loading" }));
@@ -106,6 +107,9 @@ export default function SavedLeads() {
         const st = res.data.status;
         if (st === "success") {
           successCount++;
+          setBusy(b => ({ ...b, [l.id]: "enriched" }));
+        } else if (st === "partial") {
+          detailsCount++;
           setBusy(b => ({ ...b, [l.id]: "enriched" }));
         } else if (st === "empty") {
           setBusy(b => ({ ...b, [l.id]: "empty" }));
@@ -124,13 +128,13 @@ export default function SavedLeads() {
       user_id: user.id,
       type: "bulk_enrichment_complete",
       title: "Bulk enrichment complete",
-      body: `${successCount} of ${toEnrich.length} leads enriched successfully. ${successCount * 5} credits charged.`,
+      body: `${successCount} enriched with verified contact · ${detailsCount} with background details · ${successCount * 5} credits charged.`,
       action_url: "/saved-leads",
       read: false,
     }).catch(() => {});
     toast({
       title: "Bulk enrichment complete",
-      description: `${successCount} of ${toEnrich.length} leads enriched successfully. ${successCount * 5} credits charged.`,
+      description: `${successCount} enriched with verified contact · ${detailsCount} with background details · ${successCount * 5} credits charged.`,
     });
   };
 
@@ -143,6 +147,10 @@ export default function SavedLeads() {
       if (st === "success") {
         setBusy(b => ({ ...b, [l.id]: "enriched" }));
         load();
+      } else if (st === "partial") {
+        setBusy(b => ({ ...b, [l.id]: "enriched" }));
+        load();
+        toast({ title: "Details found", description: res.data.error || "Background details were found, but no verified email or phone. 0 credits charged." });
       } else if (st === "empty") {
         setBusy(b => ({ ...b, [l.id]: "empty" }));
         toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });

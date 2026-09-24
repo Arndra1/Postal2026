@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle, Tag, List, Scale, User, Building2 } from "lucide-react";
 import TagsEditor from "@/components/leads/TagsEditor";
 import ListsEditor from "@/components/leads/ListsEditor";
+import FoundDetails from "@/components/search/FoundDetails";
 
 const PIPELINE_OPTIONS = [
   { value: "new", label: "New" },
@@ -47,6 +48,8 @@ export default function BankruptcyLeadCard({ r, k, busy, savedLead, enrichmentDa
   const enrichedEmail = enrichmentData?.verified_email || enrichmentData?.email || savedLead?.email || "";
   const enrichedPhone = enrichmentData?.verified_phone || enrichmentData?.phone || savedLead?.phone || "";
   const hasVerifiedContact = saved && (enrichedEmail || enrichedPhone);
+  const foundBackground = !hasVerifiedContact && enrichmentData &&
+    (enrichmentData.company || enrichmentData.job_title || enrichmentData.website || enrichmentData.linkedin);
 
   return (
     <div className="glass-card p-5">
@@ -93,6 +96,8 @@ export default function BankruptcyLeadCard({ r, k, busy, savedLead, enrichmentDa
           <p className="text-[10px] text-muted-foreground mt-2 italic">Contact information is provided by third-party enrichment, not the bankruptcy court.</p>
         </div>
       )}
+
+      {foundBackground && <FoundDetails data={enrichmentData} />}
 
       <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-border">
         {saved && (

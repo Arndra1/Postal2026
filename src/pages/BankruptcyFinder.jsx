@@ -149,6 +149,10 @@ export default function BankruptcyFinder() {
       if (st === "success") {
         setBusy(b => ({ ...b, [ke]: "enriched" }));
         if (res.data.results) setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
+      } else if (st === "partial") {
+        setBusy(b => ({ ...b, [ke]: "enriched" }));
+        if (res.data.results) setEnrichmentData(d => ({ ...d, [k]: res.data.results }));
+        toast({ title: "Details found", description: res.data.error || "Background details were found, but no verified email or phone. 0 credits charged." });
       } else if (st === "empty") {
         setBusy(b => ({ ...b, [ke]: "empty" }));
         toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });

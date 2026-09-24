@@ -32,6 +32,7 @@ export default function NewBusinessFinder() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState({});
   const [savedLeads, setSavedLeads] = useState({});
+  const [enrichmentData, setEnrichmentData] = useState({});
   const { toast } = useToast();
 
   const loadAll = async () => {
@@ -126,6 +127,10 @@ export default function NewBusinessFinder() {
       const code = res.data.code || "";
       if (st === "success") {
         setBusy((b) => ({ ...b, [ke]: "enriched" }));
+      } else if (st === "partial") {
+        setBusy((b) => ({ ...b, [ke]: "enriched" }));
+        if (res.data.results) setEnrichmentData((d) => ({ ...d, [k]: res.data.results }));
+        toast({ title: "Details found", description: res.data.error || "Background details were found, but no verified email or phone. 0 credits charged." });
       } else if (st === "empty") {
         setBusy((b) => ({ ...b, [ke]: "empty" }));
         toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });
@@ -278,7 +283,7 @@ export default function NewBusinessFinder() {
                 {!loading && rows.length === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">No new businesses found in this date range.</td></tr>}
                 {!loading && rows.map((r, i) => {
                   const k = keyOf(r, i);
-                  return <StateFilingRow key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} onSave={onSave} onEnrich={onEnrich} onStar={onStar} onPipeline={onPipeline} />;
+                  return <StateFilingRow key={k} r={r} k={k} busy={busy} savedLead={savedLeads[k]} enrichmentData={enrichmentData[k]} onSave={onSave} onEnrich={onEnrich} onStar={onStar} onPipeline={onPipeline} />;
                 })}
               </tbody>
             </table>

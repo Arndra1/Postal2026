@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle } from "lucide-react";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
+import FoundDetails from "@/components/search/FoundDetails";
 
 const PIPELINE_OPTIONS = [
   { value: "new", label: "New" },
@@ -13,13 +14,15 @@ const PIPELINE_OPTIONS = [
 
 // A single public-data prospect row with 0-credit organize actions + the
 // 5-credit optional enrichment handoff. "View" opens the official source URL.
-export default function PublicLeadRow({ r, k, busy, savedLead, onSave, onEnrich, onStar, onPipeline }) {
+export default function PublicLeadRow({ r, k, busy, savedLead, enrichmentData, onSave, onEnrich, onStar, onPipeline }) {
   const saving = busy[k] === "saving";
   const saved = !!savedLead;
   const enriching = busy[k + "e"] === "loading";
   const enriched = busy[k + "e"] === "enriched";
   const enrichFailed = busy[k + "e"] === "failed";
   const dup = r.possible_duplicate;
+  const foundBackground = enrichmentData &&
+    (enrichmentData.company || enrichmentData.job_title || enrichmentData.website || enrichmentData.linkedin);
 
   return (
     <tr className="border-t border-white/30 hover:bg-white/40">
@@ -37,6 +40,7 @@ export default function PublicLeadRow({ r, k, busy, savedLead, onSave, onEnrich,
             </span>
           )}
         </div>
+        {foundBackground && <div className="mt-2"><FoundDetails data={enrichmentData} /></div>}
       </td>
       <td className="px-5 py-3 hidden md:table-cell text-sm">{r.industry || "—"}</td>
       <td className="px-5 py-3 hidden lg:table-cell text-sm">{r.jurisdiction || r.state || "—"}</td>

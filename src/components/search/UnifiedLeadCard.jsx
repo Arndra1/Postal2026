@@ -4,6 +4,7 @@ import { Save, Sparkles, Star, ExternalLink, Loader2, Check, X, AlertTriangle, T
 import TagsEditor from "@/components/leads/TagsEditor";
 import ListsEditor from "@/components/leads/ListsEditor";
 import EnrichedDot from "@/components/leads/EnrichedDot";
+import FoundDetails from "@/components/search/FoundDetails";
 
 const PIPELINE_OPTIONS = [
   { value: "new", label: "New" },
@@ -45,6 +46,8 @@ export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData,
   const enrichedPhone = enrichmentData?.verified_phone || enrichmentData?.phone || savedLead?.phone || "";
   const hasVerifiedContact = saved && (enrichedEmail || enrichedPhone);
   const isEnriched = savedLead?.enrichment_status === "enriched" || hasVerifiedContact;
+  const foundBackground = !hasVerifiedContact && enrichmentData &&
+    (enrichmentData.company || enrichmentData.job_title || enrichmentData.website || enrichmentData.linkedin);
 
   return (
     <div className="glass-card p-5 relative">
@@ -87,6 +90,8 @@ export default function UnifiedLeadCard({ r, k, busy, savedLead, enrichmentData,
           </div>
         </div>
       )}
+
+      {foundBackground && <FoundDetails data={enrichmentData} />}
 
       <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-border">
         {saved && (

@@ -178,10 +178,21 @@ export default async function(req) {
           if (lead && (lead.user_id === user.id || exempt)) {
             const found = providerResult.results || {};
             const patch = {};
+            // Only fill fields the lead does not already carry — a public-record
+            // value is never overwritten by enrichment.
             for (const field of ["website", "linkedin", "job_title", "address"]) {
               if (found[field] && !lead[field]) patch[field] = found[field];
             }
-            if (Object.keys(patch).length) await base44.entities.Lead.update(leadId, patch);
+            // The Lead record has no "company" field, so a matched employer is
+            // kept as the lead's business name when it has none of its own.
+            if (found.company && !lead.business_name) patch.business_name = found.company;
+            if (Object.keys(patch).length) {
+              // Flag the lead as enriched so the details that WERE found surface
+              // in the UI instead of the run looking like a dead end. Contact
+              // fields stay empty — nothing was verified, so nothing is claimed.
+              patch.enrichment_status = "enriched";
+              await base44.entities.Lead.update(leadId, patch);
+            }
           }
         } catch (_e) { /* lead missing or not owned by caller — no update */ }
       }

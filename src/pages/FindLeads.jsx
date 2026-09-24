@@ -36,6 +36,7 @@ export default function FindLeads() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState({});
   const [savedLeads, setSavedLeads] = useState({});
+  const [enrichmentData, setEnrichmentData] = useState({});
 
   const isNB = tab === "new_businesses";
 
@@ -108,6 +109,10 @@ export default function FindLeads() {
       const code = res.data.code || "";
       if (st === "success") {
         setBusy((b) => ({ ...b, [ke]: "enriched" }));
+      } else if (st === "partial") {
+        setBusy((b) => ({ ...b, [ke]: "enriched" }));
+        if (res.data.results) setEnrichmentData((d) => ({ ...d, [k]: res.data.results }));
+        toast({ title: "Details found", description: res.data.error || "Background details were found, but no verified email or phone. 0 credits charged." });
       } else if (st === "empty") {
         setBusy((b) => ({ ...b, [ke]: "empty" }));
         toast({ title: "No contact found", description: res.data.error || "No verified contact information was found for this lead." });
@@ -278,6 +283,7 @@ export default function FindLeads() {
                         k={k}
                         busy={busy}
                         savedLead={savedLeads[k]}
+                        enrichmentData={enrichmentData[k]}
                         onSave={onSave}
                         onEnrich={onEnrich}
                         onStar={onStar}
