@@ -252,6 +252,23 @@
     animation: bell-swing 1.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   }
 
+  /* ===== Live status halo (active membership) =====
+     Expanding ring that fades out behind the solid status dot. */
+  @keyframes status-halo {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    70%  { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+  .status-halo {
+    animation: status-halo 1.6s ease-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-halo {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
   /* ===== iOS safe-area insets ===== */
   .safe-pt { padding-top: env(safe-area-inset-top); }
   .safe-pb { padding-bottom: env(safe-area-inset-bottom); }

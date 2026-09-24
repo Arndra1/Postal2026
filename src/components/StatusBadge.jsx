@@ -33,10 +33,26 @@ const labels = {
 };
 
 export default function StatusBadge({ status, label }) {
+  const text = label || labels[status] || String(status || "unknown").replace(/_/g, " ");
+
+  // Active subscriptions get a live indicator: a pulsing green dot beside the
+  // word "active", so an on membership reads as live rather than as a label.
+  if (status === "active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+        <span className="relative inline-flex w-2 h-2">
+          <span className="status-halo absolute inline-flex h-full w-full rounded-full bg-emerald-500" />
+          <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+        </span>
+        {text}
+      </span>
+    );
+  }
+
   const cls = styles[status] || styles.unknown;
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
-      {label || labels[status] || String(status || "unknown").replace(/_/g, " ")}
+      {text}
     </span>
   );
 }
